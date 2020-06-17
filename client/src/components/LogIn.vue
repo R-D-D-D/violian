@@ -9,12 +9,12 @@
     //- br
     //- .error(v-html="error") {{ error }}
 
-  #register
+  #login
     v-row(align='center' justify='center')
       v-col(cols='12' sm='10' md='6')
         v-card.elevation-12
           v-toolbar(color='primary' dark flat)
-            v-toolbar-title Register form
+            v-toolbar-title Login form
             v-spacer
             //- v-tooltip(bottom)
             //-   template(v-slot:activator='{ on, attrs }')
@@ -38,7 +38,7 @@
                 :rules="passwordRules")
           v-card-actions
             v-spacer
-            v-btn(color='primary' @click="register" dark :loading='loading') Register
+            v-btn(color='primary' @click="login" dark :loading='loading') Register
             v-spacer
           v-card-text
             .error(v-html="error") {{ error }}
@@ -47,7 +47,7 @@
 <script>
 import Authentication from '@/services/Authentication'
 export default {
-  name: 'Register',
+  name: 'LogIn',
   data () {
     return {
       email: '',
@@ -65,11 +65,11 @@ export default {
     }
   },
   methods: {
-    async register () {
+    async login () {
       this.error = ''
       this.loading = true
       try {
-        const response = await Authentication.register({
+        const response = await Authentication.login({
           email: this.email,
           password: this.password
         })
