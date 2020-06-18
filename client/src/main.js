@@ -4,8 +4,12 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import vuetify from '@/plugins/vuetify' // path to vuetify export
+import { sync } from 'vuex-router-sync'
+import store from '@/store/store'
 
 Vue.config.productionTip = false
+
+sync(store, router)
 
 /* eslint-disable no-new */
 new Vue({
@@ -13,7 +17,8 @@ new Vue({
   el: '#app',
   router,
   components: { App },
-  mounted: function() {
+  store,
+  mounted: function () {
     var script = document.createElement('link')
     script.href = 'https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css'
     script.rel = 'stylesheet'

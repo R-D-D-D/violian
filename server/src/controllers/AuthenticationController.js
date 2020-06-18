@@ -12,10 +12,26 @@ function jwtSignUser (user) {
 module.exports = {
   async register (req, res) {
     try {
-      const user = await User.create(req.body)
-      console.log('in register, user password: ', user.password)
-      res.send(user.toJSON())
+      if (req.body.role == 'Tutor') {
+        req.body['isTutor'] = true
+        req.body['isStudent'] = false
+      } else {
+        req.body['isStudent'] = true
+        req.body['isTutor'] = false
+      }
+      const user = await User.create({
+        email: req.body.email,
+        password: req.body.password,
+        isTutor: req.body['isTutor'],
+        isStudent: req.body['isStudent']
+      })
+      const userJson = user.toJSON();
+      res.send({
+        user: userJson,
+        token: jwtSignUser(userJson)
+      })
     } catch (err) {
+      console.log(err)
       res.status(400).send({
         error: "This email account is already in use"
       })

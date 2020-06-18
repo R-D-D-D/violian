@@ -6,7 +6,8 @@ module.exports = {
       email: Joi.string().email(),
       password: Joi.string().regex(
         new RegExp('^[a-zA-Z0-9]{8,32}$')
-      )
+      ),
+      role: Joi.string()
     }
 
     const {error, value} = Joi.validate(req.body, schema)
@@ -26,6 +27,11 @@ module.exports = {
               1. It must only contain alphabetical characters
               <br>
               2. It must be 8 - 32 characters long`
+          })
+          break
+        case 'role':
+          res.status(400).send({
+            error: `Please indicate whether you are a student or tutor`
           })
           break
         default:
