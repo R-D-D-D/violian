@@ -10,7 +10,6 @@
 </template>
 
 <script>
-import Authentication from '@/services/Authentication'
 export default {
   name: 'Panel',
   props: ['title']

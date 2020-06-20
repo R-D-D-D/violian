@@ -19,5 +19,3 @@ sequelize.sync()
   })
 
 // hey
-
-console.log('hello world')

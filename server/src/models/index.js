@@ -15,7 +15,6 @@ fs
   .readdirSync(__dirname)
   .forEach((file) => {
     if (file != 'index.js') {
-      console.log(path.join(__dirname, file))
       const model = require(path.join(__dirname, file))(sequelize, DataTypes)
       db[model.name] = model
     }

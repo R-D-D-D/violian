@@ -37,6 +37,10 @@
             v-list-item-icon
               v-icon mdi-playlist-music
             v-list-item-title Homework
+          v-list-item(to="preparelesson" v-if="$store.state.isUserLoggedIn  && $store.state.user.isTutor")
+            v-list-item-icon
+              v-icon mdi-notebook-outline
+            v-list-item-title Prepare Lesson
           v-list-item(v-if="$store.state.isUserLoggedIn" @click="logout")
             v-list-item-icon
               v-icon mdi-logout

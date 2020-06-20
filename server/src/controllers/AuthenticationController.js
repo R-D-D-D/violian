@@ -53,7 +53,6 @@ module.exports = {
         })
       }
 
-      console.log("user", user)
       const passwordValid = await user.comparePassword(password)
       if (!passwordValid) {
         console.log("password validity: ", passwordValid)

@@ -1,3 +1,5 @@
+ /* eslint-disable */ 
+
 import Tone from 'tone'
 
 const tone = {

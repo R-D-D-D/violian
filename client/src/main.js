@@ -9,7 +9,9 @@ import store from '@/store/store'
 
 Vue.config.productionTip = false
 
-sync(store, router)
+// Vue.component('panel', Panel)
+
+// sync(store, router)
 
 /* eslint-disable no-new */
 new Vue({
@@ -18,11 +20,11 @@ new Vue({
   router,
   components: { App },
   store,
-  mounted: function () {
-    var script = document.createElement('link')
-    script.href = 'https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css'
-    script.rel = 'stylesheet'
-    document.head.appendChild(script)
-  },
+  // mounted: function () {
+  //   var script = document.createElement('link')
+  //   script.href = 'https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css'
+  //   script.rel = 'stylesheet'
+  //   document.head.appendChild(script)
+  // },
   template: '<App/>'
 })

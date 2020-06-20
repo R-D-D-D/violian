@@ -32,7 +32,7 @@
             v-model='password' 
             :rules="passwordRules")
           v-spacer
-          v-btn.mt-5(@click="login" :loading='loading' type="submit") Log In
+          v-btn.mt-5(@click="login" :loading='loading') Log In
           v-spacer
       v-card-text
         .error(v-html="error") {{ error }}
@@ -68,13 +68,15 @@ export default {
       try {
         const response = await Authentication.login({
           email: this.email,
-          password: this.password
+          password: this.password,
+          role: 'student'
         })
-        console.log(response.data)
         this.loading = false
         this.$store.dispatch('setToken', response.data.token)
         this.$store.dispatch('setUser', response.data.user)
-        this.$router.push('/')
+        this.$router.push({
+          name: 'home'
+        })
       } catch (err) {
         this.error = err.response.data.error
         this.loading = false

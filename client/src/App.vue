@@ -3,8 +3,8 @@
     v-app
       page-header
 
-      v-main.mt-5
-        v-container(fluid)
+      v-main
+        v-container.pt-0.px-0(fluid)
           router-view
       v-footer(app)
 </template>
