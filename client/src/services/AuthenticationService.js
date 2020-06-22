@@ -1,5 +1,4 @@
 import Api from '@/services/Api'
-import axios from 'axios'
 
 export default {
   register (credentials) {

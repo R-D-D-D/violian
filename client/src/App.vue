@@ -4,9 +4,9 @@
       page-header
 
       v-main
-        v-container.pt-0.px-0(fluid)
+        v-container.pa-0(fluid)
           router-view
-      v-footer(app)
+      //- v-footer(app)
 </template>
 
 <script>

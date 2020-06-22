@@ -4,7 +4,8 @@ import HelloWorld from '@/components/HelloWorld'
 import Register from '@/components/Register'
 import Student from '@/components/Student'
 import LogIn from '@/components/LogIn'
-import PrepareLesson from '@/components/PrepareLesson'
+import ShowLesson from '@/components/Lesson/ShowLesson'
+import LessonIndex from '@/components/Lesson/LessonIndex'
 
 Vue.use(VueRouter)
 
@@ -31,9 +32,14 @@ export default new VueRouter({
       component: Student
     },
     {
-      path: '/preparelesson',
-      name: 'preparelesson',
-      component: PrepareLesson
+      path: '/lesson/show',
+      name: 'newlesson',
+      component: ShowLesson
+    },
+    {
+      path: '/lesson/index',
+      name: 'lessonindex',
+      component: LessonIndex
     }
   ]
 })

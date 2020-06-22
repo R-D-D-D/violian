@@ -1,4 +1,3 @@
-const Promise = require('bluebird')
 const bcrypt = require('bcrypt')
 
 async function hashPassword(user, options) {
@@ -41,5 +40,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  return User;
+  User.associate = function (models) {
+    User.hasMany(models.Lesson, { foreignKey: 'TutorId' })
+    User.belongsToMany(User, { as: 'Student', through: 'TutorStudents', foreignKey: 'TutorId' }) // Tutor belongs to many students
+    User.belongsToMany(User, { as: 'Tutor', through: 'StudentTutors', foreignKey: 'StudentId' }) // Tutor belongs to many students
+  }
+  return User
 }

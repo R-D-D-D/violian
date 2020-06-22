@@ -6,7 +6,7 @@
       //-     v-toolbar-title(dark v-bind='attrs' v-on='on') Login form
       //-   span Log in
       v-card-text
-        v-form
+        v-form(ref="form")
           v-text-field(
             label='Email' 
             name='email' 
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import Authentication from '@/services/Authentication'
+import AuthenticationService from '@/services/AuthenticationService'
 import Panel from '@/components/Panel'
 
 export default {
@@ -45,7 +45,7 @@ export default {
       email: '',
       emailRules: [
         v => !!v || 'E-mail is required',
-        v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+        v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
       ],
       password: '',
       passwordRules: [
@@ -59,10 +59,12 @@ export default {
   },
   methods: {
     async register () {
+      if (!this.$refs.form.validate())
+        return
       this.error = ''
       this.loading = true
       try {
-        const response = await Authentication.register({
+        const response = await AuthenticationService.register({
           email: this.email,
           password: this.password,
           role: this.role

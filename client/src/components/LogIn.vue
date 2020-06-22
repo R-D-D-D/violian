@@ -16,7 +16,7 @@
       //-     v-toolbar-title(dark v-bind='attrs' v-on='on') Login form
       //-   span Log in
       v-card-text
-        v-form
+        v-form(ref="form")
           v-text-field(
             label='Email' 
             name='email' 
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import Authentication from '@/services/Authentication'
+import AuthenticationService from '@/services/AuthenticationService'
 import Panel from '@/components/Panel'
 
 export default {
@@ -52,6 +52,7 @@ export default {
       email: 'testing@gmail.com',
       emailRules: [
         v => !!v || 'E-mail is required',
+        v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
       ],
       password: '12345678',
       passwordRules: [
@@ -63,10 +64,12 @@ export default {
   },
   methods: {
     async login () {
+      if (!this.$refs.form.validate())
+        return
       this.error = ''
       this.loading = true
       try {
-        const response = await Authentication.login({
+        const response = await AuthenticationService.login({
           email: this.email,
           password: this.password,
           role: 'student'
