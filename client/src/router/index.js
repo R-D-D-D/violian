@@ -32,8 +32,8 @@ export default new VueRouter({
       component: Student
     },
     {
-      path: '/lesson/show',
-      name: 'newlesson',
+      path: '/lesson/show/:id',
+      name: 'showlesson',
       component: ShowLesson
     },
     {

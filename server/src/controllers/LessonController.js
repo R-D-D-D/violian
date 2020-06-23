@@ -4,10 +4,10 @@ const {User} = require('../models')
 module.exports = {
   async create (req, res) {
     try {
-      const {tutorId} = req.body
+      const {TutorId} = req.body
       const user = await User.findOne({
         where: {
-          id: tutorId
+          id: TutorId
         }
       })
       
@@ -20,7 +20,9 @@ module.exports = {
       const lesson = await user.createLesson(req.body)
       lesson.setTutor(user)
 
-      res.send(lesson.toJSON())
+      res.send({
+        lesson: lesson.toJSON()
+      })
     } catch (err) {
       res.status(500).send({
         error: 'an  error has occured trying to create the lesson'
@@ -31,10 +33,11 @@ module.exports = {
   async list (req, res) {
     try {
       console.log("in get")
-      const {tutorId} = req.body
+      const {uid} = req.query
+      console.log('userId', req.query)
       const user = await User.findOne({
         where: {
-          id: tutorId
+          id: uid
         }
       })
       
@@ -47,14 +50,7 @@ module.exports = {
       console.log("user found")
 
       var lessons = null
-      var tutor = await User.findOne({
-        where: {
-          id: req.body.tutorId
-        }
-      })
-      lessons = await tutor.getLessons()
-
-      console.log("user1 found")
+      lessons = await user.getLessons()
 
       if (!lessons) {
         return res.status(403).send({
@@ -68,6 +64,7 @@ module.exports = {
       lessons.forEach(lesson => {
         lessonsJson.push(lesson.toJSON())
       })
+      console.log(lessonsJson)
       res.send({
         lessons: lessonsJson
       })
@@ -79,6 +76,51 @@ module.exports = {
   },
 
   async destroy (req, res) {
+    try {
+      const {lid} = req.query
+      await Lesson.destroy({
+        where: {
+          id: lid
+        }
+      })
 
+      res.send({
+        data: 'ok'
+      })
+    } catch (err) {
+      res.status(500).send({
+        error: "An error has occured in trying to delete lesson"
+      })
+    }
+  },
+
+  async edit (req, res) {
+    try {
+      const {lessonObj} = req.body
+      await Lesson.update({
+        date: lessonObj.date,
+        name: lessonObj.name,
+        rhythms: lessonObj.rhythms
+      }, {
+        where: {
+          id: lessonObj.id
+        }
+      })
+
+      const lesson = await Lesson.findOne({
+        where: {
+          id: lessonObj.id
+        }
+      })
+
+      res.send({
+        lesson: lesson
+      })
+
+    } catch (err) {
+      res.status(500).send({
+        error: "An error has occured in trying to delete lesson"
+      })
+    }
   }
 }

@@ -388,7 +388,7 @@ Vex.UI.Handler.prototype.deleteNote = function(note){
 };
 
 Vex.UI.Handler.prototype.exportNotes = function() {
-	result = [];
+	var result = [];
 	for(var i = 0; i < this.staveList.length; i++){
 		for(var j = 0; j < this.staveList[i].getTickables().length; j++){
 			var note = this.staveList[i].getTickables()[j];
@@ -409,6 +409,50 @@ Vex.UI.Handler.prototype.exportNotes = function() {
 		}
 	}
 	return result;
+};
+
+Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
+	var tickables = []
+	var barNum = 0
+	var barDuration = eval(timeSignature)
+	var accumDuration = 0
+
+	for (var j = 0; j < this.staveList.length; j++) {
+		this.staveList[j].setTickables([])
+	}
+
+	for (var i = 0; i < notes.length; i++) {
+		var noteArr = notes[i].split('/')
+		var dur = noteArr[2]
+		var isDot = false
+		if (dur.includes("r")) {
+			dur = dur.replace("r", "");
+		}
+		if (dur.includes("d")) {
+			dur = dur.replace("d", "");
+			isDot = true;
+		}
+		var staveNote = new Vex.Flow.StaveNote({clef: "treble", keys: [noteArr[0] + '/' + noteArr[1]], duration: noteArr[2] })
+		dur = 1 / parseInt(dur)
+		if (isDot)
+			dur = dur * 1.5
+
+		if (accumDuration + dur > barDuration) {
+			this.staveList[barNum].setTickables(tickables)
+			tickables = []
+			barNum++;
+			accumDuration = dur
+		} else {
+			accumDuration += dur
+		}
+
+		tickables.push(staveNote);
+	}
+	
+	if (tickables.length > 0 && barNum + 1 <= this.options.numberOfStaves) {
+		this.staveList[barNum].setTickables(tickables)
+	}
+	this.redraw()
 };
 
 Vex.UI.Handler.prototype.numBars = 4;
@@ -1089,21 +1133,21 @@ Vex.Flow.Stave.prototype.insertTickableBetween = function(newTickable, previousT
 			return;
 	}
 
-	if (previousTickable) {
-		if (previousTickable.getModifiers('annotations')[0].text == "L") 
-			newTickable.addModifier(0, new Vex.Flow.Annotation('R'));
-		else 
-			newTickable.addModifier(0, new Vex.Flow.Annotation('L'));
-	} else {
-		if (nextTickable) {
-			if (nextTickable.getModifiers('annotations')[0].text == "L") 
-				newTickable.addModifier(0, new Vex.Flow.Annotation('R'));
-			else 
-				newTickable.addModifier(0, new Vex.Flow.Annotation('L'));
-		} else {
-				newTickable.addModifier(0, new Vex.Flow.Annotation('L'));
-		}
-	}
+	// if (previousTickable) {
+	// 	if (previousTickable.getModifiers('annotations')[0].text == "L") 
+	// 		newTickable.addModifier(0, new Vex.Flow.Annotation('R'));
+	// 	else 
+	// 		newTickable.addModifier(0, new Vex.Flow.Annotation('L'));
+	// } else {
+	// 	if (nextTickable) {
+	// 		if (nextTickable.getModifiers('annotations')[0].text == "L") 
+	// 			newTickable.addModifier(0, new Vex.Flow.Annotation('R'));
+	// 		else 
+	// 			newTickable.addModifier(0, new Vex.Flow.Annotation('L'));
+	// 	} else {
+	// 			newTickable.addModifier(0, new Vex.Flow.Annotation('L'));
+	// 	}
+	// }
 
 	if (nextTickable==null) {
 			this.pushTickable(newTickable);

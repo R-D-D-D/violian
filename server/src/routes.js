@@ -3,6 +3,7 @@ const LessonController = require('./controllers/LessonController')
 const SubscriptionController = require('./controllers/SubscriptionController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
+const Lesson = require('./models/Lesson')
 
 module.exports = (app) => {
   // log in
@@ -15,21 +16,23 @@ module.exports = (app) => {
   // lesson management  
   app.post('/lesson/new', LessonController.create),
 
+  app.put('/lesson/edit', LessonController.edit),
+
   app.get('/lesson/list', LessonController.list),
 
-  app.get('/lesson/del', LessonController.destroy),
+  app.delete('/lesson/del', LessonController.destroy),
   
   // subscription management
   app.post('/subscribe/new', SubscriptionController.subscribe),
 
-  app.get('/subscribe/get/student', SubscriptionController.getStudentSubscriptionInfo),
+  app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfo),
 
-  app.get('/subscribe/get/tutor', SubscriptionController.getTutorSubscriptionInfo)
+  app.get('/subscribe/get/tutor', SubscriptionController.getSubscriptionInfo)
 
 /*
 ## lessons
 - lesson management
-  - POST `/lesson/new? { name, date, rhythms, userId}` - `<lessonObj>`
+  - POST `/lesson/new? { name, date, rhythms, userId }` - `<lessonObj>`
   - GET `/lesson/list { tutorId }` - `{ lessons: [<lessonObj>] }`
   - GET `/lesson/del { lessonId }` - `{ data: ok }`
 

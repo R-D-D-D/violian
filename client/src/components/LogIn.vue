@@ -49,7 +49,7 @@ export default {
   },
   data () {
     return {
-      email: 'testing@gmail.com',
+      email: 'testing1@gmail.com',
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid'

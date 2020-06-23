@@ -4,7 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import vuetify from '@/plugins/vuetify' // path to vuetify export
-import { sync } from 'vuex-router-sync'
+// import { sync } from 'vuex-router-sync'
 import store from '@/store/store'
 
 Vue.config.productionTip = false
@@ -20,11 +20,8 @@ new Vue({
   router,
   components: { App },
   store,
-  // mounted: function () {
-  //   var script = document.createElement('link')
-  //   script.href = 'https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css'
-  //   script.rel = 'stylesheet'
-  //   document.head.appendChild(script)
-  // },
+  mounted: function () {
+    store.dispatch('getLessons', 2)
+  },
   template: '<App/>'
 })

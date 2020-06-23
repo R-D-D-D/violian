@@ -8,11 +8,12 @@
 
 ## lessons
 - lesson management
-  - POST `/lesson/new? { name, date, rhythms, tutorId}` - `<lessonObj>`
-  - GET `/lesson/list { tutorId }` - `{ lessons: [<lessonObj>] }`
-  - GET `/lesson/del { lessonId }` - `{ data: ok }`
+  - POST `/lesson/new { name, date, rhythms, TutorId }` - `<lessonObj>`
+  - PUT `/lesson/edit { lessonObj }` - `{ lesson: <lessonObj> }`
+  - GET `/lesson/list?uid=` - `{ lessons: [<lessonObj>] }`
+  - DELETE `/lesson/del?lid=` - `{ data: ok }`
 
 ## subscriptions
 - POST `/subscribe/new { studentId, tutorId }` - `{ data: ok }`
-- GET `/subscribe/get/student { studentId }` - `{ tutors: [<userObj>] }`
-- GET `/subscribe/get/tutor { tutor Id }` - `{ students: [<userObj>] }`
+- GET `/subscribe/get/student?uid=` - `{ tutors: [<userObj>] }`
+- GET `/subscribe/get/tutor?uid=` - `{ students: [<userObj>] }`

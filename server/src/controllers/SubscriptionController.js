@@ -27,13 +27,13 @@ module.exports = {
 
       // add a tutor to student
       await student.addTutor(tutor)
-      console.log(await student.getTutor())
+      // console.log(await student.getTutors())
 
       // add the student under tutor
       await tutor.addStudent(student)
-      console.log(await tutor.getStudent())
+      // console.log(await tutor.getStudents())
 
-      console.log("even got here")
+      // console.log("even got here")
 
       res.send({data: 'ok'})
     } catch (err) {
@@ -44,68 +44,42 @@ module.exports = {
     } 
   },
 
-  async getStudentSubscriptionInfo (req, res) {
+  async getSubscriptionInfo (req, res) {
     try {
-      const {studentId} = req.body
-      const student = await User.findOne({
-        where: {
-          id: studentId
-        }
+      var user =  await User.findOne({
+          where: {
+            id: req.query.uid
+          }
       })
 
-      console.log("student found")
+      console.log("user found")
       
-      if (!student) {
+      if (!user) {
         return res.status(403).send({
-          error: "Student information is incorrect"
+          error: "User information is incorrect"
         })
       }
 
-      var tutors = student.getTutor()
-
-      const usersJson = []
-      tutors.forEach(student => {
-        usersJson.push(student.toJSON())
-      })
-      res.send({
-        tutors: usersJson
-      })
-    } catch (err) {
-      console.log(err)
-      res.status(500).send({
-        error: 'an error has occured trying to retrieve student tutor information'
-      })
-    }
-  },
-
-  async getTutorSubscriptionInfo (req, res) {
-    try {
-      const {tutorId} = req.body
-      const tutor = await User.findOne({
-        where: {
-          id: tutorId
-        }
-      })
-
-      console.log("auser found")
-      
-      if (!tutor) {
-        return res.status(403).send({
-          error: "Tutor information is incorrect"
-        })
+      var associatedUsers = []
+      if (user.isStudent) {
+        associatedUsers = await user.getTutors()
+      } else {
+        associatedUsers = await user.getStudents()
       }
 
-      var students = user.getStudent()
-
-      console.log("Students found")
-
       const usersJson = []
-      students.forEach(user => {
-        usersJson.push(user.toJSON())
+      associatedUsers.forEach(associatedUser => {
+        usersJson.push(associatedUser.toJSON())
       })
-      res.send({
-        students: usersJson
-      })
+      if (user.isStudent) {
+        res.send({
+          tutors: usersJson
+        })
+      } else {
+        res.send({
+          students: usersJson
+        })
+      }
     } catch (err) {
       console.log(err)
       res.status(500).send({
