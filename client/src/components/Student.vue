@@ -1,56 +1,45 @@
 <template lang="pug">
   #student
-    panel(title="Homeworks")
+    panel(title="Lessons By")
       v-list
-        v-list-item(v-for='rhythm in rhythms' :key='rhythm.title' @click='')
-          v-list-item-icon
-            v-icon(v-if='rhythm.icon' color='pink') mdi-star
+        v-list-item(v-for='tutor in subscribedTutors' :key='tutor.id' @click='go_to_lessons($event, tutor)')
+          //- v-list-item-icon
+          //-   v-icon(v-if='rhythm.icon' color='pink') mdi-star
           v-list-item-content
-            v-list-item-title(v-text='rhythm.title')
+            v-list-item-title(v-text='tutor.email')
           v-list-item-avatar
-            v-img(:src='rhythm.avatar')
-      v-btn(@click="playsequence") Play Sequence
-    #vexflow-wrapper
-
-    
-
+            v-img(:src='avatar')
 </template>
 
 <script>
 import Panel from '@/components/Panel'
-import tone from '@/plugins/tone'
-import vexUI from '@/plugins/vex'
+import { mapState } from 'vuex'
 
 export default {
   name: 'Student',
   data () {
     return {
-      rhythms: [{
-        title: 'practice 1',
-        rhythm: 'c/5/4 c/5/4 c/5/4 c/5/4',
-        icon: true,
-        avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg'
-      },
-      {
-        title: 'practice 2',
-        rhythm: 'c/5/4 c/5/4 c/5/4 c/5/4',
-        avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg'
-      }],
-      tone: tone,
-      handler: null
+      avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg'
     }
   },
   components: {
     'panel': Panel
   },
+  computed: {
+    ...mapState(['user', 'subscribedTutors'])
+  },
   methods: {
     playsequence () {
       this.tone.init()
       this.tone.playSequence(60, ['C/5/4', 'C/5/4', 'C/5/4', 'C/5/4', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r'], 3, {})
+    },
+
+    async go_to_lessons (event, tutor) {
+      if (tutor.lessons == null) {
+        await this.$store.dispatch('getLessonsForStudent', tutor)
+      }
+      this.$router.push(`/lesson/index/${tutor.id}`)
     }
-  },
-  mounted: function () {
-    this.handler = new vexUI.UI.Handler("vexflow-wrapper").init();
   }
 }
 </script>

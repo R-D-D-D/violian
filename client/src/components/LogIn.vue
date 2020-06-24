@@ -49,7 +49,7 @@ export default {
   },
   data () {
     return {
-      email: 'testing1@gmail.com',
+      email: 'testing@gmail.com',
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
@@ -71,12 +71,18 @@ export default {
       try {
         const response = await AuthenticationService.login({
           email: this.email,
-          password: this.password,
-          role: 'student'
+          password: this.password
         })
+
         this.loading = false
         this.$store.dispatch('setToken', response.data.token)
         this.$store.dispatch('setUser', response.data.user)
+        if (response.data.user.isStudent) {
+          this.$store.dispatch('getAllTutors')
+          this.$store.dispatch('getTutorsOfStudent', response.data.user.id)
+        } else {
+          this.$store.dispatch('getStudentsOfTutor', response.data.user.id)
+        }
         this.$router.push({
           name: 'home'
         })

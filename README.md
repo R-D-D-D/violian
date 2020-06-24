@@ -3,12 +3,12 @@
 
 # paths
 ## login
-- POST `/register { email, password }` - `<userObj>`
-- GET `/login { email, password }` - `<userObj>`
+- POST `/register { email, password }` - `{ user: <userObj>, token: jwtSignedToken}`
+- GET `/login { email, password }` - `{ user: <userObj>, token: jwtSignedToken}`
 
 ## lessons
 - lesson management
-  - POST `/lesson/new { name, date, rhythms, TutorId }` - `<lessonObj>`
+  - POST `/lesson/new { name, date, rhythms, TutorId }` - `{ lesson: <lessonObj> }`
   - PUT `/lesson/edit { lessonObj }` - `{ lesson: <lessonObj> }`
   - GET `/lesson/list?uid=` - `{ lessons: [<lessonObj>] }`
   - DELETE `/lesson/del?lid=` - `{ data: ok }`
@@ -17,3 +17,4 @@
 - POST `/subscribe/new { studentId, tutorId }` - `{ data: ok }`
 - GET `/subscribe/get/student?uid=` - `{ tutors: [<userObj>] }`
 - GET `/subscribe/get/tutor?uid=` - `{ students: [<userObj>] }`
+- GET `/tutor/list` - `{ tutors: [<userObj>] }`

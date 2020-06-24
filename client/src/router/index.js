@@ -32,12 +32,12 @@ export default new VueRouter({
       component: Student
     },
     {
-      path: '/lesson/show/:id',
+      path: '/lesson/show/:tutor_id/:lesson_id',
       name: 'showlesson',
       component: ShowLesson
     },
     {
-      path: '/lesson/index',
+      path: '/lesson/index/:tutor_id',
       name: 'lessonindex',
       component: LessonIndex
     }

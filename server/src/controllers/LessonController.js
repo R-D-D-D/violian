@@ -64,7 +64,7 @@ module.exports = {
       lessons.forEach(lesson => {
         lessonsJson.push(lesson.toJSON())
       })
-      console.log(lessonsJson)
+      // console.log(lessonsJson)
       res.send({
         lessons: lessonsJson
       })
@@ -113,8 +113,9 @@ module.exports = {
         }
       })
 
+      console.log(lesson.toJSON())
       res.send({
-        lesson: lesson
+        lesson: lesson.toJSON()
       })
 
     } catch (err) {

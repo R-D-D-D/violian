@@ -21,7 +21,7 @@ new Vue({
   components: { App },
   store,
   mounted: function () {
-    store.dispatch('getLessons', 2)
+    
   },
   template: '<App/>'
 })

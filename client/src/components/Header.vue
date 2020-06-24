@@ -15,7 +15,7 @@
         v-btn(depressed to="/register" color="indigo") Register
         v-btn(depressed to="/login" color="indigo") Log In
       v-toolbar-items(v-if="$store.state.isUserLoggedIn")
-        v-btn(depressed to="/student" color="indigo" v-if="$store.state.user.isStudent") Homework
+        v-btn(depressed to="/student" color="indigo" v-if="$store.state.user.isStudent") Lessons
         v-btn(depressed @click="logout" color="indigo") Log Out
     
     v-navigation-drawer(v-model='drawer' absolute temporary)
@@ -36,7 +36,7 @@
           v-list-item(to="/student" v-if="$store.state.isUserLoggedIn  && $store.state.user.isStudent")
             v-list-item-icon
               v-icon mdi-playlist-music
-            v-list-item-title Homework
+            v-list-item-title Lessons
           v-list-item(to="/lesson/index" v-if="$store.state.isUserLoggedIn  && $store.state.user.isTutor")
             v-list-item-icon
               v-icon mdi-notebook-outline

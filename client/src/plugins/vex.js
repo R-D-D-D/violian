@@ -141,7 +141,7 @@ Vex.UI.Handler.prototype.redrawStave = function(stave){
 	} else {
 		this.ctx.clearRect(box.getX() - 15, box.getY(), box.getW() + 16, box.getH());
 	}
-	this.drawStaves(stave);
+	this.drawStaves(stave, true);
 	this.drawNotes(stave);
 };
 
@@ -281,6 +281,7 @@ Vex.UI.Handler.prototype.updateProvisoryType = function(newType){
 Vex.UI.Handler.prototype.drawProvisoryTickable = function(mousePos){
 	
 	if(this.provisoryTickable && this.currentStave!=null){
+		//console.log('hey----------', this.provisoryTickable)
 		this.redrawStave(this.currentStave);
 		if(mousePos!==undefined){
 			if(this.provisoryTickable instanceof Vex.Flow.StaveNote){
@@ -412,47 +413,58 @@ Vex.UI.Handler.prototype.exportNotes = function() {
 };
 
 Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
-	var tickables = []
-	var barNum = 0
-	var barDuration = eval(timeSignature)
-	var accumDuration = 0
-
-	for (var j = 0; j < this.staveList.length; j++) {
-		this.staveList[j].setTickables([])
-	}
-
-	for (var i = 0; i < notes.length; i++) {
-		var noteArr = notes[i].split('/')
-		var dur = noteArr[2]
-		var isDot = false
-		if (dur.includes("r")) {
-			dur = dur.replace("r", "");
-		}
-		if (dur.includes("d")) {
-			dur = dur.replace("d", "");
-			isDot = true;
-		}
-		var staveNote = new Vex.Flow.StaveNote({clef: "treble", keys: [noteArr[0] + '/' + noteArr[1]], duration: noteArr[2] })
-		dur = 1 / parseInt(dur)
-		if (isDot)
-			dur = dur * 1.5
-
-		if (accumDuration + dur > barDuration) {
-			this.staveList[barNum].setTickables(tickables)
-			tickables = []
-			barNum++;
-			accumDuration = dur
-		} else {
-			accumDuration += dur
-		}
-
-		tickables.push(staveNote);
-	}
+	if (notes && timeSignature) {
+		var tickables = []
+		var barNum = 0
+		var barDuration = eval(timeSignature)
+		var accumDuration = 0
 	
-	if (tickables.length > 0 && barNum + 1 <= this.options.numberOfStaves) {
-		this.staveList[barNum].setTickables(tickables)
+		for (var j = 0; j < this.staveList.length; j++) {
+			this.staveList[j].setTickables([])
+		}
+	
+		for (var i = 0; i < notes.length; i++) {
+			var noteArr = notes[i].split('/')
+			var dur = noteArr[2]
+			var isDot = false
+			if (dur.includes("r")) {
+				dur = dur.replace("r", "");
+			}
+			if (dur.includes("d")) {
+				dur = dur.replace("d", "");
+				isDot = true;
+			}
+			var staveNote = new Vex.Flow.StaveNote({clef: "treble", keys: [noteArr[0] + '/' + noteArr[1]], duration: dur })
+			staveNote.setStyle(Vex.UI.defaultNoteStyle);
+			staveNote.setTickContext(new Vex.Flow.TickContext());
+			dur = 1 / parseInt(dur)
+			if (isDot) {
+				dur = dur * 1.5
+				staveNote.addDotToAll()
+			}
+	
+			if (accumDuration + dur > barDuration) {
+				this.staveList[barNum].setTickables(tickables)
+				tickables = []
+				barNum++;
+				accumDuration = dur
+			} else {
+				accumDuration += dur
+			}
+			staveNote.setStave(this.staveList[barNum])
+	
+			tickables.push(staveNote);
+		}
+		
+		if (tickables.length > 0 && barNum + 1 <= this.options.numberOfStaves) {
+			this.staveList[barNum].setTickables(tickables)
+		}
+
+		for (var j = 0; j < this.staveList.length; j++) {
+			this.drawBeams(this.staveList[j], true);
+		}
+		this.redraw()
 	}
-	this.redraw()
 };
 
 Vex.UI.Handler.prototype.numBars = 4;
@@ -638,8 +650,6 @@ Vex.UI.NoteMenu.prototype.drawMenuPanel = function(mousePos) {
 		//Reposition panel Y to fit canvas
 		panelY = (canvas.height / Vex.UI.scale) - panelHeight - 10; //10 - chosen offset
 	}
-	console.log("pannelY", panelY);
-	console.log("canvas height", canvas.height);
 	
 	//Draw the Panel.
 	var context = this.ctx;
@@ -721,9 +731,8 @@ Vex.UI.NoteMenu.prototype.handleMouseMove = function(evt){
 	//get mouse position
 	var mousePos = getMousePositionInCanvas(this.canvas, evt);
 	
-	
 	for(var i = 0; i<this.buttons.length; i++){
-		button =  this.buttons[i];
+		var button =  this.buttons[i];
 		
 		if(isCursorWithinRectangle(button.props.x, button.props.y, button.props.width, button.props.height, mousePos.x, mousePos.y)){
 			//cursor is in this button
@@ -733,13 +742,13 @@ Vex.UI.NoteMenu.prototype.handleMouseMove = function(evt){
 				//It isnt! change the current button to normal, and highlight the new button
 				
 				if(this.currentButton !=null)
-					this.currentButton.highlight(this.canvas, null);
+					this.currentButton.highlight(this.canvas, null, this.currentButton);
 				
 				//Highlight new button
 				
 				this.currentButton = button;
 				//highlight the button
-				this.currentButton.highlight(this.canvas, 'yellow');
+				this.currentButton.highlight(this.canvas, 'yellow', this.currentButton);
 				this.handler.tipRenderer.showTip(this.currentButton.props.tip);
 				
 			}
@@ -749,7 +758,7 @@ Vex.UI.NoteMenu.prototype.handleMouseMove = function(evt){
 				
 		} else {
 			//it isnt in this button, make sure it isnt highlighted
-			button.highlight(this.canvas, null);
+			button.highlight(this.canvas, null, button);
 		}
 		
 	}
@@ -782,6 +791,7 @@ Vex.UI.NoteMenu.prototype.addDoubleSharp = function(){
 };
 
 Vex.UI.NoteMenu.prototype.addDot = function(){
+	console.log('got here')
 	this.handler.addDotToNote(this.note);
 	this.close();
 };
@@ -1443,8 +1453,8 @@ Vex.Flow.StaveNote.prototype.change = function(action){
 		else if (type == "r") type = "n";
 		dur = Vex.Flow.parseNoteDurationString(this.duration);
 		var dots = "";
-		for (var i=0;i<dur.dots;i++) dots+="d";
-		dur = dur.duration+dots+type;
+		for (var i=0; i < dur.dots; i++) dots+="d";
+		dur = dur.duration + dots + type;
 	}
 	//create new note with new parameters
 	return this.clone({keys: newKeys, duration:dur });
@@ -1456,6 +1466,7 @@ Vex.Flow.StaveNote.prototype.change = function(action){
 Vex.Flow.StaveNote.prototype.drawFlag = function(){
 	if (!this.context) throw new Vex.RERR("NoCanvasContext",
 	"Can't draw without a canvas context.");
+	//console.log('drawflag called')
 	var ctx = this.context;
 	var glyph = this.getGlyph();
 	var render_flag = this.beam === null;
@@ -1841,6 +1852,8 @@ Vex.UI.NoteMenuButtonRenderer.prototype.closeButton = function (){
 	 context.lineTo(buttonX + buttonWidth - drawingOffset, buttonY + drawingOffset);
 	 context.strokeStyle = 'white';
 	 context.stroke();
+
+	 //context.strokeStyle = 'black'
 	 
 	 return new Vex.UI.Button({
 		 backgroundColor: 'red',
@@ -2124,7 +2137,7 @@ Vex.UI.Button = function(props){
 };
 
 
-Vex.UI.Button.prototype.highlight = function (canvas, color){
+Vex.UI.Button.prototype.highlight = function (canvas, color, button){
 		//If color == null remove highlight
 		if(color==null)
 			color = button.props.backgroundColor;
@@ -2153,4 +2166,4 @@ Vex.UI.TickableType = {
 	CLEF : "clef"
 };
 
-export default Vex
+export default Vex.UI

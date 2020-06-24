@@ -1,7 +1,7 @@
 <template lang="pug">
   #lessons.mt-5
     panel(title="Upcoming Lessons")
-      v-list
+      v-list(v-if="!is_student")
         v-list-item(v-for="lesson in lessons" :key="lesson.name")
           v-list-item-content
             v-list-item-title.text-h5.py-0(v-text="lesson.name")
@@ -10,7 +10,13 @@
           v-list-item-icon
             v-btn(outlined color='indigo' @click="showlesson($event, lesson.id)")
                 v-icon mdi-pencil
-    v-row(justify='center')
+      v-list(v-else)
+        v-list-item(v-for="lesson in tutor.lessons" :key="lesson.name" @click="showlesson($event, lesson.id)")
+          v-list-item-content
+            v-list-item-title.text-h5.py-0(v-text="lesson.name")
+          v-list-item-content
+            v-list-item-title(v-text='lesson.date')
+    v-row(justify='center' v-if="!is_student")
       v-dialog(v-model='dialog' persistent='' max-width='600px')
         template(v-slot:activator='{ on, attrs }')
           v-btn.mt-5(x-large v-bind='attrs' v-on='on')
@@ -50,7 +56,7 @@ export default {
       picker: new Date().toISOString().substr(0, 10),
       name: '',
       nameRules: [
-        v => !!v || 'E-mail is required',
+        v => !!v || 'Name is required',
       ],
       pickerRules: [
         v => !!v || 'Password is required',
@@ -62,7 +68,17 @@ export default {
       loading: false
     }
   },
-  computed: mapState(['user', 'students', 'tutors', 'lessons']),
+  computed: {
+    is_student () {
+      return this.user.isStudent
+    },
+
+    tutor () {
+      return this.$store.getters.tutorFromSubscribedTutors(this.$route.params.tutor_id)
+    },
+
+    ...mapState(['user', 'students', 'subscribedTutors', 'lessons'])
+  },
   components: {
     'panel': Panel
   },
@@ -82,13 +98,17 @@ export default {
           this.dialog = false
           this.$router.push(`/lesson/show/${response.data.lesson.id}`)
         } catch (err) {
-          this.error = err
+          console.log(err)
         }
       }
     },
 
     showlesson (event, id) {
-      this.$router.push(`/lesson/show/${id}`)
+      if (this.is_student) {
+        this.$router.push(`/lesson/show/${this.tutor.id}/${id}`)
+      } else {
+        this.$router.push(`/lesson/show/${this.user.id}/${id}`)
+      }
     }
   },
   mounted: async function () {

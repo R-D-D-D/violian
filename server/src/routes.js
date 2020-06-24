@@ -27,7 +27,9 @@ module.exports = (app) => {
 
   app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfo),
 
-  app.get('/subscribe/get/tutor', SubscriptionController.getSubscriptionInfo)
+  app.get('/subscribe/get/tutor', SubscriptionController.getSubscriptionInfo),
+
+  app.get('/tutor/list', SubscriptionController.getAllTutors)
 
 /*
 ## lessons

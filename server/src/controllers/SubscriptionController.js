@@ -86,5 +86,29 @@ module.exports = {
         error: 'an error has occured trying to retrieve student tutor information'
       })
     }
+  },
+
+  async getAllTutors (req, res) {
+    try {
+      var tutors =  await User.findAll({
+          where: {
+            isTutor: true
+          }
+      })
+
+      const usersJson = []
+      tutors.forEach(associatedUser => {
+        usersJson.push(associatedUser.toJSON())
+      })
+
+      res.send({
+        tutors: usersJson
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: 'an error has occured trying to retrieve tutors information'
+      })
+    }
   }
 }
