@@ -6,7 +6,7 @@
           //- v-list-item-icon
           //-   v-icon(v-if='rhythm.icon' color='pink') mdi-star
           v-list-item-content
-            v-list-item-title(v-text='tutor.email')
+            v-list-item-title(v-text='tutor.username')
           v-list-item-avatar
             v-img(:src='avatar')
 </template>
@@ -29,11 +29,6 @@ export default {
     ...mapState(['user', 'subscribedTutors'])
   },
   methods: {
-    playsequence () {
-      this.tone.init()
-      this.tone.playSequence(60, ['C/5/4', 'C/5/4', 'C/5/4', 'C/5/4', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r', 'b/4/4r'], 3, {})
-    },
-
     async go_to_lessons (event, tutor) {
       if (tutor.lessons == null) {
         await this.$store.dispatch('getLessonsForStudent', tutor)

@@ -9,6 +9,19 @@
               v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
                 v-icon(left dark) mdi-content-save-all-outline
                 | Save Rhythm
+          v-row(v-else)
+            v-col
+              v-btn.mt-5(x-large light @click="$emit('play_sequence')" :loading="save_btn_loading")
+                v-icon(left dark) mdi-play-outline
+                | Play Rhythm
+          v-row
+            v-col
+              v-btn.mt-5.record(x-large light @click="")
+                v-icon(left dark color="red darken-3") mdi-circle-slice-8
+                | Record
+              v-btn.mt-5.stop(x-large light)
+                v-icon(left dark color="red darken-3") mdi-stop-circle-outline
+                | Stop
 
       //- Side bar
       v-col.p-0(cols='3')
@@ -26,7 +39,7 @@
                 v-list-item-content
                   v-list-item-title.text-left.text-h5(v-text='rhythm.title' v-if="!title_editable || rhythm != active_rhythm")
                   v-text-field#title_edit.py-0(v-model="active_rhythm_title" type="text" @input="enable_save_btn" v-else required :rules="nameRules")
-                v-list-item-icon
+                v-list-item-icon(v-if="!is_student")
                   v-btn.delete_btn
                     v-icon(color="indigo" @click="") mdi-trash-can-outline
           v-card-actions(v-if="!is_student")
@@ -101,7 +114,8 @@ export default {
         v => !!v || 'Title is required'
       ],
       dialog: false,
-      error: null
+      error: null,
+      recording: false
     }
   },
   components: {
@@ -247,6 +261,123 @@ export default {
 
     open_dialogue () {
       this.dialog = true
+    },
+
+    record () {
+      // set up basic variables for app
+
+      const record = document.querySelector('.record');
+      const stop = document.querySelector('.stop');
+      const soundClips = document.querySelector('.sound-clips');
+      const mainSection = document.querySelector('.main-controls');
+
+      // disable stop button while not recording
+
+      stop.disabled = true;
+
+      // visualiser setup - create web audio api context and canvas
+
+      let audioCtx;
+
+      if (navigator.mediaDevices.getUserMedia) {
+        console.log('getUserMedia supported.');
+
+        const constraints = { audio: true };
+        let chunks = [];
+
+        let onSuccess = function(stream) {
+          const mediaRecorder = new MediaRecorder(stream);
+
+          record.onclick = function() {
+            mediaRecorder.start();
+            console.log(mediaRecorder.state);
+            console.log("recorder started");
+            record.style.background = "red";
+
+            stop.disabled = false;
+            record.disabled = true;
+          }
+
+          stop.onclick = function() {
+            mediaRecorder.stop();
+            console.log(mediaRecorder.state);
+            console.log("recorder stopped");
+            record.style.background = "";
+            record.style.color = "";
+            // mediaRecorder.requestData();
+
+            stop.disabled = true;
+            record.disabled = false;
+          }
+
+          mediaRecorder.onstop = function(e) {
+            console.log("data available after MediaRecorder.stop() called.");
+
+            const clipName = prompt('Enter a name for your sound clip?','My unnamed clip');
+
+            const clipContainer = document.createElement('div');
+            const clipLabel = document.createElement('p');
+            const audio = document.createElement('audio');
+            const deleteButton = document.createElement('button');
+            const comparison = document.createElement('img');
+
+            clipContainer.classList.add('clip', 'col-12', 'text-center');
+            deleteButton.classList.add('btn', 'btn-outline-light')
+            clipLabel.classList.add('text-light')
+            audio.setAttribute('controls', '');
+            deleteButton.textContent = 'Delete';
+            comparison.src = 'resources/comparison.png';
+            comparison.classList.add('col-12', 'mt-2');
+
+            if(clipName === null) {
+              clipLabel.textContent = 'My unnamed clip';
+            } else {
+              clipLabel.textContent = clipName;
+            }
+
+            clipContainer.appendChild(audio);
+            clipContainer.appendChild(clipLabel);
+            clipContainer.appendChild(deleteButton);
+            soundClips.appendChild(clipContainer);
+            soundClips.appendChild(comparison);
+
+            audio.controls = true;
+            const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+            chunks = [];
+            const audioURL = window.URL.createObjectURL(blob);
+            audio.src = audioURL;
+            console.log("recorder stopped");
+
+            deleteButton.onclick = function(e) {
+              let evtTgt = e.target;
+              evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode.parentNode.childNodes[0]);
+            }
+
+            clipLabel.onclick = function() {
+              const existingName = clipLabel.textContent;
+              const newClipName = prompt('Enter a new name for your sound clip?');
+              if(newClipName === null) {
+                clipLabel.textContent = existingName;
+              } else {
+                clipLabel.textContent = newClipName;
+              }
+            }
+          }
+
+          mediaRecorder.ondataavailable = function(e) {
+            chunks.push(e.data);
+          }
+        }
+
+        let onError = function(err) {
+          console.log('The following error occured: ' + err);
+        }
+
+        navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
+
+      } else {
+        console.log('getUserMedia not supported on your browser!');
+      }
     }
   },
   mounted: function () {
@@ -255,8 +386,8 @@ export default {
     this.$on('play_and_record_sequence', () => {
       const audio = document.getElementById('solution-audio')
       tone.init()
-      tone.createAndRecordSequence(60, this.handler.exportNotes(), 2, audio)
-      tone.createAndRecordSequence(this.bpm, this.handler.exportNotes(), parseInt(this.num_of_bars) + 1, audio, false, this.handler)
+      tone.createAndRecordSequence(this.time_signature, 60, this.handler.exportNotes(), 2, audio)
+      tone.createAndRecordSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.num_of_bars) + 1, audio, false, this.handler)
     })
 
     this.$on('play_sequence', () => {
@@ -264,7 +395,7 @@ export default {
       // TODO disable edit when playing
       // this.handler.disableEdit();
       console.log(this.handler.exportNotes())
-      tone.playSequence(this.bpm, this.handler.exportNotes(), parseInt(this.num_of_bars) + 1, this.handler)
+      tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.no_bars) + 1, this.handler)
       // this.handler.enableEdit();
     })
 

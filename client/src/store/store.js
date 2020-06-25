@@ -74,7 +74,11 @@ export default new Vuex.Store({
     },
 
     setLessonsForTutor (state, payload) {
-      var tutorIdx = state.subscribedTutors.indexOf(payload.tutor)
+      var tutorIdx = -1
+      for (var i = 0; i < state.subscribedTutors.length; i++) {
+        if (state.subscribedTutors[i].id == payload.tutor.id)
+          tutorIdx = i
+      }
       if (tutorIdx < 0) 
         throw new Error('Negative index')
       state.subscribedTutors[tutorIdx].lessons = payload.lessons
@@ -147,10 +151,23 @@ export default new Vuex.Store({
     },
 
     // subscription management
+    async subscribe(store, payload) {
+      try {
+        const response = await SubscriptionService.subscribe(payload)
+        store.dispatch('getTutorsOfStudent', payload.studentId)
+      } catch (err) {
+        console.log(err)
+      }
+    },
+
     async getAllTutors ({commit}) {
       try {
         const response = await SubscriptionService.getAllTutors()
-        commit('setAllTutors', response.data.tutors)
+        var tutors = response.data.tutors.map(tutor => {
+          tutor.lessons = null
+          return tutor
+        })
+        commit('setAllTutors', tutors)
       } catch (err) {
         console.log(err)
       }
@@ -159,7 +176,7 @@ export default new Vuex.Store({
     async getTutorsOfStudent ({commit}, userId) {
       try {
         const response = await SubscriptionService.getSubscriptionInfoOfStudent(userId)
-        var tutors = await response.data.tutors.map(tutor => {
+        var tutors = response.data.tutors.map(tutor => {
           tutor.lessons = null
           return tutor
         })
@@ -182,9 +199,13 @@ export default new Vuex.Store({
     // for student to use when logged in as student to get lessons of his subscribed tutor
     async getLessonsForStudent ({commit}, tutor) {
       const response = await LessonService.list(tutor.id)
+      var lessons = response.data.lessons.map(lesson => {
+        lesson.rhythms = utils.parseRhythmsString(lesson.rhythms)
+        return lesson
+      })
       commit('setLessonsForTutor', {
         tutor: tutor,
-        lessons: response.data.lessons
+        lessons: lessons
       })
     },
 

@@ -20,6 +20,7 @@ module.exports = {
         req.body['isTutor'] = false
       }
       const user = await User.create({
+        username: req.body.username,
         email: req.body.email,
         password: req.body.password,
         isTutor: req.body['isTutor'],

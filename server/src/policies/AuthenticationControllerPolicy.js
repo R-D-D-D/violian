@@ -7,7 +7,10 @@ module.exports = {
       password: Joi.string().regex(
         new RegExp('^[a-zA-Z0-9]{8,32}$')
       ),
-      role: Joi.string()
+      role: Joi.string(),
+      username: Joi.string().regex(
+        new RegExp('^[A-Za-z0-9 _]*[A-Za-z0-9][A-Za-z0-9 _]{1,32}$')
+      )
     }
 
     const {error, value} = Joi.validate(req.body, schema)
@@ -32,6 +35,11 @@ module.exports = {
         case 'role':
           res.status(400).send({
             error: `Please indicate whether you are a student or tutor`
+          })
+          break
+        case 'username':
+          res.status(400).send({
+            error: `Username must be 1 - 32 characters long and cannot contain special symbols`
           })
           break
         default:

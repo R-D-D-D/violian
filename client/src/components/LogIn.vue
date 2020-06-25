@@ -78,10 +78,10 @@ export default {
         this.$store.dispatch('setToken', response.data.token)
         this.$store.dispatch('setUser', response.data.user)
         if (response.data.user.isStudent) {
-          this.$store.dispatch('getAllTutors')
           this.$store.dispatch('getTutorsOfStudent', response.data.user.id)
         } else {
-          this.$store.dispatch('getStudentsOfTutor', response.data.user.id)
+          this.$store.dispatch('getLessons', response.data.user.id)
+          //this.$store.dispatch('getStudentsOfTutor', response.data.user.id)
         }
         this.$router.push({
           name: 'home'

@@ -7,6 +7,13 @@
       //-   span Log in
       v-card-text
         v-form(ref="form")
+         v-text-field(
+            label='Username' 
+            name='username' 
+            prepend-icon='mdi-account' 
+            type='text' 
+            v-model='username' 
+            :rules="nameRules")
           v-text-field(
             label='Email' 
             name='email' 
@@ -42,6 +49,11 @@ export default {
   },
   data () {
     return {
+      username: '',
+      nameRules: [
+        v => !!v || 'Username is required',
+        v => new RegExp('^[a-zA-Z0-9]{1,32}$').test(v) || 'Name must be alphanumeric characters and of length 8 - 32'
+      ],
       email: '',
       emailRules: [
         v => !!v || 'E-mail is required',
@@ -50,7 +62,7 @@ export default {
       password: '',
       passwordRules: [
         v => !!v || 'Password is required',
-        v => new RegExp('^[a-zA-Z0-9]{8,32}$').test(v) || 'Name must be alphanumeric characters and of length 8 - 32',
+        v => new RegExp('^[a-zA-Z0-9]{8,32}$').test(v) || 'Password must be alphanumeric characters and of length 8 - 32',
       ],
       error: null,
       loading: false,
@@ -65,6 +77,7 @@ export default {
       this.loading = true
       try {
         const response = await AuthenticationService.register({
+          username: this.username,
           email: this.email,
           password: this.password,
           role: this.role

@@ -24,7 +24,8 @@ module.exports = (sequelize, DataTypes) => {
     isStudent: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
-    }
+    },
+    username: DataTypes.STRING
   }, {
     hooks: {
       beforeSave: hashPassword

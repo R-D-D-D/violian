@@ -16,10 +16,33 @@
         v-btn(depressed to="/login" color="indigo") Log In
       v-toolbar-items(v-if="$store.state.isUserLoggedIn")
         v-btn(depressed to="/student" color="indigo" v-if="$store.state.user.isStudent") Lessons
+        v-btn(depressed @click="browseAllTutors" color="indigo" v-if="$store.state.user.isStudent") All Tutors
         v-btn(depressed @click="logout" color="indigo") Log Out
     
     v-navigation-drawer(v-model='drawer' absolute temporary)
-      v-list(nav dense)
+      v-list(nav dense v-if="$store.state.isUserLoggedIn")
+        v-list-item-group(active-class="text--accent-4" )
+          v-list-item(to="/home")
+            v-list-item-icon
+              v-icon mdi-home
+            v-list-item-title Home
+          v-list-item(to="/student" v-if="$store.state.user.isStudent")
+            v-list-item-icon
+              v-icon mdi-playlist-music
+            v-list-item-title Lessons
+          v-list-item(@click="browseAllTutors" v-if="$store.state.user.isStudent")
+            v-list-item-icon
+              v-icon mdi-account
+            v-list-item-title All Tutors
+          v-list-item(@click="go_to_lessons" v-if="$store.state.user.isTutor")
+            v-list-item-icon
+              v-icon mdi-notebook-outline
+            v-list-item-title Lessons
+          v-list-item(v-if="$store.state.isUserLoggedIn" @click="logout")
+            v-list-item-icon
+              v-icon mdi-logout
+            v-list-item-title Log Out
+      v-list(nav dense v-else)
         v-list-item-group(active-class="text--accent-4")
           v-list-item(to="/home")
             v-list-item-icon
@@ -33,18 +56,6 @@
             v-list-item-icon
               v-icon mdi-account
             v-list-item-title Log In
-          v-list-item(to="/student" v-if="$store.state.isUserLoggedIn  && $store.state.user.isStudent")
-            v-list-item-icon
-              v-icon mdi-playlist-music
-            v-list-item-title Lessons
-          v-list-item(to="/lesson/index" v-if="$store.state.isUserLoggedIn  && $store.state.user.isTutor")
-            v-list-item-icon
-              v-icon mdi-notebook-outline
-            v-list-item-title Lessons
-          v-list-item(v-if="$store.state.isUserLoggedIn" @click="logout")
-            v-list-item-icon
-              v-icon mdi-logout
-            v-list-item-title Log Out
 </template>
 
 <script>
@@ -57,10 +68,21 @@ export default {
   },
 
   methods: {
-    logout() {
+    logout () {
       this.$store.dispatch('setToken', null)
       this.$store.dispatch('setUser', null)
       this.$router.push('/')
+    },
+
+    async browseAllTutors () {
+      if (this.$store.state.allTutors.length == 0) {
+        await this.$store.dispatch('getAllTutors')
+      }
+      this.$router.push('/tutor/index')
+    },
+
+    go_to_lessons () {
+      this.$router.push(`/lesson/index/${this.$store.state.user.id}`)
     }
   }
 }

@@ -2,7 +2,7 @@
 
 import Tone from 'tone'
 
-const tone = {
+export default {
   lowPass: new Tone.Filter({
     frequency: 11000,
   }),
@@ -68,7 +68,7 @@ const tone = {
     return result;
   },
 
-  init() {
+  async init() {
     if (this.initiated) 
       return
     this.initiated = true;
@@ -89,22 +89,26 @@ const tone = {
     this.lowPass.toMaster();
     this.poly.toMaster();
     if (this.player == null) {
-      this.player = new Tone.Player('https://cdn.jsdelivr.net/gh/R-D-D-D/Ground-Zero/web_frontend/src/resources/metronome_click.mp3');
+      this.player = new Tone.Player()
+      await this.player.load('https://cdn.jsdelivr.net/gh/R-D-D-D/Ground-Zero/web_frontend/src/resources/metronome_click.mp3');
       this.player.toMaster();
     }
   },
 
-  playSequence(bpm, notes, numBars, handler) {
-    this.createAndRecordSequence(bpm, notes, numBars, undefined, true, handler);
+  playSequence(timeSignature, bpm, notes, numBars, handler) {
+    this.createAndRecordSequence(timeSignature, bpm, notes, numBars, undefined, true, handler);
   },
 
-  createAndRecordSequence(bpm, notes, numBars, audio, noRecord, handler) {
+  createAndRecordSequence(timeSignature, bpm, notes, numBars, audio, noRecord, handler) {
     // simple check to avoid double play
     if (this.started || numBars == 0) return;
     this.started = true;
 
-    Tone.Transport.bpm.value = bpm;
+    Tone.Transport.bpm.value = parseInt(bpm);
     this.notesToEvents([])
+
+    var timeSigArr = timeSignature.split('/')
+    Tone.Transport.timeSignature = [parseInt(timeSigArr[0]), parseInt(timeSigArr[1])];
 
     Tone.Context.latencyHint = 'fastest';
     const part = new Tone.Part((time) => {
@@ -119,11 +123,12 @@ const tone = {
         // console.log("idx", this.idx)
       }, this.notesToEvents(notes)
     );
+    // console.log(numBars)
+    // console.log(this.notesToEvents(notes))
 
     part.start('1m');
 
-    //loop the part 1 time
-    part.loop = 1;
+    part.loop = numBars;
     var totalNumBars = numBars + "m";
     
     Tone.Transport.scheduleRepeat(() => {
@@ -177,5 +182,3 @@ const tone = {
     }
   }
 }
-
-export default tone

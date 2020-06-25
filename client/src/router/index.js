@@ -2,10 +2,11 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
 import Register from '@/components/Register'
-import Student from '@/components/Student'
+import Student from '@/components/StudentView/Student'
 import LogIn from '@/components/LogIn'
 import ShowLesson from '@/components/Lesson/ShowLesson'
 import LessonIndex from '@/components/Lesson/LessonIndex'
+import TutorIndex from '@/components/TutorIndex'
 
 Vue.use(VueRouter)
 
@@ -40,6 +41,11 @@ export default new VueRouter({
       path: '/lesson/index/:tutor_id',
       name: 'lessonindex',
       component: LessonIndex
+    },
+    {
+      path: '/tutor/index',
+      name: 'tutorindex',
+      component: TutorIndex
     }
   ]
 })

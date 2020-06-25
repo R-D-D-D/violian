@@ -5,6 +5,7 @@ module.exports = {
   async subscribe (req, res) {
     try {
       const {studentId, tutorId} = req.body
+      console.log('req boy:', req.body)
       const student = await User.findOne({
         where: {
           id: studentId
