@@ -10,12 +10,7 @@ export default new Vuex.Store({
   strict: true,
   state: {
     token: null,
-    user: {
-      id: 2,
-      email: "testing@gmail.com",
-      isTutor: false,
-      isStudent: true
-    },
+    user: null,
     subscribedStudents: [],
     // this tutor object contains lessons that belongs to them
     subscribedTutors: [],
