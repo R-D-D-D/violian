@@ -10,7 +10,7 @@
                 v-icon(left dark) mdi-content-save-all-outline
                 | Save Rhythm
           v-row(v-else)
-            v-col.text-center
+            v-col
               v-btn.mt-5(x-large light @click="$emit('play_sequence')" :loading="save_btn_loading")
                 v-icon(left dark) mdi-play-outline
                 | Play Rhythm
