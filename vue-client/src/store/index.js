@@ -17,7 +17,7 @@ export default new Vuex.Store({
     allTutors: [],
     // this lessons array is for tutors when they log in as tutor
     lessons: [],
-    isUserLoggedIn: true
+    isUserLoggedIn: false
   },
 
   getters: {
