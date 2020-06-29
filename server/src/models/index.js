@@ -11,7 +11,7 @@ const db = {}
 //   config.db.options
 // )
 const sequelize = new Sequelize(config.db.url)
-
+//const sequelize = new Sequelize({dialect: 'sqlite',storage: './rhythmacademy.sqlite'})
 fs
   .readdirSync(__dirname)
   .forEach((file) => {
