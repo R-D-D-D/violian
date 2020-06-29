@@ -128,7 +128,7 @@ export default {
 
     part.start('1m');
 
-    part.loop = numBars;
+    //part.loop = numBars;
     var totalNumBars = numBars + "m";
     
     Tone.Transport.scheduleRepeat(() => {

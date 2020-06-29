@@ -28,7 +28,7 @@ Vex.UI.Handler = function (containerId, options){
 		numberOfStaves: 4,
 		canvasProperties: {
 			id: containerId + "-canvas",
-			width: 1225,
+			width: window.innerWidth * 0.9,
 			height: 320,
 			tabindex: 1
 		}
@@ -39,7 +39,7 @@ Vex.UI.Handler = function (containerId, options){
 	this.renderer = new Vex.Flow.Renderer(this.canvas, Vex.Flow.Renderer.Backends.CANVAS);
 	this.ctx = this.renderer.getContext();
 	this.staveList = this.createStaves();
-	this.ctx.scale(1.5, 1.5);
+	this.ctx.scale(Vex.UI.scale, Vex.UI.scale);
 
 	// if(this.options.showToolbar)
 	// 	this.toolbar = new Vex.UI.Toolbar(this);
@@ -77,14 +77,15 @@ Vex.UI.Handler.prototype.createCanvas = function() {
 Vex.UI.Handler.prototype.createStaves = function() {
 	var staveList = [];
 	var yPosition = 0;
+	var widthOfStave = (this.canvas.width / Vex.UI.scale - 20) / 2
 	for(var i = 0; i < this.options.numberOfStaves; i++){
 		//TODO make stave position more dinamic
 		var stave = {};
 		if ((i + 1) % 2 == 0) {
-			stave = new Vex.Flow.Stave(410, yPosition, 400);
+			stave = new Vex.Flow.Stave(10 + widthOfStave, yPosition, widthOfStave);
 			yPosition += (stave.height * 1.2);
 		} else {
-			stave = new Vex.Flow.Stave(10, yPosition, 400);
+			stave = new Vex.Flow.Stave(10, yPosition, widthOfStave);
 			stave.addClef("treble").addTimeSignature('4/4');
 		}
 		stave.font = {
@@ -103,7 +104,7 @@ Vex.UI.Handler.prototype.createStaves = function() {
 };
 
 
-Vex.UI.Handler.prototype.init = function() {
+Vex.UI.Handler.prototype.init = function(editable = true) {
 	//Draw everything
 	this.redraw();
 
@@ -114,6 +115,47 @@ Vex.UI.Handler.prototype.init = function() {
 	}
 
 	return this;
+};
+
+Vex.UI.Handler.prototype.resize = function() {
+	//Merge options with default options
+	var defaultOptions = {
+		canEdit: true,
+		canPlay: true,
+		canAddStaves: true,
+		canChangeNoteValue: true,
+		showToolbar: true,
+		numberOfStaves: 4,
+		canvasProperties: {
+			id: containerId + "-canvas",
+			width: window.innerWidth * 0.9,
+			height: 320,
+			tabindex: 1
+		}
+	};
+
+	this.options = mergeProperties(this.options, {
+		canvasProperties: {
+			id: containerId + "-canvas",
+			width: window.innerWidth * 0.9,
+			height: 320,
+			tabindex: 1
+		}
+	});
+
+	var canvas = document.createElement('canvas');
+	//Attach all properties to element
+	var props = Object.keys(this.options.canvasProperties);
+	for(var i = 0; i<props.length; i++){
+		canvas[props[i]] = this.options.canvasProperties[props[i]];
+	}
+	this.container.removeChild(this.container.childNodes[0]);  
+	this.container.appendChild(canvas);
+	this.convas = canvas;
+	this.renderer = new Vex.Flow.Renderer(this.canvas, Vex.Flow.Renderer.Backends.CANVAS);
+	this.ctx = this.renderer.getContext();
+	this.staveList = this.createStaves();
+	this.ctx.scale(Vex.UI.scale, Vex.UI.scale);
 };
 
 Vex.UI.Handler.prototype.redraw = function(notesInserted){

@@ -11,7 +11,7 @@ module.exports = {
   //   }
   // },
   db: {
-	  url: 'postgres://runding:wangrun123ding@rhythm-academy.cz7i91nic2ll.ap-southeast-1.rds.amazonaws.com:5432/rhythmacademy'
+	  url: process.env.DB_URL || 'postgres://runding:wangrun123ding@rhythm-academy.cz7i91nic2ll.ap-southeast-1.rds.amazonaws.com:5432/rhythmacademy'
   },
   authentication: {
     jwtSecret: process.env.JWT_SECRET || 'secret'
