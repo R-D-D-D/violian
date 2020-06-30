@@ -1,77 +1,18 @@
 <template lang="pug">
-  #show-lesson(@click="disable_title_edit($event)")
+  #show-lesson
     v-row.py-3
       v-col
         .text-h2.font-weight-bold {{ lesson.name }}
+    
     v-row 
-      v-col(cols='6')
-        video(width="90%" controls)
-          source(src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4")
-      v-col(cols='6')
-    v-row(no-gutters)
-      v-col.p-0(cols='12' background-color='grey lighten-3')
-        v-sheet(color='grey lighten-4' dark)
-          #vexflow-wrapper(@click="enable_save_btn")
-    v-row(v-if="!is_student")
-      v-col
-        v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
-          v-icon(left dark) mdi-content-save-all-outline
-          | Save Rhythm
-    v-row(v-else)
-      v-col
-        v-btn.mt-5(x-large light @click="$emit('play_sequence')" :loading="save_btn_loading")
-          v-icon(left dark) mdi-play-outline
-          | Play Rhythm
-    v-row
-      v-col
-        v-btn.mt-5.record(x-large light @click="")
-          v-icon(left dark color="red darken-3") mdi-circle-slice-8
-          | Record
-        v-btn.mt-5.stop(x-large light)
-          v-icon(left dark color="red darken-3") mdi-stop-circle-outline
-          | Stop
+      v-col.mx-5
+        v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo")
+          v-tab(v-for="rhythm in lesson.rhythms" :key="rhythm.id") {{ rhythm.title }}
+        v-tabs-items(v-model="tab")
+          v-tab-item(v-for="rhythm in lesson.rhythms" :key="rhythm.id")
+            practice(:rhythm="rhythm")
 
-      //- Side bar
-      //- v-col.p-0
-        //- v-sheet.pa-8(color='indigo' :height="height" dark)
-        v-card.elevation-12.pa-0(:height="height")
-          v-toolbar(light v-if="lesson")
-            v-toolbar-title.text-h4 {{ lesson.name }}
-            v-spacer
-          v-card-text.py-0(:class="{'rhythm-list-half': !is_student, 'rhythm-list-full': is_student}")
-            v-list(v-if="lesson")
-              v-list-item(v-for="rhythm in lesson.rhythms" :key="rhythm.id" @click="display_rhythm($event, rhythm)" active @dblclick="edit_rhythm_title")
-                v-list-item-icon
-                  v-icon(color="pink" v-if='active_rhythm == rhythm') mdi-star
-                  v-icon(v-else) mdi-star
-                v-list-item-content
-                  v-list-item-title.text-left.text-h5(v-text='rhythm.title' v-if="!title_editable || rhythm != active_rhythm")
-                  v-text-field#title_edit.py-0(v-model="active_rhythm_title" type="text" @input="enable_save_btn" v-else required :rules="nameRules")
-                v-list-item-icon(v-if="!is_student")
-                  v-btn.delete_btn
-                    v-icon(color="indigo" @click="") mdi-trash-can-outline
-          v-card-actions(v-if="!is_student")
-            v-spacer
-            v-btn#add_btn.mt-3(outlined color="indigo" @click="open_dialogue")
-              v-icon(left) mdi-plus-thick
-              |  Add Rhythm
-            v-spacer
-          v-toolbar(light flat v-if="!is_student")
-            v-toolbar-title Current Rhythm
-            v-spacer
-          v-card-text(v-if="!is_student")
-            v-select(:items="time_signatures" v-model="time_signature" label='Time Signature' @change="$emit('change_time_signature')" @click="enable_save_btn").pt-0
-            v-slider(v-model='no_bars' min='0' max='4' :label='bars_label' @change="$emit('change_bars')" @click="enable_save_btn")
-            v-slider(v-model='bpm' min='60' max='120' :label='bpm_label' @click="enable_save_btn")
-          //- v-container(fluid)
-          //-   v-row
-          //-     v-col
-          //-       h2 Settings 
-          //-       v-select(:items="time_signatures" label='Time Signature')
-          //-       v-slider(v-model='no_bars' min='0' max='16' :label='bars_label' message="hey")
-          //-       v-slider(v-model='bpm' min='60' max='180' :label='bpm_label')
-
-    //- v-row(justify='center')
+    v-row(justify='center')
       v-dialog(v-model='dialog' persistent='' max-width='600px')
         template(v-slot:activator='{ on, attrs }')
         v-card
@@ -82,7 +23,7 @@
               v-container
                 v-row
                   v-col(cols='12')
-                    v-text-field(v-model="active_rhythm_title" type="text" label='Rhythm name*' required :rules="nameRules")
+                    v-text-field(v-model="new_title" type="text" label='Rhythm name*' required :rules="nameRules")
                 //- v-col(cols='12')
                 //-   v-autocomplete(:items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']" label='Interests' multiple='')
           v-card-actions
@@ -94,39 +35,29 @@
 </template>
 
 <script>
-import tone from "@/plugins/tone";
-import vexUI from "@/plugins/vex";
 import Panel from "@/components/Panel";
 import { mapState } from "vuex";
 import utils from "@/utils";
+import ShowPractice from "@/components/Lesson/ShowPractice";
 
 export default {
   name: "ShowLesson",
   data () {
     return {
-      no_bars: 4,
-      bpm: 60,
-      time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
-      time_signature: "4/4",
-      bars_label: "No. Bars: 4",
-      bpm_label: "BPM: 60",
-      handler: {},
-      disable: true,
-      active_rhythm: null,
-      active_rhythm_title: "",
-      title_editable: false,
-      save_btn_loading: false,
-      add_btn_loading: false,
+      dialog: false,
+      error: null,
+      recording: false,
+      tab: null,
+      new_title: '',
       nameRules: [
         v => !!v || "Title is required"
       ],
-      dialog: false,
-      error: null,
-      recording: false
+      add_btn_loading: false,
     }
   },
   components: {
-    "panel": Panel
+    "panel": Panel,
+    "practice": ShowPractice
   },
   computed: {
     lesson () {
@@ -147,100 +78,53 @@ export default {
       return this.user.isStudent;
     },
 
-    ...mapState(["user", "students", "subscribedTutors"])
-  },
-  watch: {
-    bpm: function (val) {
-      this.bpm_label = "BPM: " + val;
-    },
-    no_bars: function (val) {
-      this.bars_label = "No. Bars: " + val;
-    }
+    ...mapState(["user", "subscribedTutors"])
   },
   methods: {
     alert () {
       alert("testing");
     },
 
-    onResize(event) {
-      console.log('window has been resized', event) 
-      this.handler = new vexUI.Handler("vexflow-wrapper").init();
-    },
-
     // there are many rhythms in a lesson, display one of them
-    async display_rhythm (event, rhythm) {
-      if (event) {
-        // delete btn pressed
-        if (event.target && event.target.nodeName &&  event.target.nodeName == "BUTTON") {
-          confirm("Are you sure you want to delete?");
-          var rhythmIdx = this.lesson.rhythms.indexOf(rhythm);
-          var newLesson = utils.cloneLesson(this.lesson);
+    // async display_rhythm (event, rhythm) {
+    //   if (event) {
+    //     // delete btn pressed
+    //     if (event.target && event.target.nodeName &&  event.target.nodeName == "BUTTON") {
+    //       confirm("Are you sure you want to delete?");
+    //       var rhythmIdx = this.lesson.rhythms.indexOf(rhythm);
+    //       var newLesson = utils.cloneLesson(this.lesson);
 
-          newLesson.rhythms.splice(rhythmIdx, 1);
-          newLesson.rhythms = utils.generateRhythmsString(newLesson.rhythms);
-          try {
-            await this.$store.dispatch("editRhythm", {
-              lesson: this.lesson,
-              newLesson: newLesson
-            });
-            return;
-          } catch (err) {
-            console.log(err);
-            return;
-          }
-        }
-      }
-      this.active_rhythm = rhythm;
-      this.active_rhythm_title = rhythm.title;
-      this.disable = true;
+    //       newLesson.rhythms.splice(rhythmIdx, 1);
+    //       newLesson.rhythms = utils.generateRhythmsString(newLesson.rhythms);
+    //       try {
+    //         await this.$store.dispatch("editRhythm", {
+    //           lesson: this.lesson,
+    //           newLesson: newLesson
+    //         });
+    //         return;
+    //       } catch (err) {
+    //         console.log(err);
+    //         return;
+    //       }
+    //     }
+    //   }
+    //   this.active_rhythm = rhythm;
+    //   this.active_rhythm_title = rhythm.title;
+    //   this.disable = true;
 
-      this.no_bars = rhythm.noOfBars;
-      this.handler.changeBars(this.no_bars);
+    //   this.no_bars = rhythm.noOfBars;
+    //   this.handler.changeBars(this.no_bars);
 
-      this.time_signature = rhythm.timeSignature;
-      this.handler.setTimeSignature(this.time_signature);
+    //   this.time_signature = rhythm.timeSignature;
+    //   this.handler.setTimeSignature(this.time_signature);
 
-      this.bpm = rhythm.bpm;
+    //   this.bpm = rhythm.bpm;
 
-      this.handler.importNotes(rhythm.rhythm, this.time_signature);
-    },
-
-    enable_save_btn () {
-      this.disable = false;
-    },
+    //   this.handler.importNotes(rhythm.rhythm, this.time_signature);
+    // },
 
     edit_rhythm_title () {
       this.title_editable = true;
-    },
-
-    async update_rhythms () {
-      this.save_btn_loading = true;
-      var oldRhythmIdx = this.lesson.rhythms.indexOf(this.active_rhythm);
-      // console.log("oldRhythmIdx", oldRhythmIdx)
-      var newRhythm = {
-        id: this.active_rhythm.id,
-        title: this.active_rhythm_title,
-        timeSignature: this.time_signature,
-        noOfBars: this.no_bars,
-        bpm: this.bpm,
-        rhythm: this.handler.exportNotes()
-      }
-
-      var newLesson = utils.cloneLesson(this.lesson);
-      newLesson.rhythms[oldRhythmIdx] = newRhythm;
-      newLesson.rhythms = utils.generateRhythmsString(newLesson.rhythms);
-      await this.$store.dispatch("editRhythm", {
-        lesson: this.lesson,
-        newLesson: newLesson
-      });
-      this.save_btn_loading = false;
-      this.display_rhythm({}, this.lesson.rhythms[oldRhythmIdx]);
-    },
-
-    disable_title_edit (event) {
-      if (event.target.id != "title_edit") {
-        this.title_editable = false;
-      }
     },
 
     async add_rhythm () {
@@ -275,43 +159,9 @@ export default {
     }
   },
   mounted: function () {
-    if (this.user.isStudent) {
-      this.handler = new vexUI.Handler("vexflow-wrapper", {
-        canEdit: false
-      }).init();
-    } else {
-      this.handler = new vexUI.Handler("vexflow-wrapper").init();
-    }
-
-    if (this.lesson.rhythms) {
-      this.display_rhythm(null, this.lesson.rhythms[0])
-    }
-
-    this.$on("play_and_record_sequence", () => {
-      const audio = document.getElementById("solution-audio");
-      tone.init();
-      tone.createAndRecordSequence(this.time_signature, 60, this.handler.exportNotes(), 2, audio);
-      tone.createAndRecordSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.num_of_bars) + 1, audio, false, this.handler);
-    });
-
-    this.$on("play_sequence", () => {
-      tone.init();
-      // TODO disable edit when playing
-      // this.handler.disableEdit();
-      console.log(this.handler.exportNotes());
-      tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.no_bars) + 1, this.handler);
-      // this.handler.enableEdit();
-    });
-
-    this.$on("change_time_signature", () => {
-      this.handler.setTimeSignature(this.time_signature);
-    });
-
-    this.$on("change_bars", () => {
-      this.handler.changeBars(this.no_bars);
-    });
-
-    //window.addEventListener('resize', this.onResize);
+    // if (this.lesson.rhythms) {
+    //   this.display_rhythm(null, this.lesson.rhythms[0])
+    // }
   }
 }
 </script>

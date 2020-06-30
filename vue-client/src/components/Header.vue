@@ -1,9 +1,12 @@
 <template lang="pug">
-  #nav
+  div
     v-app-bar(
       dark
       color="indigo"
       app
+      dense
+      absolute
+      v-bind:class="{ hide: hidden }"
     )
       v-app-bar-nav-icon(@click="drawer = true")
 
@@ -84,9 +87,18 @@ export default {
     go_to_lessons () {
       this.$router.push(`/lesson/index/${this.$store.state.user.id}`)
     }
+  },
+
+  computed: {
+    hidden () {
+      return this.$store.state.hideNav;
+    }
   }
 }
 </script>
 
 <style>
+.hide {
+  display: none !important;
+}
 </style>

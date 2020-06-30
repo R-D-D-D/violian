@@ -8,14 +8,12 @@
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld";
 import PageHeader from "./components/Header";
 
 export default {
   name: "App",
 
   components: {
-    'helloworld': HelloWorld,
     'page-header': PageHeader
   },
 

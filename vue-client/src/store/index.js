@@ -17,7 +17,8 @@ export default new Vuex.Store({
     allTutors: [],
     // this lessons array is for tutors when they log in as tutor
     lessons: [],
-    isUserLoggedIn: false
+    isUserLoggedIn: false,
+    hideNav: false
   },
 
   getters: {
@@ -77,6 +78,10 @@ export default new Vuex.Store({
       if (tutorIdx < 0) 
         throw new Error("Negative index");
       state.subscribedTutors[tutorIdx].lessons = payload.lessons;
+    },
+
+    setNav (state, bool) {
+      state.hideNav = bool;
     }
   },
 

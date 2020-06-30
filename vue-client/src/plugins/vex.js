@@ -26,6 +26,7 @@ Vex.UI.Handler = function (containerId, options){
 		canChangeNoteValue: true,
 		showToolbar: true,
 		numberOfStaves: 4,
+		extraStaveHeight: false,
 		canvasProperties: {
 			id: containerId + "-canvas",
 			width: window.innerWidth * 0.9,
@@ -77,13 +78,15 @@ Vex.UI.Handler.prototype.createCanvas = function() {
 Vex.UI.Handler.prototype.createStaves = function() {
 	var staveList = [];
 	var yPosition = 0;
+	if (!this.options.extraStaveHeight) 
+		yPosition = -20;
 	var widthOfStave = (this.canvas.width / Vex.UI.scale - 20) / 2
 	for(var i = 0; i < this.options.numberOfStaves; i++){
 		//TODO make stave position more dinamic
 		var stave = {};
 		if ((i + 1) % 2 == 0) {
 			stave = new Vex.Flow.Stave(10 + widthOfStave, yPosition, widthOfStave);
-			yPosition += (stave.height * 1.2);
+			yPosition += (stave.height / 9 * 13);
 		} else {
 			stave = new Vex.Flow.Stave(10, yPosition, widthOfStave);
 			stave.addClef("treble").addTimeSignature('4/4');
