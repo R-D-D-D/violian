@@ -4,14 +4,11 @@ const { Sequelize, DataTypes } = require('sequelize')
 const config = require('../config/config')
 const db = {}
 
-// const sequelize = new Sequelize(
-//   config.db.database,
-//   config.db.user,
-//   config.db.password,
-//   config.db.options
-// )
-// const sequelize = new Sequelize(config.db.url)
-const sequelize = new Sequelize({dialect: 'sqlite',storage: './rhythmacademy.sqlite'})
+const sequelize = new Sequelize({
+  dialect: config.db.dialect, 
+  storage: config.db.url
+})
+
 fs
   .readdirSync(__dirname)
   .forEach((file) => {

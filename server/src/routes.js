@@ -1,9 +1,13 @@
 const AuthenticationController = require('./controllers/AuthenticationController')
-const LessonController = require('./controllers/LessonController')
 const SubscriptionController = require('./controllers/SubscriptionController')
+const CourseController = require('./controllers/CourseController')
+const LessonController = require('./controllers/LessonController')
+const ExerciseController = require('./controllers/ExerciseController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
-const Lesson = require('./models/Lesson')
+
+const multer = require('multer');
+const upload = multer();
 
 module.exports = (app) => {
   // log in
@@ -13,6 +17,15 @@ module.exports = (app) => {
 
   app.post('/login', AuthenticationController.login),
 
+  // course management  
+  app.post('/course/new', CourseController.create),
+
+  app.put('/course/edit', CourseController.edit),
+
+  app.get('/course/list', CourseController.list),
+
+  app.delete('/course/del', CourseController.destroy),
+
   // lesson management  
   app.post('/lesson/new', LessonController.create),
 
@@ -21,13 +34,34 @@ module.exports = (app) => {
   app.get('/lesson/list', LessonController.list),
 
   app.delete('/lesson/del', LessonController.destroy),
+
+  // exercise management  
+  app.post('/exercise/new', upload.fields(
+    [{ name: 'demoVideo', maxCount: 1 }, 
+    { name: 'video', maxCount: 1 },
+    { name: 'demoPoster', maxCount: 1 },
+    { name: 'videoPoster', maxCount: 1 }]), ExerciseController.create),
+
+  app.put('/exercise/edit', upload.fields(
+    [{ name: 'demoVideo', maxCount: 1 }, 
+    { name: 'video', maxCount: 1 },
+    { name: 'demoPoster', maxCount: 1 },
+    { name: 'videoPoster', maxCount: 1 }]), ExerciseController.edit),
+
+  app.get('/exercise/list', ExerciseController.list),
+
+  app.delete('/exercise/del', ExerciseController.destroy),
   
   // subscription management
   app.post('/subscribe/new', SubscriptionController.subscribe),
 
-  app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfo),
+  // app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfo),
 
-  app.get('/subscribe/get/tutor', SubscriptionController.getSubscriptionInfo),
+  // app.get('/subscribe/get/tutor', SubscriptionController.getSubscriptionInfo),
+
+  app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfoOfStudent),
+
+  app.get('/subscribe/get/course', SubscriptionController.getSubscriptionInfoOfCourse),
 
   app.get('/tutor/list', SubscriptionController.getAllTutors)
 

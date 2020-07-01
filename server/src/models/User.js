@@ -44,7 +44,8 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = function (models) {
     User.hasMany(models.Course, { foreignKey: 'TutorId' })
     User.belongsToMany(User, { as: 'Students', through: 'TutorStudents', foreignKey: 'TutorId' }) // Tutor belongs to many students
-    User.belongsToMany(User, { as: 'Tutors', through: 'StudentTutors', foreignKey: 'StudentId' }) // Tutor belongs to many students
+    User.belongsToMany(User, { as: 'Tutors', through: 'StudentTutors', foreignKey: 'StudentId' }) // Student belongs to many tutors
+    User.belongsToMany(models.Course, { as: 'SubscribedCourses', through: 'StudentCourses' })
   }
   return User
 }

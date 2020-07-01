@@ -1,40 +1,41 @@
 const {User} = require('../models')
-const { TimeoutError } = require('bluebird')
+const {Course} = require('../models')
 
 module.exports = {
   async subscribe (req, res) {
     try {
-      const {studentId, tutorId} = req.body
+      const {studentId, courseId} = req.body
       console.log('req boy:', req.body)
+
       const student = await User.findOne({
         where: {
           id: studentId
         }
       })
 
-      const tutor = await User.findOne({
+      const course = await Course.findOne({
         where: {
-          id: tutorId
+          id: courseId
         }
       })
 
-      console.log("student tutor found")
+      console.log("student and course found")
       
-      if (!student || !tutor) {
+      if (!student || !course) {
         return res.status(403).send({
-          error: "User information is incorrect"
+          error: "Given information is incorrect"
         })
       }
 
       // add a tutor to student
-      await student.addTutor(tutor)
-      // console.log(await student.getTutors())
+      await student.addSubscribedCourse(course)
+      console.log(await student.getSubscribedCourses())
 
       // add the student under tutor
-      await tutor.addStudent(student)
-      // console.log(await tutor.getStudents())
+      await course.addStudent(student)
+      console.log(await course.getStudents())
 
-      // console.log("even got here")
+      console.log("even got here")
 
       res.send({data: 'ok'})
     } catch (err) {
@@ -45,7 +46,7 @@ module.exports = {
     } 
   },
 
-  async getSubscriptionInfo (req, res) {
+  async getSubscriptionInfoOfStudent (req, res) {
     try {
       var user =  await User.findOne({
           where: {
@@ -55,36 +56,95 @@ module.exports = {
 
       console.log("user found")
       
-      if (!user) {
+      if (!user || !user.isStudent) {
         return res.status(403).send({
           error: "User information is incorrect"
         })
       }
 
-      var associatedUsers = []
-      if (user.isStudent) {
-        associatedUsers = await user.getTutors()
-      } else {
-        associatedUsers = await user.getStudents()
-      }
+      // var associatedUsers = []
+      // if (user.isStudent) {
+      //   associatedUsers = await user.getTutors()
+      // } else {
+      //   associatedUsers = await user.getStudents()
+      // }
 
-      const usersJson = []
-      associatedUsers.forEach(associatedUser => {
-        usersJson.push(associatedUser.toJSON())
+      // const usersJson = []
+
+      const subscribedCourses = await user.getSubscribedCourses()
+
+      console.log(subscribedCourses)
+      const coursesJson = []
+      subscribedCourses.forEach(course => {
+        coursesJson.push(course.toJSON())
       })
-      if (user.isStudent) {
-        res.send({
-          tutors: usersJson
-        })
-      } else {
-        res.send({
-          students: usersJson
-        })
-      }
+      // if (user.isStudent) {
+      //   res.send({
+      //     tutors: usersJson
+      //   })
+      // } else {
+      //   res.send({
+      //     students: usersJson
+      //   })
+      // }
+      res.send({
+        courses: coursesJson
+      })
     } catch (err) {
       console.log(err)
       res.status(500).send({
-        error: 'an error has occured trying to retrieve student tutor information'
+        error: 'an error has occured trying to retrieve subscription information'
+      })
+    }
+  },
+
+  async getSubscriptionInfoOfCourse (req, res) {
+    try {
+      var course =  await Course.findOne({
+          where: {
+            id: req.query.cid
+          }
+      })
+
+      console.log("course found")
+      
+      if (!course) {
+        return res.status(403).send({
+          error: "Course information is incorrect"
+        })
+      }
+
+      // var associatedUsers = []
+      // if (user.isStudent) {
+      //   associatedUsers = await user.getTutors()
+      // } else {
+      //   associatedUsers = await user.getStudents()
+      // }
+
+      // const usersJson = []
+
+      const subscribedStudents = await course.getStudents()
+
+      const studentsJson = []
+      subscribedStudents.forEach(student => {
+        studentsJson.push(student.toJSON())
+      })
+      // if (user.isStudent) {
+      //   res.send({
+      //     tutors: usersJson
+      //   })
+      // } else {
+      //   res.send({
+      //     students: usersJson
+      //   })
+      // }
+      res.send({
+        students: studentsJson
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: 'an error has occured trying to retrieve subscription information'
       })
     }
   },
@@ -109,6 +169,30 @@ module.exports = {
       console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to retrieve tutors information'
+      })
+    }
+  },
+
+  async getAllStudents (req, res) {
+    try {
+      var students =  await User.findAll({
+          where: {
+            isStudent: true
+          }
+      })
+
+      const usersJson = []
+      students.forEach(associatedUser => {
+        usersJson.push(associatedUser.toJSON())
+      })
+
+      res.send({
+        students: usersJson
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: 'an error has occured trying to retrieve students information'
       })
     }
   }

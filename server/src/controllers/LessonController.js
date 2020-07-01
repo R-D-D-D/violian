@@ -1,24 +1,30 @@
 const {Lesson} = require('../models')
 const {User} = require('../models')
+const {Course} = require('../models')
 
 module.exports = {
   async create (req, res) {
     try {
-      const {TutorId} = req.body
-      const user = await User.findOne({
+      const {cid} = req.body
+      const course = await Course.findOne({
         where: {
-          id: TutorId
+          id: cid
         }
       })
       
-      if (!user) {
+      if (!course) {
         return res.status(403).send({
-          error: "User information is incorrect"
+          error: "Course information is incorrect"
         })
       }
 
-      const lesson = await user.createLesson(req.body)
-      lesson.setTutor(user)
+      const lesson = await course.createLesson({
+        name: req.body.name,
+        duration: req.body.duration
+      })
+
+      await course.increment('duration', { by: parseInt(req.body.duration) })
+      await lesson.setCourse(course)
 
       res.send({
         lesson: lesson.toJSON()
@@ -30,27 +36,64 @@ module.exports = {
     }
   },
 
-  async list (req, res) {
+  async edit (req, res) {
     try {
-      console.log("in get")
-      const {uid} = req.query
-      console.log('userId', req.query)
-      const user = await User.findOne({
+      const {lessonObj} = req.body
+      const lesson = await Lesson.findOne({
         where: {
-          id: uid
+          id: lessonObj.id
         }
       })
-      
-      if (!user) {
-        return res.status(403).send({
-          error: "User information is incorrect"
+
+      if (!lesson) {
+        res.status(403).send({
+          error: "Lesson not found"
         })
       }
 
-      console.log("user found")
+      const course = await lesson.getCourse()
+      var differenceInDuration = parseInt(lessonObj.duration) - lesson.duration
+      if (differenceInDuration != 0) {
+        if (differenceInDuration > 0) {
+          await course.increment('duration', { by: differenceInDuration })
+        } else {
+          await course.decrement('duration', { by: differenceInDuration })
+        }
+      }
 
-      var lessons = null
-      lessons = await user.getLessons()
+      lesson.name = lessonObj.name
+      lesson.duration = lessonObj.duration
+      await lesson.save()
+
+      res.send({
+        lesson: lesson.toJSON()
+      })
+
+    } catch (err) {
+      res.status(500).send({
+        error: "An error has occured in trying to edit lesson"
+      })
+    }
+  },
+
+  async list (req, res) {
+    try {
+      console.log("in get")
+      const {cid} = req.query
+
+      const course = await Course.findOne({
+        where: {
+          id: cid
+        }
+      })
+      
+      if (!course) {
+        return res.status(403).send({
+          error: "Course information is incorrect"
+        })
+      }
+
+      var lessons = await course.getLessons()
 
       if (!lessons) {
         return res.status(403).send({
@@ -58,8 +101,6 @@ module.exports = {
         })
       }
       
-      console.log("lesson found")
-
       const lessonsJson = []
       lessons.forEach(lesson => {
         lessonsJson.push(lesson.toJSON())
@@ -78,46 +119,18 @@ module.exports = {
   async destroy (req, res) {
     try {
       const {lid} = req.query
-      await Lesson.destroy({
+      const lesson = await Lesson.findOne({
         where: {
           id: lid
         }
       })
 
+      const course = await lesson.getCourse()
+      await course.decrement('duration', { by: lesson.duration })
+      await lesson.destroy()
       res.send({
         data: 'ok'
       })
-    } catch (err) {
-      res.status(500).send({
-        error: "An error has occured in trying to delete lesson"
-      })
-    }
-  },
-
-  async edit (req, res) {
-    try {
-      const {lessonObj} = req.body
-      await Lesson.update({
-        date: lessonObj.date,
-        name: lessonObj.name,
-        rhythms: lessonObj.rhythms
-      }, {
-        where: {
-          id: lessonObj.id
-        }
-      })
-
-      const lesson = await Lesson.findOne({
-        where: {
-          id: lessonObj.id
-        }
-      })
-
-      console.log(lesson.toJSON())
-      res.send({
-        lesson: lesson.toJSON()
-      })
-
     } catch (err) {
       res.status(500).send({
         error: "An error has occured in trying to delete lesson"

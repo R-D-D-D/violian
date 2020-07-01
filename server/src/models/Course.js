@@ -3,16 +3,20 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING
     },
-    date: {
-      type: DataTypes.DATEONLY
+    duration: {
+      type: DataTypes.INTEGER
     },
-    rhythms: {
-      type: DataTypes.TEXT
+    price: {
+      type: DataTypes.DOUBLE
     }
   })
 
   Course.associate = function (models) {
+    Course.belongsToMany(models.User, { as: 'Students', through: 'StudentCourses' })
     Course.belongsTo(models.User, { as: 'Tutor' })
+    Course.hasMany(models.Lesson, {
+      onDelete: 'CASCADE'
+    })
   }
   
   return Course

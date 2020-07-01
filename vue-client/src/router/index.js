@@ -7,6 +7,7 @@ import LogIn from "../components/LogIn"
 import ShowLesson from "../components/Lesson/ShowLesson"
 import LessonIndex from "../components/Lesson/LessonIndex"
 import TutorIndex from "../components/TutorIndex"
+import Video from "../components/Video"
 
 Vue.use(VueRouter);
 
@@ -45,7 +46,12 @@ const routes = [
     path: '/tutor/index',
     name: 'tutorindex',
     component: TutorIndex
-  }
+  },
+  {
+    path: '/video',
+    name: 'video',
+    component: Video
+  },
 ];
 
 const router = new VueRouter({

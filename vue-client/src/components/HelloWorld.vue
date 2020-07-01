@@ -24,17 +24,14 @@
           //-     v-btn#voldec(type='button') Vol-
           //-   li
           //-     v-btn#fs Fullscreen
-          v-row#video-controls.controls(no-gutters)
-            v-col.ma-0.pa-0(cols="6")
+          v-row#video-controls.controls.justify-center(no-gutters :align="'center'")
+            v-col.ma-0.pa-0.d-flex.justify-center.align-center
               v-btn#playpause(v-if="!playing")
-                v-icon(left) mdi-play
-                | Play
+                v-icon mdi-play
               v-btn#playpause(v-else)
-                v-icon(left) mdi-pause
-                | Pause
+                v-icon mdi-pause
               v-btn#stop
-                v-icon(left) mdi-square
-                | Stop
+                v-icon mdi-square
               v-btn#mute
                 v-icon(v-if="!muted") mdi-volume-mute 
                 v-icon(v-else) mdi-volume-high
@@ -42,10 +39,10 @@
                 v-icon mdi-volume-plus
               v-btn#voldec
                 v-icon mdi-volume-minus
+              v-progress-linear#progress.progress.mx-5(v-model="progress" height="8" color="indigo darken-2" rounded)
               v-btn#fs
-                v-icon mdi-fullscreen
-            v-col(cols="6")
-              v-progress-linear#progress.progress(v-model="progress" height="8" color="indigo darken-2" rounded)
+                v-icon(v-if="!isFullScreen") mdi-fullscreen
+                v-icon(v-else) mdi-fullscreen-exit
 
           #vexflow-wrapper
 </template>
@@ -177,8 +174,9 @@ export default {
       }
 
       // Set the video container's fullscreen state
-      var setFullscreenData = function(state) {
+      var setFullscreenData = (state) => {
         videoContainer.setAttribute('data-fullscreen', !!state);
+        this.isFullScreen = state;
       }
 
       // Checks if the document is currently in fullscreen mode
@@ -308,10 +306,6 @@ export default {
 
 #test {
   width: 20px;
-}
-
-.button-group {
-  /* display: inline-block; */
 }
 
 figure {

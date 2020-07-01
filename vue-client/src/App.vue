@@ -24,6 +24,8 @@ export default {
 </script>
 
 <style>
+@import '../node_modules/video.js/dist/video-js.css';
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
