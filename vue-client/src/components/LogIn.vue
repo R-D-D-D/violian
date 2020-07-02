@@ -49,7 +49,7 @@ export default {
   },
   data () {
     return {
-      email: 'testing@gmail.com',
+      email: 'testing1@gmail.com',
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
@@ -78,10 +78,9 @@ export default {
         this.$store.dispatch('setToken', response.data.token)
         this.$store.dispatch('setUser', response.data.user)
         if (response.data.user.isStudent) {
-          this.$store.dispatch('getTutorsOfStudent', response.data.user.id)
+          this.$store.dispatch('getCoursesForStudent', response.data.user)
         } else {
-          this.$store.dispatch('getLessons', response.data.user.id)
-          //this.$store.dispatch('getStudentsOfTutor', response.data.user.id)
+          this.$store.dispatch('getCoursesForTutor', response.data.user)
         }
         this.$router.push({
           name: 'home'

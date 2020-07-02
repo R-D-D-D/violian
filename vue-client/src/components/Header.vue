@@ -18,8 +18,9 @@
         v-btn(depressed to="/register" color="indigo") Register
         v-btn(depressed to="/login" color="indigo") Log In
       v-toolbar-items(v-if="$store.state.isUserLoggedIn")
-        v-btn(depressed to="/student" color="indigo" v-if="$store.state.user.isStudent") Your Lessons
+        v-btn(depressed to="/student" color="indigo" v-if="$store.state.user.isStudent") My Courses
         v-btn(depressed @click="browseAllTutors" color="indigo" v-if="$store.state.user.isStudent") All Tutors
+        v-btn(depressed @click="go_to_courses" color="indigo" v-if="$store.state.user.isTutor") My Courses
         v-btn(depressed @click="logout" color="indigo") Log Out
     
     v-navigation-drawer(v-model='drawer' absolute temporary)
@@ -32,15 +33,15 @@
           v-list-item(to="/student" v-if="$store.state.user.isStudent")
             v-list-item-icon
               v-icon mdi-playlist-music
-            v-list-item-title Your Lessons
+            v-list-item-title My Lessons
           v-list-item(@click="browseAllTutors" v-if="$store.state.user.isStudent")
             v-list-item-icon
               v-icon mdi-account
             v-list-item-title All Tutors
-          v-list-item(@click="go_to_lessons" v-if="$store.state.user.isTutor")
+          v-list-item(@click="go_to_courses" v-if="$store.state.user.isTutor")
             v-list-item-icon
               v-icon mdi-notebook-outline
-            v-list-item-title Your Lessons
+            v-list-item-title My Lessons
           v-list-item(v-if="$store.state.isUserLoggedIn" @click="logout")
             v-list-item-icon
               v-icon mdi-logout
@@ -84,8 +85,8 @@ export default {
       this.$router.push('/tutor/index')
     },
 
-    go_to_lessons () {
-      this.$router.push(`/lesson/index/${this.$store.state.user.id}`)
+    go_to_courses () {
+      this.$router.push(`/course/index/${this.$store.state.user.id}`)
     }
   },
 

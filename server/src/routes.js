@@ -37,13 +37,13 @@ module.exports = (app) => {
 
   // exercise management  
   app.post('/exercise/new', upload.fields(
-    [{ name: 'demoVideo', maxCount: 1 }, 
+    [{ name: 'demo', maxCount: 1 }, 
     { name: 'video', maxCount: 1 },
     { name: 'demoPoster', maxCount: 1 },
     { name: 'videoPoster', maxCount: 1 }]), ExerciseController.create),
 
   app.put('/exercise/edit', upload.fields(
-    [{ name: 'demoVideo', maxCount: 1 }, 
+    [{ name: 'demo', maxCount: 1 }, 
     { name: 'video', maxCount: 1 },
     { name: 'demoPoster', maxCount: 1 },
     { name: 'videoPoster', maxCount: 1 }]), ExerciseController.edit),

@@ -5,11 +5,15 @@ export default {
     return Api().post('lesson/new', lessonInfo)
   },
 
-  list (userId) {
-    return Api().get(`lesson/list?uid=${userId}`)
+  list (courseId) {
+    return Api().get(`lesson/list?cid=${courseId}`)
   },
 
   edit (lessonInfo) {
     return Api().put('lesson/edit', lessonInfo)
+  },
+
+  delete (lessonId) {
+    return Api().delete(`lesson/delete?lid=${lessonId}`)
   }
 }

@@ -27,7 +27,7 @@
 ## exercises
 - exercise management
   - POST `/exercise/new { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, lid }` - `{ exercise: <exerciseObj> }`
-  - PUT `/exercise/edit { exerciseObj }` - `{ exercise: <exerciseObj> }`
+  - PUT `/exercise/edit { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, eid }` - `{ exercise: <exerciseObj> }`
   - GET `/exercise/list?lid=` - `{ exercises: [<exerciseObj>] }`
   - DELETE `/exercise/del?eid=` - `{ data: ok }`
 

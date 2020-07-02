@@ -9,8 +9,8 @@ export default {
     return Api().get(`subscribe/get/student?uid=${userId}`)
   },
 
-  getSubscriptionInfoOfTutor (userId) {
-    return Api().get(`subscribe/get/tutor?uid=${userId}`)
+  getSubscriptionInfoOfCourse (courseId) {
+    return Api().get(`subscribe/get/course?cid=${courseId}`)
   },
 
   getAllTutors () {

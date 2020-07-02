@@ -4,8 +4,9 @@ import HelloWorld from "../components/HelloWorld"
 import Register from "../components/Register"
 import Student from "../components/StudentView/Student"
 import LogIn from "../components/LogIn"
-import ShowLesson from "../components/Lesson/ShowLesson"
-import LessonIndex from "../components/Lesson/LessonIndex"
+import ShowCourse from "../components/Course/ShowCourse"
+import CourseIndex from "../components/Course/CourseIndex"
+import NewCourse from "../components/Course/NewCourse"
 import TutorIndex from "../components/TutorIndex"
 import Video from "../components/Video"
 
@@ -33,14 +34,19 @@ const routes = [
     component: Student
   },
   {
-    path: '/lesson/show/:tutor_id/:lesson_id',
-    name: 'showlesson',
-    component: ShowLesson
+    path: '/course/show/:tutor_id/:course_id',
+    name: 'showcourse',
+    component: ShowCourse
   },
   {
-    path: '/lesson/index/:tutor_id',
-    name: 'lessonindex',
-    component: LessonIndex
+    path: '/course/index/:tutor_id',
+    name: 'courseindex',
+    component: CourseIndex
+  },
+  {
+    path: '/course/new/',
+    name: 'newcourse',
+    component: NewCourse
   },
   {
     path: '/tutor/index',

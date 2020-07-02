@@ -16,6 +16,7 @@ Vex.UI.defaultNoteStyle = {shadowBlur:0, shadowColor:'black', fillStyle:'black',
 Vex.UI.scale = 1.5;
 
 Vex.UI.Handler = function (containerId, options){
+	console.log(containerId)
 	this.container = document.getElementById(containerId);
 
 	//Merge options with default options
@@ -26,11 +27,10 @@ Vex.UI.Handler = function (containerId, options){
 		canChangeNoteValue: true,
 		showToolbar: true,
 		numberOfStaves: 4,
-		extraStaveHeight: false,
+		lessStaveHeight: false,
 		canvasProperties: {
 			id: containerId + "-canvas",
 			width: window.innerWidth * 0.9,
-			height: 320,
 			tabindex: 1
 		}
 	};
@@ -70,6 +70,12 @@ Vex.UI.Handler.prototype.createCanvas = function() {
 	for(var i = 0; i<props.length; i++){
 		canvas[props[i]] = this.options.canvasProperties[props[i]];
 	}
+	if (this.options.lessStaveHeight) {
+		canvas.height = 90 * Vex.UI.scale;
+	} else {
+		canvas.height = 130 * Math.ceil(this.options.numberOfStaves / 2) * Vex.UI.scale;
+		console.log(canvas.height)
+	}
 	this.container.appendChild(canvas);
 
 	return canvas;
@@ -78,7 +84,7 @@ Vex.UI.Handler.prototype.createCanvas = function() {
 Vex.UI.Handler.prototype.createStaves = function() {
 	var staveList = [];
 	var yPosition = 0;
-	if (!this.options.extraStaveHeight) 
+	if (this.options.lessStaveHeight) 
 		yPosition = -20;
 	var widthOfStave = (this.canvas.width / Vex.UI.scale - 20) / 2
 	for(var i = 0; i < this.options.numberOfStaves; i++){
@@ -86,7 +92,8 @@ Vex.UI.Handler.prototype.createStaves = function() {
 		var stave = {};
 		if ((i + 1) % 2 == 0) {
 			stave = new Vex.Flow.Stave(10 + widthOfStave, yPosition, widthOfStave);
-			yPosition += (stave.height / 9 * 13);
+			console.log(stave.height)
+			yPosition += 130;
 		} else {
 			stave = new Vex.Flow.Stave(10, yPosition, widthOfStave);
 			stave.addClef("treble").addTimeSignature('4/4');

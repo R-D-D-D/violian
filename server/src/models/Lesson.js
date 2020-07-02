@@ -5,6 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     duration: {
       type: DataTypes.INTEGER
+    },
+    description: {
+      type: DataTypes.TEXT
     }
   })
 

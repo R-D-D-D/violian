@@ -64,7 +64,7 @@ name: "VideoPlayer",
 }
 </script>
 
-<style>
+<style scoped>
 #vexflow-wrapper {
   position: absolute;
   background-color: #FAFAFA;

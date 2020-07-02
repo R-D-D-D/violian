@@ -1,38 +1,28 @@
 import Vue from "vue"
 import Vuex from "vuex"
+import createPersistedState from "vuex-persistedstate"
 import LessonService from "../services/LessonService"
 import SubscriptionService from "../services/SubscriptionService"
-import utils from "../utils"
+import CourseService from "../services/CourseService"
+// import ExerciseService from "../services/ExerciseService"
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   strict: true,
+  plugins: [createPersistedState()],
   state: {
     token: null,
     user: null,
-    subscribedStudents: [],
-    // this tutor object contains lessons that belongs to them
-    subscribedTutors: [],
-    allTutors: [],
     // this lessons array is for tutors when they log in as tutor
-    lessons: [],
+    userOwnedCourses: [],
+    userSubscribedCourses: [],
+    allTutors: [],
     isUserLoggedIn: false,
     hideNav: false
   },
 
   getters: {
-    lesson: state => id => {
-      return state.lessons.filter(lesson => lesson.id == id)[0];
-    },
-
-    lessonFromSubscribedTutors: state => (tutor_id, lesson_id) => {
-      return state.subscribedTutors.filter(tutor => tutor.id == tutor_id)[0].lessons.filter(lesson => lesson.id == lesson_id)[0];
-    },
-
-    tutorFromSubscribedTutors: state => id => {
-      return state.subscribedTutors.filter(tutor => tutor.id == id)[0];
-    }
   },
 
   mutations: {
@@ -52,36 +42,31 @@ export default new Vuex.Store({
       state.isUserLoggedIn = false;
     },
 
-    addLesson (state, lesson) {
-      lesson.rhythms = utils.parseRhythmsString(lesson.rhythms);
-      state.lessons.push(lesson);
-    },
-
-    setLessons (state, lessons) {
-      state.lessons = lessons;
-    },
-
     setAllTutors (state, tutors) {
       state.allTutors = tutors;
     },
 
-    setTutors (state, tutors) {
-      state.subscribedTutors = tutors;
+    setUserOwnedCourses (state, courses) {
+      state.userOwnedCourses = courses;
     },
 
-    setLessonsForTutor (state, payload) {
-      var tutorIdx = -1
-      for (var i = 0; i < state.subscribedTutors.length; i++) {
-        if (state.subscribedTutors[i].id == payload.tutor.id)
-          tutorIdx = i;
-      }
-      if (tutorIdx < 0) 
-        throw new Error("Negative index");
-      state.subscribedTutors[tutorIdx].lessons = payload.lessons;
+    setUserSubscribedCourses (state, courses) {
+      state.userSubscribedCourses = courses;
     },
 
     setNav (state, bool) {
       state.hideNav = bool;
+    },
+
+    addCourse (state, course) {
+      state.userOwnedCourses.push(course);
+    },
+
+    addLesson (state, lesson) {
+      console.log("reached here?")
+      console.log(lesson)
+      const course = state.userOwnedCourses.find(course => course.id == lesson.CourseId)
+      course.lessons.push(lesson)
     }
   },
 
@@ -99,23 +84,15 @@ export default new Vuex.Store({
       commit("setUser", user);
     },
 
-    // lesson management
-    addLesson ({commit}, lesson) {
-      commit("addLesson", lesson);
+    // course management
+    addCourse ({commit}, course) {
+      commit("addCourse", course);
     },
 
-    // for tutor to use when logged in as tutor
-    async getLessons ({commit}, userId) {
-      try {
-        var response = await LessonService.list(userId);
-        var lessons = response.data.lessons.map(lesson => {
-          lesson.rhythms = utils.parseRhythmsString(lesson.rhythms);
-          return lesson;
-        })
-        commit("setLessons", lessons);
-      } catch (err) {
-        console.log(err);
-      }
+    // lesson management
+    async addLesson ({commit}, lesson) {
+      const response = await LessonService.create(lesson);
+      commit("addLesson", response.data.lesson);
     },
 
     // takes in lesson, oldRhythm and newRhythm as args
@@ -134,7 +111,7 @@ export default new Vuex.Store({
     async subscribe(store, payload) {
       try {
         await SubscriptionService.subscribe(payload);
-        store.dispatch("getTutorsOfStudent", payload.studentId);
+        store.dispatch("getCoursesForStudent", payload.studentId);
       } catch (err) {
         console.log(err);
       }
@@ -153,40 +130,38 @@ export default new Vuex.Store({
       }
     },
 
-    async getTutorsOfStudent ({commit}, userId) {
-      try {
-        const response = await SubscriptionService.getSubscriptionInfoOfStudent(userId);
-        var tutors = response.data.tutors.map(tutor => {
-          tutor.lessons = null;
-          return tutor;
-        })
-        // console.log(tutors)
-        commit("setTutors", tutors);
-      } catch (err) {
-        console.log(err);
-      }
-    },
-
-    async getStudentsOfTutor ({commit}, userId) {
-      try {
-        const response = await SubscriptionService.getSubscriptionInfoOfTutor(userId);
-        commit("setStudents", response.data.students);
-      } catch (err) {
-        console.log(err);
-      }
+    async getCoursesForTutor ({commit}, tutor) {
+      const response = await CourseService.list(tutor.id);
+      var courses = response.data.courses
+      console.log(courses)
+      courses = courses.map(course => {
+        course.lessons = course.lessons.map(lesson => {
+          lesson.exercises = lesson.exercises.map(exercise => {
+            exercise.melody = exercise.melody.split('-')
+            return exercise
+          })
+          return lesson
+        });
+        return course
+      })
+      console.log(courses)
+      commit("setUserOwnedCourses", courses);
     },
 
     // for student to use when logged in as student to get lessons of his subscribed tutor
-    async getLessonsForStudent ({commit}, tutor) {
-      const response = await LessonService.list(tutor.id);
-      var lessons = response.data.lessons.map(lesson => {
-        lesson.rhythms = utils.parseRhythmsString(lesson.rhythms)
-        return lesson
-      });
-      commit("setLessonsForTutor", {
-        tutor: tutor,
-        lessons: lessons
-      });
+    async getCoursesForStudent ({commit}, student) {
+      const response = await SubscriptionService.getSubscriptionInfoOfStudent(student.id);
+      var courses = response.data.courses
+      courses = courses.map(course => {
+        course.lessons = course.lessons.map(lesson => {
+          lesson.exercises = lesson.exercises.map(exercise => {
+            exercise.melody = exercise.melody.split('-')
+            return exercise
+          })
+          return lesson
+        });
+      })
+      commit("setUserSubscribedCourses", courses);
     },
 
   }

@@ -53,8 +53,6 @@ module.exports = {
             id: req.query.uid
           }
       })
-
-      console.log("user found")
       
       if (!user || !user.isStudent) {
         return res.status(403).send({
@@ -71,22 +69,27 @@ module.exports = {
 
       // const usersJson = []
 
-      const subscribedCourses = await user.getSubscribedCourses()
+      var subscribedCourses = await user.getSubscribedCourses()
+      // const arr = [1, 2, 3];
 
-      console.log(subscribedCourses)
-      const coursesJson = []
-      subscribedCourses.forEach(course => {
-        coursesJson.push(course.toJSON())
-      })
-      // if (user.isStudent) {
-      //   res.send({
-      //     tutors: usersJson
-      //   })
-      // } else {
-      //   res.send({
-      //     students: usersJson
-      //   })
-      // }
+      // const asyncRes = await Promise.all(arr.map(async (i) => {
+      //   await sleep(10);
+      //   return i + 1;
+      // }));
+      var coursesJson = []
+
+      coursesJson = await Promise.all(subscribedCourses.map(async course => {
+        var courseJson = course.toJSON()
+        var lessons = await course.getLessons()
+        courseJson.lessons = await Promise.all(lessons.map(async lesson => {
+          var lessonJson = lesson.toJSON()
+          var exercises = await lesson.getExercises()
+          lessonJson.exercises = exercises.map(exercise => exercise.toJSON())
+          return lessonJson
+        }))
+        return courseJson
+      }))
+
       res.send({
         courses: coursesJson
       })

@@ -8,6 +8,21 @@ module.exports = (sequelize, DataTypes) => {
     },
     price: {
       type: DataTypes.DOUBLE
+    },
+    currency: {
+      type: DataTypes.STRING
+    },
+    description: {
+      type: DataTypes.TEXT
+    },
+    language: {
+      type: DataTypes.STRING
+    },
+    level: {
+      type: DataTypes.STRING
+    },
+    instrument: {
+      type: DataTypes.STRING
     }
   })
 

@@ -41,13 +41,11 @@ module.exports = {
         }
       })
       
-      if (!user) {
+      if (!user || !user.isTutor) {
         return res.status(403).send({
           error: "User information is incorrect"
         })
       }
-
-      console.log("user found")
 
       var courses = null
       courses = await user.getCourses()
@@ -60,10 +58,20 @@ module.exports = {
       
       console.log("lesson found")
 
-      const coursesJson = []
-      courses.forEach(course => {
-        coursesJson.push(course.toJSON())
-      })
+      var coursesJson = []
+
+      coursesJson = await Promise.all(courses.map(async course => {
+        var courseJson = course.toJSON()
+        var lessons = await course.getLessons()
+        courseJson.lessons = await Promise.all(lessons.map(async lesson => {
+          var lessonJson = lesson.toJSON()
+          var exercises = await lesson.getExercises()
+          lessonJson.exercises = exercises.map(exercise => exercise.toJSON())
+          return lessonJson
+        }))
+        return courseJson
+      }))
+
       // console.log(lessonsJson)
       res.send({
         courses: coursesJson

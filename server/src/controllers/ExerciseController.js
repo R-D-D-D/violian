@@ -19,7 +19,7 @@ module.exports = {
           id: lid
         },
         include: Course
-      })
+      }) 
       
       if (!lesson) {
         return res.status(403).send({
@@ -28,7 +28,7 @@ module.exports = {
       }
 
       const user = await lesson.Course.getTutor()
-      if (req.files['demoPoster'].length > 0) {
+      if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) {
         var params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/demoPoster/${lesson.id}/${req.files['demoPoster'][0].originalname}`,
@@ -40,19 +40,19 @@ module.exports = {
         req.body.demoPosterUrl = response.Location
       }
 
-      if (req.files['demoVideo'].length > 0) {
+      if (req.files['demo'] && req.files['demo'].length > 0) {
         var params = {
             Bucket: config.aws.bucket,
-            Key: `${user.email}/demoVideo/${lesson.id}/${req.files['demoVideo'][0].originalname}`,
-            Body: req.files['demoVideo'][0].buffer
+            Key: `${user.email}/demo/${lesson.id}/${req.files['demo'][0].originalname}`,
+            Body: req.files['demo'][0].buffer
         }
     
         // Uploading files to the bucket
         const response = await s3.upload(params).promise()
-        req.body.demoVideoUrl = response.Location
+        req.body.demoUrl = response.Location
       }
 
-      if (req.files['video'].length > 0) {
+      if (req.files['video'] && req.files['video'].length > 0) {
         var params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/video/${lesson.id}/${req.files['video'][0].originalname}`,
@@ -64,7 +64,7 @@ module.exports = {
         req.body.videoUrl = response.Location
       }
 
-      if (req.files['videoPoster'].length > 0) {
+      if (req.files['videoPoster'] && req.files['videoPoster'].length > 0) {
         var params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/videoPoster/${lesson.id}/${req.files['videoPoster'][0].originalname}`,
@@ -92,25 +92,20 @@ module.exports = {
 
   async list (req, res) {
     try {
-      console.log("in get")
-      const {uid} = req.query
-      console.log('userId', req.query)
-      const user = await User.findOne({
+      const {lid} = req.query
+      const lesson = await Lesson.findOne({
         where: {
-          id: uid
+          id: lid
         }
       })
       
-      if (!user) {
+      if (!lesson) {
         return res.status(403).send({
-          error: "User information is incorrect"
+          error: "Lesson information is incorrect"
         })
       }
 
-      console.log("user found")
-
-      var exercises = null
-      exercises = await user.getExercises()
+      var exercises = await lesson.getExercises()
 
       if (!exercises) {
         return res.status(403).send({
@@ -118,8 +113,6 @@ module.exports = {
         })
       }
       
-      console.log("exercise found")
-
       const exercisesJson = []
       exercises.forEach(exercise => {
         exercisesJson.push(exercise.toJSON())
@@ -137,10 +130,10 @@ module.exports = {
 
   async destroy (req, res) {
     try {
-      const {lid} = req.query
+      const {eid} = req.query
       await Exercise.destroy({
         where: {
-          id: lid
+          id: eid
         }
       })
 
@@ -156,31 +149,86 @@ module.exports = {
 
   async edit (req, res) {
     try {
-      const {exerciseObj} = req.body
-      await Exercise.update({
-        date: exerciseObj.date,
-        name: exerciseObj.name,
-        rhythms: exerciseObj.rhythms
-      }, {
-        where: {
-          id: exerciseObj.id
-        }
-      })
-
+      const {eid} = req.body
       const exercise = await Exercise.findOne({
         where: {
-          id: exerciseObj.id
+          id: eid
+        },
+        include: Lesson
+      })
+      
+      if (!exercise) {
+        return res.status(403).send({
+          error: "Exercise information is incorrect"
+        })
+      }
+
+      const course = await exercise.Lesson.getCourse()
+      const user = await course.getTutor()
+      var possibleAttr = ['demo', 'demoPoster', 'video', 'videoPoster']
+      var changedAttr = []
+      if (req.files['demo'] && req.files['demo'].length > 0) 
+        changedAttr.push(0)
+      if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) 
+        changedAttr.push(1)
+      if (req.files['video'] && req.files['video'].length > 0) 
+        changedAttr.push(2)
+      if (req.files['videoPoster'] && req.files['videoPoster'].length > 0) 
+        changedAttr.push(3)
+      
+      for (var i = 0; i < changedAttr.length; i++) {
+        var originalKey = null
+        if (changedAttr[i] == 0 && exercise.demoUrl)
+          originalKey = exercise.demoUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
+        if (changedAttr[i] == 1 && exercise.demoPosterUrl)
+          originalKey = exercise.demoPosterUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
+        if (changedAttr[i] == 2 && exercise.videoUrl)
+          originalKey = exercise.videoUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
+        if (changedAttr[i] == 3 && exercise.videoPosterUrl)
+          originalKey = exercise.videoPosterUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
+
+        if (originalKey != null) {
+          var deleteParams = {
+            Bucket: config.aws.bucket,
+            Key: `${user.email}/${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/${originalKey}`
+          }
+  
+          await s3.deleteObject(deleteParams).promise()
+        }
+
+        var params = {
+            Bucket: config.aws.bucket,
+            Key: `${user.email}/${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/${req.files[`${possibleAttr[changedAttr[i]]}`][0].originalname}`,
+            Body: req.files[`${possibleAttr[changedAttr[i]]}`][0].buffer
+        }
+    
+        // Uploading files to the bucket
+        const response = await s3.upload(params).promise()
+
+        if (changedAttr[i] == 0)
+          req.body.demoUrl = response.Location
+        if (changedAttr[i] == 1)
+          req.body.demoPosterUrl = response.Location
+        if (changedAttr[i] == 2)
+          req.body.videoUrl = response.Location
+        if (changedAttr[i] == 3)
+          req.body.videoPosterUrl = response.Location
+      }
+
+      await Exercise.update(req.body, {
+        where: {
+          id: eid
         }
       })
 
-      console.log(exercise.toJSON())
+      await exercise.reload()
       res.send({
         exercise: exercise.toJSON()
       })
-
     } catch (err) {
+      console.log(err)
       res.status(500).send({
-        error: "An error has occured in trying to delete exercise"
+        error: 'an  error has occured trying to create the exercise'
       })
     }
   }
