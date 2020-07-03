@@ -1,8 +1,8 @@
 <template lang="pug">
   #courses.mt-5
-    panel(title="All Courses")
+    panel(title="All Courses" md="9")
       v-list(v-if="!is_student")
-        v-list-item(v-for="course in userOwnedCourses" :key="course.name")
+        v-list-item(v-for="course in userOwnedCourses" :key="course.id")
           v-list-item-content
             v-list-item-title.text-h5.py-0(v-text="course.name")
           v-list-item-icon
@@ -18,6 +18,9 @@
           v-btn.mt-5(x-large to="/course/new")
             v-icon(left dark) mdi-plus-thick
             | New Course
+          v-btn.mt-5(x-large @click="test")
+            v-icon(left dark) mdi-plus-thick
+            | Add Lesson
 
 </template>
 
@@ -66,6 +69,15 @@ export default {
       } else {
         this.$router.push(`/course/show/${this.user.id}/${id}`)
       }
+    },
+
+    test () {
+      this.$store.dispatch('addLesson', {
+        CourseId: 8,
+        name: 'hey',
+        description: 'hey',
+        duration: 10
+      })
     }
   },
   mounted: async function () {

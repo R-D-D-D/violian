@@ -12,14 +12,14 @@
 
 ## courses
 - course management
-  - POST `/course/new { name, price, TutorId }` - `{ course: <courseObj> }`
+  - POST `/course/new { name, price, description, langauge, level, instrument,  TutorId }` - `{ course: <courseObj> }`
   - PUT `/course/edit { courseObj }` - `{ course: <courseObj> }`
   - GET `/course/list?uid=` - `{ courses: [<courseObj>] }`
   - DELETE `/course/del?cid=` - `{ data: ok }`
 
 ## lessons
 - lesson management
-  - POST `/lesson/new { name, duration, cid }` - `{ lesson: <lessonObj> }`
+  - POST `/lesson/new { name, duration, description, video, demoVideo, cid }` - `{ lesson: <lessonObj> }`
   - PUT `/lesson/edit { lessonObj }` - `{ lesson: <lessonObj> }`
   - GET `/lesson/list?cid=` - `{ lessons: [<lessonObj>] }`
   - DELETE `/lesson/del?lid=` - `{ data: ok }`

@@ -75,19 +75,14 @@ export default {
   props: ['lesson'],
   data () {
     return {
-      no_bars: 4,
+      numberOfBars: 4,
       bpm: 60,
-      time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
-      time_signature: "4/4",
-      bars_label: "No. Bars: 4",
-      bpm_label: "BPM: 60",
+      timeSignature: '',
       handler: {},
       disable: true,
-      active_rhythm: null,
-      active_rhythm_title: "",
-      title_editable: false,
       save_btn_loading: false,
       add_btn_loading: false,
+      melody: []
     }
   },
   watch: {
@@ -149,9 +144,9 @@ export default {
   },
 
   mounted: function () {
-    if (this.lesson.rhythms) {
-      this.display_rhythm(null, this.lesson.rhythms[0])
-    }
+    // if (this.lesson.rhythms) {
+    //   this.display_rhythm(null, this.lesson.rhythms[0])
+    // }
 
     this.$on("play_and_record_sequence", () => {
       const audio = document.getElementById("solution-audio");
@@ -182,12 +177,20 @@ export default {
       this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
         canEdit: false,
         canvasProperties: {
-          width: window.innerWidth * 2 / 3
+          id: `vexflow-wrapper-${this.lesson.id}`,
+          width: window.innerWidth * 2 / 3,
+          tabindex: 1
         }
       }).init();
+      this.handler.importNotes(this.melody)
     } else {
       this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`).init();
     }
+
+    this.melody = this.lesson.exercises[0].melody
+    this.bpm = this.lesson.exercises[0].bpm
+    this.timeSignature = this.lesson.exercises[0].timeSignature
+    this.handler.importNotes(this.melody, this.timeSignature)
   }
 }
 </script>

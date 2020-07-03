@@ -63,10 +63,22 @@ export default new Vuex.Store({
     },
 
     addLesson (state, lesson) {
-      console.log("reached here?")
       console.log(lesson)
       const course = state.userOwnedCourses.find(course => course.id == lesson.CourseId)
+      if (course.lessons == null)
+        course.lessons = []
+
       course.lessons.push(lesson)
+    },
+
+    addExercise (state, payload) {
+      console.log(payload)
+      const course = state.userOwnedCourses.find(course => course.id == payload.CourseId)
+      const lesson = course.lessons.find(lesson => lesson.id == payload.exercise.LessonId)
+      if (lesson.exercises == null)
+        lesson.exercises = []
+
+      lesson.exercises.push(payload.exercise)
     }
   },
 
@@ -90,9 +102,13 @@ export default new Vuex.Store({
     },
 
     // lesson management
-    async addLesson ({commit}, lesson) {
-      const response = await LessonService.create(lesson);
-      commit("addLesson", response.data.lesson);
+    addLesson ({commit}, lesson) {
+      commit("addLesson", lesson);
+    },
+
+    addExercise ({commit}, payload) {
+      payload.exercise.melody = payload.exercise.melody.split('-')
+      commit("addExercise", payload)
     },
 
     // takes in lesson, oldRhythm and newRhythm as args

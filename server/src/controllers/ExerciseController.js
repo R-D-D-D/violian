@@ -13,6 +13,7 @@ const s3 = new AWS.S3({
 module.exports = {
   async create (req, res) {
     try {
+      console.log(req.body)
       const {lid} = req.body
       const lesson = await Lesson.findOne({
         where: {
@@ -28,6 +29,7 @@ module.exports = {
       }
 
       const user = await lesson.Course.getTutor()
+      
       if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) {
         var params = {
             Bucket: config.aws.bucket,

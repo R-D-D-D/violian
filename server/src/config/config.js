@@ -11,8 +11,8 @@ module.exports = {
   //   }
   // },
   db: {
-    url: process.env.DB_URL,
-    dialect: process.env.DB_DIALECT
+    url: process.env.DB_URL || './rhythmacademy.sqlite',
+    dialect: process.env.DB_DIALECT || 'sqlite'
   },
   aws: {
     id: process.env.AWS_ACCESS_KEY,

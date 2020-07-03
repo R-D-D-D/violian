@@ -16,7 +16,6 @@ Vex.UI.defaultNoteStyle = {shadowBlur:0, shadowColor:'black', fillStyle:'black',
 Vex.UI.scale = 1.5;
 
 Vex.UI.Handler = function (containerId, options){
-	console.log(containerId)
 	this.container = document.getElementById(containerId);
 
 	//Merge options with default options
@@ -63,6 +62,9 @@ Vex.UI.Handler = function (containerId, options){
 	// this.player = new Vex.UI.Player(this, this.staveList);
 };
 
+Vex.UI.Handler.prototype.numBars = 4;
+Vex.UI.Handler.prototype.timeSignature = '4/4';
+
 Vex.UI.Handler.prototype.createCanvas = function() {
 	var canvas = document.createElement('canvas');
 	//Attach all properties to element
@@ -74,7 +76,6 @@ Vex.UI.Handler.prototype.createCanvas = function() {
 		canvas.height = 90 * Vex.UI.scale;
 	} else {
 		canvas.height = 130 * Math.ceil(this.options.numberOfStaves / 2) * Vex.UI.scale;
-		console.log(canvas.height)
 	}
 	this.container.appendChild(canvas);
 
@@ -92,7 +93,6 @@ Vex.UI.Handler.prototype.createStaves = function() {
 		var stave = {};
 		if ((i + 1) % 2 == 0) {
 			stave = new Vex.Flow.Stave(10 + widthOfStave, yPosition, widthOfStave);
-			console.log(stave.height)
 			yPosition += 130;
 		} else {
 			stave = new Vex.Flow.Stave(10, yPosition, widthOfStave);
@@ -519,9 +519,6 @@ Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
 	}
 };
 
-Vex.UI.Handler.prototype.numBars = 4;
-Vex.UI.Handler.prototype.timeSignature = '4/4';
-
 Vex.UI.Handler.prototype.changeBars = function(newNumBars) {
 	//console.log("newBar", newNumBars);
 	if (newNumBars > this.numBars) {
@@ -559,7 +556,6 @@ Vex.UI.Handler.prototype.setTimeSignature = function(timeSignature) {
 };
 
 Vex.UI.Handler.prototype.highlightNote = function(idx) {
-	console.log("called with", idx)
 	if (idx == 0) {
 		this.staveList[0].getTickables()[0].setHighlight(true);
 		this.redraw();

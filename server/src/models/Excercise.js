@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
     timeSignature: {
       type: DataTypes.STRING
     },
+    numberOfBars: {
+      type: DataTypes.INTEGER
+    },
     bpm: {
       type: DataTypes.INTEGER
     },

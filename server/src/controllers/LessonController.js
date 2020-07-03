@@ -20,18 +20,20 @@ module.exports = {
 
       const lesson = await course.createLesson({
         name: req.body.name,
-        duration: req.body.duration
+        duration: req.body.duration || 0,
+        description: req.body.description
       })
 
-      await course.increment('duration', { by: parseInt(req.body.duration) })
+      await course.increment('duration', { by: parseInt(req.body.duration) || 0})
       await lesson.setCourse(course)
 
       res.send({
         lesson: lesson.toJSON()
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
-        error: 'an  error has occured trying to create the lesson'
+        error: 'an error has occured trying to create the lesson'
       })
     }
   },

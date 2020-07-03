@@ -2,7 +2,9 @@ import Api from '@/services/Api'
 
 export default {
   create (exerciseInfo) {
-    return Api().post('exercise/new', exerciseInfo)
+    return Api().post('exercise/new', exerciseInfo, {
+      headers: {'Content-Type': 'multipart/form-data' }
+    })
   },
 
   list (lessonId) {
@@ -14,6 +16,6 @@ export default {
   },
 
   delete (exerciseId) {
-    return Api().delete(`lesson/delete?eid=${exerciseId}`)
+    return Api().delete(`exercise/delete?eid=${exerciseId}`)
   }
 }
