@@ -33,7 +33,7 @@
           v-list-item(to="/student" v-if="$store.state.user.isStudent")
             v-list-item-icon
               v-icon mdi-playlist-music
-            v-list-item-title My Lessons
+            v-list-item-title My Courses
           v-list-item(@click="browseAllTutors" v-if="$store.state.user.isStudent")
             v-list-item-icon
               v-icon mdi-account
@@ -41,7 +41,7 @@
           v-list-item(@click="go_to_courses" v-if="$store.state.user.isTutor")
             v-list-item-icon
               v-icon mdi-notebook-outline
-            v-list-item-title My Lessons
+            v-list-item-title My Courses
           v-list-item(v-if="$store.state.isUserLoggedIn" @click="logout")
             v-list-item-icon
               v-icon mdi-logout

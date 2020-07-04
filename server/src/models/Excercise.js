@@ -26,6 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     videoPosterUrl: {
       type: DataTypes.STRING
+    },
+    demoStartTime: {
+      type: DataTypes.INTEGER
     }
   })
 

@@ -1,8 +1,21 @@
 <template lang="pug">
   div
-    v-container(fluid)
-      v-row(no-gutters)
-        v-col
+    v-card
+      v-row.justify-center
+        v-col(cols="11")
+          h1.display-1.text-left Description
+        v-col(cols="11")
+          p {{ description }}
+
+      v-row.justify-center
+        v-col(cols="11").text-center.pa-0
+          video.vjs-big-play-centered(ref="videoPlayer" class="video-js" @timeupdate="timeUpdated")
+          #vexflow-wrapper
+          
+      v-row
+        v-col(cols="12")
+          .display-1 The score
+        v-col(cols="12")
           div(:id="'vexflow-wrapper-' + lesson.id"  @click="enable_save_btn")
 
       v-row(v-if="!is_student")
@@ -69,6 +82,7 @@ import tone from "@/plugins/tone";
 import vexUI from "@/plugins/vex";
 import { mapState } from "vuex";
 import utils from "@/utils";
+import videojs from 'video.js';
 
 export default {
   name: 'ShowLesson',
@@ -82,7 +96,28 @@ export default {
       disable: true,
       save_btn_loading: false,
       add_btn_loading: false,
-      melody: []
+      description: '',
+      melody: [],
+      options: {
+        controls: true,
+        fluid: true,
+        sources: [
+          {
+            src: this.lesson.exercises[0].demoUrl,
+            type: "video/mp4"
+          }
+        ]
+      },
+      videoHandler: null,
+      hide: true,
+      // videoWidth: 0,
+      // videoHeight: 0,
+      // originalVideoWidth: 0,
+      // originalVideoHeight: 0,
+      notesInBars: null,
+      timePerTwoBars: 0,
+      demoStartTime: 0,
+      currentDisplayedBar: null
     }
   },
   watch: {
@@ -108,6 +143,35 @@ export default {
     ...mapState(["user", "students", "subscribedTutors"])
   },
   methods: {
+    timeUpdated (event) {
+      if (this.currentDisplayedBar == null) {
+        if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
+          this.currentDisplayedBar = 0
+          this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1]), this.timeSignature)
+        } else {
+          return
+        }
+      }
+
+      if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars - this.currentDisplayedBar >= 1) {
+        var currBar = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
+        console.log('in if', currBar)
+        if (currBar >= this.notesInBars.length / 2)
+          return
+        this.currentDisplayedBar = currBar
+        this.videoHandler.importNotes(this.notesInBars[currBar * 2].concat(this.notesInBars[currBar * 2 + 1]), this.timeSignature)
+        return
+      }
+      if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars < this.currentDisplayedBar) {
+        var currBar1 = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
+        console.log('in else', currBar1)
+        if (currBar1 < 0)
+          return
+        this.currentDisplayedBar = currBar1
+        this.videoHandler.importNotes(this.notesInBars[currBar1 * 2].concat(this.notesInBars[currBar1 * 2 + 1]), this.timeSignature)
+      }
+    },
+
     async update_rhythms () {
       this.save_btn_loading = true;
       var oldRhythmIdx = this.lesson.rhythms.indexOf(this.active_rhythm);
@@ -140,61 +204,115 @@ export default {
       if (event.target.id != "title_edit") {
         this.title_editable = false;
       }
-    }
+    },
+
+    // adjustAspectRatioForFullScreen (width, height) {
+    //   var aspectRatio = this.originalHeight / this.originalWidth;
+    //   var desiredHeight = width * aspectRatio;
+    //   if (desiredHeight > height) {
+    //     this.videoHeight = height;
+    //     this.videoWidth = height / aspectRatio;
+    //   } else if (desiredHeight == height) {
+    //     this.videoHeight = height;
+    //     this.videoWidth = width;
+    //   } else {
+    //     this.videoHeight = desiredHeight;
+    //     this.videoWidth = width;
+    //   }
+    // }
   },
 
   mounted: function () {
-    // if (this.lesson.rhythms) {
-    //   this.display_rhythm(null, this.lesson.rhythms[0])
-    // }
+    // find out the aspect ratio of the video
+    // const videoElement = this.$refs.videoPlayer
 
-    this.$on("play_and_record_sequence", () => {
-      const audio = document.getElementById("solution-audio");
-      tone.init();
-      tone.createAndRecordSequence(this.time_signature, 60, this.handler.exportNotes(), 2, audio);
-      tone.createAndRecordSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.num_of_bars) + 1, audio, false, this.handler);
-    });
+    // videoElement.addEventListener('loadeddata', () => {
+    //   //Video should now be loaded but we can add a second check
+
+    //   if(videoElement.readyState == 4){
+    //     console.log("height", videoElement.videoHeight) // returns the intrinsic height of the video
+    //     this.originalHeight = videoElement.videoHeight
+    //     console.log("width", videoElement.videoWidth) // returns the intrinsic width of the video
+    //     this.originalWidth = videoElement.videoWidth
+    //     this.adjustAspectRatioForFullScreen(window.innerWidth, window.innerHeight)
+    //   }
+    // });
 
     this.$on("play_sequence", () => {
       tone.init();
       // TODO disable edit when playing
       // this.handler.disableEdit();
       console.log(this.handler.exportNotes());
-      tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.no_bars) + 1, this.handler);
+      tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.numberOfBars) + 1, this.handler);
       // this.handler.enableEdit();
     });
 
-    this.$on("change_time_signature", () => {
-      this.handler.setTimeSignature(this.time_signature);
-    });
-
-    this.$on("change_bars", () => {
-      this.handler.changeBars(this.no_bars);
-    });
-
     //window.addEventListener('resize', this.onResize);
+    // this generates the score
     if (this.user.isStudent) {
       this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
-        canEdit: false,
-        canvasProperties: {
-          id: `vexflow-wrapper-${this.lesson.id}`,
-          width: window.innerWidth * 2 / 3,
-          tabindex: 1
-        }
+        numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars),
+        canEdit: false
       }).init();
-      this.handler.importNotes(this.melody)
     } else {
-      this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`).init();
+      this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
+        numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars)
+      }).init();
     }
 
     this.melody = this.lesson.exercises[0].melody
-    this.bpm = this.lesson.exercises[0].bpm
+    this.bpm = parseInt(this.lesson.exercises[0].bpm)
     this.timeSignature = this.lesson.exercises[0].timeSignature
     this.handler.importNotes(this.melody, this.timeSignature)
+    this.description = this.lesson.description
+    this.demoStartTime = parseInt(this.lesson.exercises[0].demoStartTime)
+    this.numberOfBars = parseInt(this.lesson.exercises[0].numberOfBars)
+    this.notesInBars = this.handler.notesToBars(this.melody, this.timeSignature)
+
+    this.timePerTwoBars = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60) * 2
+
+    this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
+        console.log('onPlayerReady', this);
+    });
+
+    this.videoHandler = new vexUI.Handler("vexflow-wrapper", {
+      canEdit: false,
+      numberOfStaves: 2,
+      lessStaveHeight: true,
+      canvasProperties: {
+        id: "vexflow-wrapper" + "-canvas",
+        width: document.getElementById("vjs_video_3").offsetWidth,
+        height: 80 * vexUI.scale,
+        tabindex: 1
+      }
+    }).init();
+
+    this.player.on('fullscreenchange', () => {
+      if (this.player.isFullscreen_) {
+        this.hide = false;
+      } else {
+        this.hide = true;
+      }
+    })
+
+    document.getElementById("vjs_video_3").appendChild(document.getElementById("vexflow-wrapper"))
+  },
+
+  beforeDestroy() {
+    if (this.player) {
+        this.player.dispose()
+    }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+#vexflow-wrapper {
+  position: absolute;
+  background-color: #FAFAFA;
+  top: 0;
+  left: 0;
+  right: 0;
+}
 </style>

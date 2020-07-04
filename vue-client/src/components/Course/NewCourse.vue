@@ -40,12 +40,12 @@
                     v-form.mt-5(:ref="`lessonForm${idx}`")
                       v-row
                         v-col(cols="12" md="4")
-                          v-text-field(label='Name' name='name' type='text' v-model='lessons[idx].name' :rules="nameRules" solo clearable color="indigo")
+                          v-text-field(label='Name' name='name' type='text' v-model='lessons[idx].name' :rules="requiredRules" solo clearable color="indigo" ) Title*
                         v-col(cols="12" md="4")
                           v-text-field(label='Duration in minutes' name='duration' v-model='lessons[idx].duration' :rules="durationRules" solo clearable color="indigo")
                       v-row
                         v-col(cols="12")
-                          v-textarea(label="Description" auto-grow solo v-model='lessons[idx].description')
+                          v-textarea(label="Description" auto-grow v-model='lessons[idx].description')
                       v-row
                         v-col(cols="12" md="4")
                           v-file-input(
@@ -53,24 +53,26 @@
                             placeholder="Choose Explanation Video" 
                             prepend-icon="mdi-video" 
                             label="Explanation Video"
-                            v-model="lessons[idx].video"
-                            :rules="requiredRules")
+                            v-model="lessons[idx].video")
                         v-col(cols="12" md="4")
                           v-file-input(
                             accept="video/mp4, video/ogg" 
                             placeholder="Choose Explanation Video" 
-                            prepend-icon="mdi-video" 
+                            prepend-icon="mdi-video"
                             label="Demo Video"
                             v-model="lessons[idx].demoVideo")
                       v-row
-                        v-col
+                        v-col(cols="12" md="4")
                           v-switch(v-model="lessons[idx].useScore" :label="`Overlay score on your demo video`" @change="toggleVex($event, idx)")
+                        v-col(cols="12" md="4" v-if="lessons[idx].useScore")
+                          v-text-field(label='Demo Start Time' v-model='lessons[idx].demoStartTime' clearable color="indigo" prepend-icon="mdi-alarm" persistent-hint hint="At roughly which second did you start playing in demo video" :rules="demoStartTimeRules")
+
                     v-row
                       v-col(:id="`pannel-content-${idx}`" @click="changeMelody($event, idx)")
                     v-row(v-if="lessons[idx].useScore")
                       v-col(cols="12" md="6")
                         v-subheader.pl-0 No. Bars
-                        v-slider(v-model='lessons[idx].numberOfBars' min='0' max='4' thumb-label :thumb-size="24" @change="changeBars($event, idx)")
+                        v-slider(v-model='lessons[idx].numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, idx)")
                       v-col(cols="12" md="6")
                         v-subheader.pl-0 BPM
                         v-slider(v-model='lessons[idx].bpm' min='60' max='120' thumb-label :thumb-size="24")
@@ -196,10 +198,15 @@ export default {
         timeSignature: '4/4',
         bpm: 60,
         numberOfBars: 4,
-        melody: []
+        melody: [],
+        demoStartTime: "0"
       }],
       durationRules: [
         v => !!v || "Duration is required",
+        v => new RegExp(/^\d+$/).test(v) || "Please input numbers only"
+      ],
+      demoStartTimeRules: [
+        v => !!v || "Demo Start Time is required",
         v => new RegExp(/^\d+$/).test(v) || "Please input numbers only"
       ],
       requiredRules: [
@@ -230,8 +237,10 @@ export default {
         if (this.reviewVexHandlers.length == 0) {
           // first time coming
           for (var i = 0; i < this.lessons.length; i++) {
+            console.log(this.lessons[i])
             const handler = new vexUI.Handler(`vexflow-review-wrapper-${i}`, {
               canEdit: false,
+              numberOfStaves: this.lessons[i].numberOfBars,
               canvasProperties: {
                 id: `vexflow-review-wrapper-${i}` + '-canvas',
                 width: window.innerWidth * 5 / 6,
@@ -239,7 +248,6 @@ export default {
               }
             }).init();
             handler.setTimeSignature(this.lessons[i].timeSignature)
-            handler.changeBars(this.lessons[i].numberOfBars)
             if (this.lessons[i].melody.length > 0) {
               handler.importNotes(this.lessons[i].melody, this.lessons[i].timeSignature)
             }
@@ -250,7 +258,6 @@ export default {
         } else {
           for (var j = 0; j < this.lessons.length; j++) {
             this.reviewVexHandlers[j].setTimeSignature(this.lessons[j].timeSignature)
-            this.reviewVexHandlers[j].changeBars(this.lessons[j].numberOfBars)
             this.reviewVexHandlers[j].importNotes(this.lessons[j].melody, this.lessons[j].timeSignature)
           }
         }
@@ -266,6 +273,13 @@ export default {
     },
 
     goStepThree () {
+      console.log(this.$refs['lessonForm0'])
+      for (var i = 0; i < this.lessons.length; i++) {
+        if (!this.$refs[`lessonForm${i}`][0].validate()) {
+          alert('Please fill in name, duration and demo start time for all lessons')
+          return
+        }
+      }
       this.e1 = 3
     },
 
@@ -310,6 +324,7 @@ export default {
           formData.set('bpm', this.lessons[i].bpm)
           formData.set('lid', lessonResponse.data.lesson.id)
           formData.set('numberOfBars', this.lessons[i].numberOfBars)
+          formData.set('demoStartTime', parseInt(this.lessons[i].demoStartTime))
           formData.append('video', this.lessons[i].video)
           formData.append('demo', this.lessons[i].demoVideo)
 
@@ -340,7 +355,8 @@ export default {
         timeSignature: '4/4',
         bpm: 60,
         numberOfBars: 4,
-        melody: []
+        melody: [],
+        demoStartTime: "0"
       })
       this.lesson.push(this.lessons.length)
     },
@@ -377,7 +393,7 @@ export default {
     },
 
     changeBars (event, idx) {
-      this.lessons[idx].handler.changeBars(this.lessons[idx].numberOfBars)
+      this.lessons[idx].handler.changeNumberOfBars(this.lessons[idx].numberOfBars, this.lessons[idx].handler.exportNotes())
     },
 
     changeMelody (event, idx) {

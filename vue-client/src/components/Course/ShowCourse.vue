@@ -7,8 +7,8 @@
     v-row 
       v-col.mx-5
         v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
-          v-tab(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
-          v-tab(:key="'+'")
+          v-tab.text-h4(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
+          v-tab.text-h4(:key="'+'")
             v-icon(left) mdi-plus
             | New Lesson
         v-tabs-items(v-model="tab")

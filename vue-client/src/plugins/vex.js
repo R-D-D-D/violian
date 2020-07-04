@@ -475,7 +475,7 @@ Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
 			this.staveList[j].setTickables([])
 		}
 	
-		for (var i = 0; i < notes.length; i++) {
+		for (var i = 0; i < notes.length && barNum < this.staveList.length; i++) {
 			var noteArr = notes[i].split('/')
 			var dur = noteArr[2]
 			var isDot = false
@@ -487,6 +487,7 @@ Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
 				isDot = true;
 			}
 			var staveNote = new Vex.Flow.StaveNote({clef: "treble", keys: [noteArr[0] + '/' + noteArr[1]], duration: dur })
+			staveNote.autoStem()
 			staveNote.setStyle(Vex.UI.defaultNoteStyle);
 			staveNote.setTickContext(new Vex.Flow.TickContext());
 			dur = 1 / parseInt(dur)
@@ -498,14 +499,15 @@ Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
 			if (accumDuration + dur > barDuration) {
 				this.staveList[barNum].setTickables(tickables)
 				tickables = []
-				barNum++;
+				barNum++
 				accumDuration = dur
 			} else {
 				accumDuration += dur
 			}
-			staveNote.setStave(this.staveList[barNum])
+			if (barNum < this.staveList.length)
+				staveNote.setStave(this.staveList[barNum])
 	
-			tickables.push(staveNote);
+			tickables.push(staveNote)
 		}
 		
 		if (tickables.length > 0 && barNum + 1 <= this.options.numberOfStaves) {
@@ -518,6 +520,52 @@ Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
 		this.redraw()
 	}
 };
+
+Vex.UI.Handler.prototype.notesToBars = function (notes, timeSignature) {
+	if (notes && timeSignature) {
+		var tickables = []
+		var barNum = 0
+		var barDuration = eval(timeSignature)
+		var accumDuration = 0
+		var notesInBars = []
+	
+		for (var i = 0; i < notes.length; i++) {
+			var noteArr = notes[i].split('/')
+			var dur = noteArr[2]
+			var isDot = false
+			if (dur.includes("r")) {
+				dur = dur.replace("r", "");
+			}
+			if (dur.includes("d")) {
+				dur = dur.replace("d", "");
+				isDot = true;
+			}
+
+			dur = 1 / parseInt(dur)
+			if (isDot) {
+				dur = dur * 1.5
+				staveNote.addDotToAll()
+			}
+	
+			if (accumDuration + dur > barDuration) {
+				notesInBars.push(tickables)
+				tickables = []
+				barNum++
+				accumDuration = dur
+			} else {
+				accumDuration += dur
+			}
+	
+			tickables.push(notes[i])
+		}
+		
+		if (tickables.length > 0 && barNum + 1 <= this.options.numberOfStaves) {
+			notesInBars.push(tickables)
+		}
+
+		return notesInBars
+	}
+}
 
 Vex.UI.Handler.prototype.changeBars = function(newNumBars) {
 	//console.log("newBar", newNumBars);
@@ -572,6 +620,43 @@ Vex.UI.Handler.prototype.highlightNote = function(idx) {
 			this.redraw();
 	}
 };
+
+Vex.UI.Handler.prototype.changeNumberOfBars = function (newNumberOfBars, notes) {
+	console.log('called')
+	this.container.removeChild(this.container.lastElementChild);
+	//Merge options with default options
+	var options = {
+		numberOfStaves: newNumberOfBars
+	};
+
+	this.options = mergeProperties(this.options, options || {});
+	this.canvas = this.createCanvas();
+	this.renderer = new Vex.Flow.Renderer(this.canvas, Vex.Flow.Renderer.Backends.CANVAS);
+	this.ctx = this.renderer.getContext();
+	this.staveList = this.createStaves();
+	this.ctx.scale(Vex.UI.scale, Vex.UI.scale);
+
+	// if(this.options.showToolbar)
+	// 	this.toolbar = new Vex.UI.Toolbar(this);
+
+	this.currentNote = null;
+	this.currentStave = null;
+	//Tickable that will follow the mouse position
+	this.provisoryTickable = null;
+	
+	this.mouseListener = new Vex.UI.MouseListener(this, this.canvas, this.staveList);
+	
+	// this.keyboardListener = new Vex.UI.KeyboardListener(this, this.canvas, this.staveList);
+	
+	this.noteMenu = new Vex.UI.NoteMenu(this, this.canvas, this.ctx);
+	this.noteMenu.init();
+	
+	this.tipRenderer = new Vex.UI.TipRenderer(this.canvas);
+	this.tipRenderer.init();
+
+	this.init()
+	this.importNotes(notes, this.timeSignature)
+}
 
 // Vex.UI.Handler.prototype.disableEdit = function() {
 // 	for (var i = 0; i < this.staveList.length; i++) {
