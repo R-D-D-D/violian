@@ -5,7 +5,6 @@ module.exports = {
   async subscribe (req, res) {
     try {
       const {studentId, courseId} = req.body
-      console.log('req boy:', req.body)
 
       const student = await User.findOne({
         where: {
@@ -18,8 +17,6 @@ module.exports = {
           id: courseId
         }
       })
-
-      console.log("student and course found")
       
       if (!student || !course) {
         return res.status(403).send({
@@ -29,17 +26,12 @@ module.exports = {
 
       // add a tutor to student
       await student.addSubscribedCourse(course)
-      console.log(await student.getSubscribedCourses())
 
       // add the student under tutor
       await course.addStudent(student)
-      console.log(await course.getStudents())
-
-      console.log("even got here")
 
       res.send({data: 'ok'})
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to subscribe'
       })
@@ -94,7 +86,6 @@ module.exports = {
         courses: coursesJson
       })
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to retrieve subscription information'
       })
@@ -108,8 +99,6 @@ module.exports = {
             id: req.query.cid
           }
       })
-
-      console.log("course found")
       
       if (!course) {
         return res.status(403).send({
@@ -145,7 +134,6 @@ module.exports = {
         students: studentsJson
       })
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to retrieve subscription information'
       })
@@ -169,7 +157,6 @@ module.exports = {
         tutors: usersJson
       })
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to retrieve tutors information'
       })
@@ -193,7 +180,6 @@ module.exports = {
         students: usersJson
       })
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to retrieve students information'
       })

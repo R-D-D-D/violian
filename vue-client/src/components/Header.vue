@@ -10,7 +10,7 @@
     )
       v-app-bar-nav-icon(@click="drawer = true")
 
-      v-toolbar-title Rhythm Academy
+      v-toolbar-title Rhythmy
 
       v-spacer
 

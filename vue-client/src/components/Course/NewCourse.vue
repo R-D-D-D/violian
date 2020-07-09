@@ -237,7 +237,6 @@ export default {
         if (this.reviewVexHandlers.length == 0) {
           // first time coming
           for (var i = 0; i < this.lessons.length; i++) {
-            console.log(this.lessons[i])
             const handler = new vexUI.Handler(`vexflow-review-wrapper-${i}`, {
               canEdit: false,
               numberOfStaves: this.lessons[i].numberOfBars,
@@ -273,7 +272,6 @@ export default {
     },
 
     goStepThree () {
-      console.log(this.$refs['lessonForm0'])
       for (var i = 0; i < this.lessons.length; i++) {
         if (!this.$refs[`lessonForm${i}`][0].validate()) {
           alert('Please fill in name, duration and demo start time for all lessons')
@@ -305,7 +303,6 @@ export default {
         this.$store.dispatch('addCourse', courseResponse.data.course)
 
         // create lessons
-        console.log('cid', courseResponse.data.course.id)
         for (var i = 0; i < this.lessons.length; i++) {
           var lessonResponse = await LessonService.create({
             name: this.lessons[i].name,
@@ -338,7 +335,6 @@ export default {
 
         this.$router.push(`/course/show/${this.user.id}/${courseResponse.data.course.id}`)
       } catch (err) {
-        console.log(err)
         this.error = err.response.data.error
       }
     },
@@ -388,7 +384,6 @@ export default {
     },
 
     changeTimeSignature (event, idx) {
-      console.log(this.lessons[idx].timeSignature)
       this.lessons[idx].handler.setTimeSignature(this.lessons[idx].timeSignature)
     },
 

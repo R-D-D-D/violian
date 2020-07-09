@@ -31,7 +31,6 @@ module.exports = {
         lesson: lesson.toJSON()
       })
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to create the lesson'
       })
@@ -80,7 +79,6 @@ module.exports = {
 
   async list (req, res) {
     try {
-      console.log("in get")
       const {cid} = req.query
 
       const course = await Course.findOne({

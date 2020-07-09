@@ -31,7 +31,7 @@ name: "VideoPlayer",
     },
     mounted() {
       this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
-          console.log('onPlayerReady', this);
+          console.log('Player ready');
       });
 
       this.handler = new vexUI.Handler("vexflow-wrapper", {

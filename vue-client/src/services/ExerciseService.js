@@ -2,9 +2,9 @@ import Api from '@/services/Api'
 
 export default {
   create (exerciseInfo) {
-    return Api().post('exercise/new', exerciseInfo, {
-      headers: {'Content-Type': 'multipart/form-data' }
-    })
+    const instance = Api()
+    instance.defaults.headers.post['Content-Type'] = 'multipart/form-data'
+    return instance.post('exercise/new', exerciseInfo)
   },
 
   list (lessonId) {
@@ -12,10 +12,12 @@ export default {
   },
 
   edit (exerciseInfo) {
-    return Api().put('exercise/edit', exerciseInfo)
+    const instance = Api()
+    instance.defaults.headers.post['Content-Type'] = 'multipart/form-data'
+    return instance.put('exercise/edit', exerciseInfo)
   },
 
   delete (exerciseId) {
-    return Api().delete(`exercise/delete?eid=${exerciseId}`)
+    return Api().delete(`exercise/del?eid=${exerciseId}`)
   }
 }

@@ -62,6 +62,20 @@ export default new Vuex.Store({
       state.userOwnedCourses.push(course);
     },
 
+    deleteCourse (state, cid) {
+      var course = state.userOwnedCourses.find(course => course.id == cid)
+      var idx = state.userOwnedCourses.indexOf(course)
+      if (idx >= 0)
+        state.userOwnedCourses.splice(idx, 1)
+      else 
+        throw new Error("negative index")
+    },
+
+    deleteAllLessons (state, course) {
+      var stateCourse = state.userOwnedCourses.find(c => c.id == course.id)
+      stateCourse.lessons = []
+    },
+
     addLesson (state, lesson) {
       console.log(lesson)
       const course = state.userOwnedCourses.find(course => course.id == lesson.CourseId)
@@ -71,14 +85,21 @@ export default new Vuex.Store({
       course.lessons.push(lesson)
     },
 
+    deleteLesson (state, lesson) {
+      console.log(lesson)
+      const course = state.userOwnedCourses.find(course => course.id == lesson.CourseId)
+      var idx = course.lessons.indexOf(lesson)
+      course.lessons.splice(idx, 1)
+    },
+
     addExercise (state, payload) {
       console.log(payload)
-      const course = state.userOwnedCourses.find(course => course.id == payload.CourseId)
-      const lesson = course.lessons.find(lesson => lesson.id == payload.exercise.LessonId)
+      const course = state.userOwnedCourses.find(course => course.id == payload.CourseId);
+      const lesson = course.lessons.find(lesson => lesson.id == payload.exercise.LessonId);
       if (lesson.exercises == null)
-        lesson.exercises = []
+        lesson.exercises = [];
 
-      lesson.exercises.push(payload.exercise)
+      lesson.exercises.push(payload.exercise);
     }
   },
 
@@ -101,9 +122,23 @@ export default new Vuex.Store({
       commit("addCourse", course);
     },
 
+    async deleteCourse(store, course) {
+      await Promise.all(course.lessons.map(lesson => {
+        return LessonService.delete(lesson.id);
+      }))
+      store.commit('deleteAllLessons', course);
+      await CourseService.delete(course.id);
+      store.commit("deleteCourse", course.id);
+    },
+
     // lesson management
     addLesson ({commit}, lesson) {
       commit("addLesson", lesson);
+    },
+
+    async deleteLesson({commit}, lesson) {
+      await LessonService.delete(lesson.id)
+      commit('deleteLesson', lesson)
     },
 
     addExercise ({commit}, payload) {

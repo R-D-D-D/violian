@@ -32,7 +32,6 @@ module.exports = {
         token: jwtSignUser(userJson)
       })
     } catch (err) {
-      console.log(err)
       res.status(400).send({
         error: "This email account is already in use"
       })
@@ -56,7 +55,6 @@ module.exports = {
 
       const passwordValid = await user.comparePassword(password)
       if (!passwordValid) {
-        console.log("password validity: ", passwordValid)
         return res.status(403).send({
           error: "Log in information is incorrect"
         })

@@ -144,31 +144,31 @@ export default {
   },
   methods: {
     timeUpdated (event) {
-      if (this.currentDisplayedBar == null) {
-        if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
-          this.currentDisplayedBar = 0
-          this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1]), this.timeSignature)
-        } else {
+      if (this.notesInBars && this.demoStartTime) {
+        if (this.currentDisplayedBar == null) {
+          if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
+            this.currentDisplayedBar = 0
+            this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1]), this.timeSignature)
+          } else {
+            return
+          }
+        }
+
+        if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars - this.currentDisplayedBar >= 1) {
+          var currBar = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
+          if (currBar >= this.notesInBars.length / 2)
+            return
+          this.currentDisplayedBar = currBar
+          this.videoHandler.importNotes(this.notesInBars[currBar * 2].concat(this.notesInBars[currBar * 2 + 1]), this.timeSignature)
           return
         }
-      }
-
-      if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars - this.currentDisplayedBar >= 1) {
-        var currBar = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
-        console.log('in if', currBar)
-        if (currBar >= this.notesInBars.length / 2)
-          return
-        this.currentDisplayedBar = currBar
-        this.videoHandler.importNotes(this.notesInBars[currBar * 2].concat(this.notesInBars[currBar * 2 + 1]), this.timeSignature)
-        return
-      }
-      if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars < this.currentDisplayedBar) {
-        var currBar1 = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
-        console.log('in else', currBar1)
-        if (currBar1 < 0)
-          return
-        this.currentDisplayedBar = currBar1
-        this.videoHandler.importNotes(this.notesInBars[currBar1 * 2].concat(this.notesInBars[currBar1 * 2 + 1]), this.timeSignature)
+        if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars < this.currentDisplayedBar) {
+          var currBar1 = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
+          if (currBar1 < 0)
+            return
+          this.currentDisplayedBar = currBar1
+          this.videoHandler.importNotes(this.notesInBars[currBar1 * 2].concat(this.notesInBars[currBar1 * 2 + 1]), this.timeSignature)
+        }
       }
     },
 
@@ -242,7 +242,6 @@ export default {
       tone.init();
       // TODO disable edit when playing
       // this.handler.disableEdit();
-      console.log(this.handler.exportNotes());
       tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.numberOfBars) + 1, this.handler);
       // this.handler.enableEdit();
     });
@@ -265,7 +264,7 @@ export default {
     this.timeSignature = this.lesson.exercises[0].timeSignature
     this.handler.importNotes(this.melody, this.timeSignature)
     this.description = this.lesson.description
-    this.demoStartTime = parseInt(this.lesson.exercises[0].demoStartTime)
+    this.demoStartTime = this.lesson.exercises[0].demoStartTime
     this.numberOfBars = parseInt(this.lesson.exercises[0].numberOfBars)
     this.notesInBars = this.handler.notesToBars(this.melody, this.timeSignature)
 
@@ -275,13 +274,14 @@ export default {
         console.log('onPlayerReady', this);
     });
 
+    console.log('video player:', this.$refs.videoPlayer.offsetWidth)
     this.videoHandler = new vexUI.Handler("vexflow-wrapper", {
       canEdit: false,
       numberOfStaves: 2,
       lessStaveHeight: true,
       canvasProperties: {
         id: "vexflow-wrapper" + "-canvas",
-        width: document.getElementById("vjs_video_3").offsetWidth,
+        width: this.$refs.videoPlayer.offsetWidth,
         height: 80 * vexUI.scale,
         tabindex: 1
       }

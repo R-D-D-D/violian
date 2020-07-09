@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     Course.belongsToMany(models.User, { as: 'Students', through: 'StudentCourses' })
     Course.belongsTo(models.User, { as: 'Tutor' })
     Course.hasMany(models.Lesson, {
-      onDelete: 'CASCADE'
+      onDelete: 'CASCADE',
+      hooks: true
     })
   }
   

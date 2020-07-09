@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
   Lesson.associate = function (models) {
     Lesson.belongsTo(models.Course)
     Lesson.hasMany(models.Exercise, {
-      onDelete: 'CASCADE'
+      onDelete: 'CASCADE',
+      hooks: true
     })
   }
   

@@ -33,8 +33,7 @@ module.exports = {
 
   async list (req, res) {
     try {
-      const {uid} = req.query
-      console.log('userId', uid)
+      const uid = req.user.id
       const user = await User.findOne({
         where: {
           id: uid
@@ -56,7 +55,6 @@ module.exports = {
         })
       }
       
-      console.log("lesson found")
 
       var coursesJson = []
 

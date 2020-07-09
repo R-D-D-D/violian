@@ -22,6 +22,6 @@ export default {
   },
 
   delete (lessonId) {
-    return Api().delete(`lesson/delete?lid=${lessonId}`)
+    return Api().delete(`lesson/del?lid=${lessonId}`)
   }
 }

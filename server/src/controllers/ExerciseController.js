@@ -13,7 +13,6 @@ const s3 = new AWS.S3({
 module.exports = {
   async create (req, res) {
     try {
-      console.log(req.body)
       const {lid} = req.body
       const lesson = await Lesson.findOne({
         where: {
@@ -85,7 +84,6 @@ module.exports = {
         exercise: exercise.toJSON()
       })
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an  error has occured trying to create the exercise'
       })
@@ -190,6 +188,7 @@ module.exports = {
           originalKey = exercise.videoPosterUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
 
         if (originalKey != null) {
+          // delete the previous video
           var deleteParams = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/${originalKey}`
@@ -228,7 +227,6 @@ module.exports = {
         exercise: exercise.toJSON()
       })
     } catch (err) {
-      console.log(err)
       res.status(500).send({
         error: 'an  error has occured trying to create the exercise'
       })

@@ -7,7 +7,10 @@
             v-list-item-title.text-h5.py-0(v-text="course.name")
           v-list-item-icon
             v-btn(outlined color='indigo' @click="showCourse($event, course.id)")
-                v-icon mdi-pencil
+              v-icon mdi-pencil
+          v-list-item-icon
+            v-btn(outlined color='indigo' @click="deleteCourse($event, course)")
+              v-icon mdi-trash-can-outline
       v-list(v-else)
         v-list-item(v-for="course in tutor.courses" :key="course.name" @click="showcourse($event, course.id)")
           v-list-item-content
@@ -18,9 +21,6 @@
           v-btn.mt-5(x-large to="/course/new")
             v-icon(left dark) mdi-plus-thick
             | New Course
-          v-btn.mt-5(x-large @click="test")
-            v-icon(left dark) mdi-plus-thick
-            | Add Lesson
 
 </template>
 
@@ -71,13 +71,10 @@ export default {
       }
     },
 
-    test () {
-      this.$store.dispatch('addLesson', {
-        CourseId: 8,
-        name: 'hey',
-        description: 'hey',
-        duration: 10
-      })
+    async deleteCourse (event, course) {
+      if (confirm('Are you sure?')) {
+        await this.$store.dispatch('deleteCourse', course)
+      }
     }
   },
   mounted: async function () {

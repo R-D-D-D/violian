@@ -5,6 +5,7 @@ const LessonController = require('./controllers/LessonController')
 const ExerciseController = require('./controllers/ExerciseController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
+const isAuthenticated = require('./policies/isAuthenticated')
 
 const multer = require('multer');
 const upload = multer();
@@ -18,52 +19,84 @@ module.exports = (app) => {
   app.post('/login', AuthenticationController.login),
 
   // course management  
-  app.post('/course/new', CourseController.create),
+  app.post('/course/new', 
+    isAuthenticated,
+    CourseController.create),
 
-  app.put('/course/edit', CourseController.edit),
+  app.put('/course/edit', 
+    isAuthenticated, 
+    CourseController.edit),
 
-  app.get('/course/list', CourseController.list),
+  app.get('/course/list', 
+    isAuthenticated,
+    CourseController.list),
 
-  app.delete('/course/del', CourseController.destroy),
+  app.delete('/course/del', 
+    isAuthenticated,
+    CourseController.destroy),
 
   // lesson management  
-  app.post('/lesson/new', LessonController.create),
+  app.post('/lesson/new', 
+    isAuthenticated, 
+    LessonController.create),
 
-  app.put('/lesson/edit', LessonController.edit),
+  app.put('/lesson/edit', 
+    isAuthenticated,
+    LessonController.edit),
 
-  app.get('/lesson/list', LessonController.list),
+  app.get('/lesson/list', 
+    isAuthenticated,
+    LessonController.list),
 
-  app.delete('/lesson/del', LessonController.destroy),
+  app.delete('/lesson/del', 
+    isAuthenticated,
+    LessonController.destroy),
 
   // exercise management  
   app.post('/exercise/new', upload.fields(
     [{ name: 'demo', maxCount: 1 }, 
     { name: 'video', maxCount: 1 },
     { name: 'demoPoster', maxCount: 1 },
-    { name: 'videoPoster', maxCount: 1 }]), ExerciseController.create),
+    { name: 'videoPoster', maxCount: 1 }]), 
+    isAuthenticated, 
+    ExerciseController.create),
 
   app.put('/exercise/edit', upload.fields(
     [{ name: 'demo', maxCount: 1 }, 
     { name: 'video', maxCount: 1 },
     { name: 'demoPoster', maxCount: 1 },
-    { name: 'videoPoster', maxCount: 1 }]), ExerciseController.edit),
+    { name: 'videoPoster', maxCount: 1 }]), 
+    isAuthenticated, 
+    ExerciseController.edit),
 
-  app.get('/exercise/list', ExerciseController.list),
+  app.get('/exercise/list', 
+    isAuthenticated, 
+    ExerciseController.list),
 
-  app.delete('/exercise/del', ExerciseController.destroy),
+  app.delete('/exercise/del', 
+    isAuthenticated, 
+    ExerciseController.destroy),
   
   // subscription management
-  app.post('/subscribe/new', SubscriptionController.subscribe),
+  app.post('/subscribe/new', 
+    isAuthenticated, 
+    SubscriptionController.subscribe),
 
   // app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfo),
 
   // app.get('/subscribe/get/tutor', SubscriptionController.getSubscriptionInfo),
 
-  app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfoOfStudent),
+  app.get('/subscribe/get/student', 
+    isAuthenticated, 
+    SubscriptionController.getSubscriptionInfoOfStudent),
 
-  app.get('/subscribe/get/course', SubscriptionController.getSubscriptionInfoOfCourse),
+  app.get('/subscribe/get/course', 
+    isAuthenticated, 
+    SubscriptionController.getSubscriptionInfoOfCourse),
 
-  app.get('/tutor/list', SubscriptionController.getAllTutors)
+  app.get('/tutor/list', 
+    isAuthenticated, 
+    SubscriptionController.getAllTutors)
 
 /*
 ## lessons
