@@ -19,8 +19,7 @@
         v-btn(depressed to="/login" color="indigo") Log In
       v-toolbar-items(v-if="$store.state.isUserLoggedIn")
         v-btn(depressed to="/student" color="indigo" v-if="$store.state.user.isStudent") My Courses
-        v-btn(depressed @click="browseAllTutors" color="indigo" v-if="$store.state.user.isStudent") All Tutors
-        v-btn(depressed @click="go_to_courses" color="indigo" v-if="$store.state.user.isTutor") My Courses
+        v-btn(depressed to="/course/index" color="indigo" v-if="$store.state.user.isTutor") My Courses
         v-btn(depressed @click="logout" color="indigo") Log Out
     
     v-navigation-drawer(v-model='drawer' absolute temporary)
@@ -37,8 +36,8 @@
           v-list-item(@click="browseAllTutors" v-if="$store.state.user.isStudent")
             v-list-item-icon
               v-icon mdi-account
-            v-list-item-title All Tutors
-          v-list-item(@click="go_to_courses" v-if="$store.state.user.isTutor")
+            v-list-item-title All Courses
+          v-list-item(to="/course/index" v-if="$store.state.user.isTutor")
             v-list-item-icon
               v-icon mdi-notebook-outline
             v-list-item-title My Courses
@@ -76,17 +75,6 @@ export default {
       this.$store.dispatch('setToken', null)
       this.$store.dispatch('setUser', null)
       this.$router.push('/')
-    },
-
-    async browseAllTutors () {
-      if (this.$store.state.allTutors.length == 0) {
-        await this.$store.dispatch('getAllTutors')
-      }
-      this.$router.push('/tutor/index')
-    },
-
-    go_to_courses () {
-      this.$router.push(`/course/index/${this.$store.state.user.id}`)
     }
   },
 

@@ -28,10 +28,10 @@ export default {
   },
   computed: {
     subscribedTutorsId () {
-      return this.subscribedTutors.map(tutor => tutor.id)
+      return this.allTutors.map(tutor => tutor.id)
     },
 
-    ...mapState(['user', 'allTutors', 'subscribedTutors'])
+    ...mapState(['user', 'allTutors'])
   },
   methods: {
     async subscribe (event, tutor) {

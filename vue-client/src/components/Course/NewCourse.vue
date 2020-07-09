@@ -29,7 +29,7 @@
                     v-select(label='Instrument' :items="instruments" v-model="instrument" solo)
           v-btn(color="indigo" @click='goStepTwo' dark)
             | Continue
-          v-btn(@click="go_to_courses") Cancel
+          v-btn(to="/course/index") Cancel
         v-stepper-content(step='2')
           v-row.justify-center
             v-col(cols="12" md="11")
@@ -86,7 +86,7 @@
 
           v-btn(color="indigo" @click='goStepThree' dark)
             | Continue
-          v-btn(@click="go_to_courses") Cancel
+          v-btn(to="/course/index") Cancel
         v-stepper-content(step='3')
           v-row.justify-center
             v-col(cols="12" md="11")
@@ -145,7 +145,7 @@
 
           v-btn(color="indigo" @click="submit" dark :loading="loading")
             | Confirm
-          v-btn(@click="go_to_courses") Cancel
+          v-btn(to="/course/index") Cancel
           v-row
             v-col
               p.error {{ error }}

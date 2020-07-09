@@ -1,6 +1,6 @@
 import Vue from "vue"
 import VueRouter from "vue-router"
-import HelloWorld from "../components/HelloWorld"
+import Home from "../components/Home"
 import Register from "../components/Register"
 import Student from "../components/StudentView/Student"
 import LogIn from "../components/LogIn"
@@ -16,7 +16,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: HelloWorld
+    component: Home
   },
   {
     path: '/register',
@@ -39,7 +39,7 @@ const routes = [
     component: ShowCourse
   },
   {
-    path: '/course/index/:tutor_id',
+    path: '/course/index',
     name: 'courseindex',
     component: CourseIndex
   },

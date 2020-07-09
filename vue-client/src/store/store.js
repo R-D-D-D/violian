@@ -18,6 +18,7 @@ export default new Vuex.Store({
     userOwnedCourses: [],
     userSubscribedCourses: [],
     allTutors: [],
+    allCourses: [],
     isUserLoggedIn: false,
     hideNav: false
   },
@@ -56,6 +57,10 @@ export default new Vuex.Store({
 
     setNav (state, bool) {
       state.hideNav = bool;
+    },
+
+    setAllCourses (state, courses) {
+      state.allCourses = courses;
     },
 
     addCourse (state, course) {
@@ -120,6 +125,11 @@ export default new Vuex.Store({
     // course management
     addCourse ({commit}, course) {
       commit("addCourse", course);
+    },
+
+    async getAllCourses ({commit}) {
+      const response = await CourseService.listAll();
+      commit('setAllCourses', response.data.courses);
     },
 
     async deleteCourse(store, course) {

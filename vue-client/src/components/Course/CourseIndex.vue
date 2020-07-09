@@ -53,10 +53,6 @@ export default {
       return this.user.isStudent
     },
 
-    tutor () {
-      return this.$store.getters.tutorFromSubscribedTutors(this.$route.params.tutor_id)
-    },
-
     ...mapState(['user', 'userOwnedCourses', 'userSubscribedCourses'])
   },
   components: {

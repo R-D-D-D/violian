@@ -3,7 +3,6 @@
     page-header
 
     v-main
-      v-container.pa-0(fluid)
         router-view
 </template>
 

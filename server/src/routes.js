@@ -3,6 +3,8 @@ const SubscriptionController = require('./controllers/SubscriptionController')
 const CourseController = require('./controllers/CourseController')
 const LessonController = require('./controllers/LessonController')
 const ExerciseController = require('./controllers/ExerciseController')
+const ThreadController = require('./controllers/ThreadController')
+const PostController = require('./controllers/PostController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
 const isAuthenticated = require('./policies/isAuthenticated')
@@ -30,6 +32,10 @@ module.exports = (app) => {
   app.get('/course/list', 
     isAuthenticated,
     CourseController.list),
+
+  app.get('/course/listall', 
+    isAuthenticated,
+    CourseController.listAll),
 
   app.delete('/course/del', 
     isAuthenticated,
@@ -82,10 +88,6 @@ module.exports = (app) => {
     isAuthenticated, 
     SubscriptionController.subscribe),
 
-  // app.get('/subscribe/get/student', SubscriptionController.getSubscriptionInfo),
-
-  // app.get('/subscribe/get/tutor', SubscriptionController.getSubscriptionInfo),
-
   app.get('/subscribe/get/student', 
     isAuthenticated, 
     SubscriptionController.getSubscriptionInfoOfStudent),
@@ -96,18 +98,36 @@ module.exports = (app) => {
 
   app.get('/tutor/list', 
     isAuthenticated, 
-    SubscriptionController.getAllTutors)
+    SubscriptionController.getAllTutors),
 
-/*
-## lessons
-- lesson management
-  - POST `/lesson/new? { name, date, rhythms, userId }` - `<lessonObj>`
-  - GET `/lesson/list { tutorId }` - `{ lessons: [<lessonObj>] }`
-  - GET `/lesson/del { lessonId }` - `{ data: ok }`
+  // thread management
+  app.get('/thread/list',
+    isAuthenticated,
+    ThreadController.list),
 
-## subscriptions
-- POST `/subscribe/new { studentId, tutorId }` - `{ data: ok }`
-- GET `/subscribe/student/get { studentId }` - `{ tutors: [<userObj>] }`
-- GET `/subscribe/tutor/get { tutor Id }` - `{ students: [<userObj>] }`
-*/
+  app.post('/thread/new',
+    isAuthenticated,
+    ThreadController.create),
+
+  app.delete('/thread/del',
+    isAuthenticated,
+    ThreadController.destroy),
+  
+  // post management
+  app.get('/post/list',
+    isAuthenticated,
+    PostController.list),
+
+  app.post('/post/new', upload.single('video'), 
+    isAuthenticated,
+    PostController.create),
+
+  app.put('/post/edit', upload.single('video'), 
+    isAuthenticated,
+    PostController.edit),
+
+  app.delete('/post/del',
+    isAuthenticated,
+    PostController.destroy)
 }
+  

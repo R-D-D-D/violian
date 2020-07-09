@@ -1,0 +1,88 @@
+<template lang="pug">
+  div
+    v-container
+      v-row.mt-10
+        v-col.text-left(cols="8")
+          h1 Welcome to Music Academy
+
+      v-row.mb-12
+        v-col(cols="8")
+          v-autocomplete(v-model='model' :items='items' :loading='isLoading' :search-input.sync='search' chips clearable hide-details hide-selected item-text='name' item-value='symbol' label='Search for a course...' solo append-icon="mdi-magnify")
+            template(v-slot:no-data)
+              v-list-item
+                v-list-item-title
+                  | Search for your favorite 
+                  strong Course
+            template(v-slot:selection='{ attr, on, item, selected }')
+              v-chip.white--text(v-bind='attr' :input-value='selected' color='indigo' v-on='on')
+                v-icon(left) mdi-coin
+                span(v-text='item')
+
+      v-divider
+
+      v-row.mt-10
+        v-col.text-left(cols="12")
+          h2 Popular Courses
+        v-col(v-for="course in allCourses" sm="6" md="4" large="3")
+          v-card.mx-auto(max-width='400')
+            v-img.white--text.align-end(height="200px" src='https://images.pexels.com/photos/1246437/pexels-photo-1246437.jpeg?cs=srgb&dl=close-up-photo-of-person-playing-piano-1246437.jpg&fm=jpg')
+              v-card-title(style="text-shadow: 1px 1px 2px #000000;") {{ course.name }}
+            v-card-subtitle.pb-0 Number 10
+            v-card-text.text--primary
+              div Whitehaven Beach
+            v-card-actions
+              v-btn(color='orange' text)
+                | Subscribe
+              v-btn(color='orange' text)
+                | Find out more
+
+
+
+</template>
+
+<script>
+import { mapState } from 'vuex'
+
+export default {
+  name: 'Home',
+  data () {
+    return {
+      isLoading: false,
+      items: ['piano', 'guitar'],
+      model: null,
+      search: null,
+      tab: null,
+    }
+  },
+
+  watch: {
+    model (val) {
+      if (val != null) this.tab = 0
+      else this.tab = null
+    },
+    search () {
+      // Items have already been loaded
+      if (this.items.length > 0) return
+
+      this.isLoading = true
+
+      // Lazily load input items
+      fetch('https://api.coingecko.com/api/v3/coins/list')
+        .then(res => res.clone().json())
+        .then(res => {
+          this.items = res
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        .finally(() => (this.isLoading = false))
+    },
+  },
+
+  computed: mapState(['user', 'allCourses'])
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+</style>

@@ -9,6 +9,10 @@ export default {
     return Api().get(`course/list?uid=${userId}`)
   },
 
+  listAll () {
+    return Api().get('course/listall')
+  },
+
   edit (courseInfo) {
     return Api().put('course/edit', courseInfo)
   },

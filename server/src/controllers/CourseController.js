@@ -51,7 +51,7 @@ module.exports = {
 
       if (!courses) {
         return res.status(403).send({
-          error: "No lesson found"
+          error: "No course found"
         })
       }
       
@@ -69,6 +69,31 @@ module.exports = {
         }))
         return courseJson
       }))
+
+      // console.log(lessonsJson)
+      res.send({
+        courses: coursesJson
+      })
+    } catch (err) {
+      res.status(500).send({
+        error: "An error has occured in trying to retrieve courses"
+      })
+    }
+  },
+
+  async listAll (req, res) {
+    try {
+      const courses = await Course.findAll()
+
+      if (!courses) {
+        return res.status(403).send({
+          error: "No course found"
+        })
+      }
+      
+      var coursesJson = courses.map(course => {
+        return course.toJSON()
+      })
 
       // console.log(lessonsJson)
       res.send({

@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Exercise.associate = function (models) {
     Exercise.belongsTo(models.Lesson)
+    Exercise.hasMany(models.Thread)
   }
 
   Exercise.beforeDestroy(async (exercise, options) => {

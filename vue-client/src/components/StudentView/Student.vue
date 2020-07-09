@@ -1,8 +1,8 @@
 <template lang="pug">
   #student
-    panel(title="Lessons By")
+    panel(title="All Courses")
       v-list
-        v-list-item(v-for='tutor in subscribedTutors' :key='tutor.id' @click='go_to_lessons($event, tutor)')
+        v-list-item(v-for='course in allCourses' :key='course.id' @click='go_to_course($event, tutor)')
           //- v-list-item-icon
           //-   v-icon(v-if='rhythm.icon' color='pink') mdi-star
           v-list-item-content
@@ -26,7 +26,7 @@ export default {
     'panel': Panel
   },
   computed: {
-    ...mapState(['user', 'subscribedTutors'])
+    ...mapState(['user', 'allCourses'])
   },
   methods: {
     async go_to_lessons (event, tutor) {

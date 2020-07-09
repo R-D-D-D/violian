@@ -12,9 +12,10 @@
 
 ## courses
 - course management
+  - GET `/course/list?uid=` - `{ courses: [<courseObj>] }`
+  - GET `/course/listall` - `{ courses: [<courseObj>] }`
   - POST `/course/new { name, price, description, langauge, level, instrument,  TutorId }` - `{ course: <courseObj> }`
   - PUT `/course/edit { courseObj }` - `{ course: <courseObj> }`
-  - GET `/course/list?uid=` - `{ courses: [<courseObj>] }`
   - DELETE `/course/del?cid=` - `{ data: ok }`
 
 ## lessons
@@ -31,14 +32,20 @@
   - GET `/exercise/list?lid=` - `{ exercises: [<exerciseObj>] }`
   - DELETE `/exercise/del?eid=` - `{ data: ok }`
 
-<!-- 
-## subscriptions for student and tutor
-- POST `/subscribe/new { studentId, tutorId }` - `{ data: ok }`
-- GET `/subscribe/get/student?uid=` - `{ tutors: [<userObj>] }`
-- GET `/subscribe/get/tutor?uid=` - `{ students: [<userObj>] }`
-- GET `/tutor/list` - `{ tutors: [<userObj>] }` -->
-
 ## subscriptions for student and course
 - POST `/subscribe/new { studentId, courseId }` - `{ data: ok }`
 - GET `/subscribe/get/student?uid=` - `{ courses: [<courseObj>] }`
 - GET `/subscribe/get/course?cid=` - `{ students: [<userObj>] }`
+
+## threads
+- thread management
+  - GET `/thread/list?eid=&uid=` - `{ threads: [<threadObj>] }`
+  - POST `/thread/new {eid, uid}` - `{ thread: threadObj }`
+  - DELETE `/thread/del?tid=`
+
+## posts
+- post management
+  - GET `/post/list?tid=` - `{ posts: [<postObj>] }` - `{ posts: [<postObj>] }`
+  - POST `/post/new { video, message, grade, uid }` - `{ post: <postObj> }`
+  - PUT `/post/edit { pid, video, message, grade }` - `{ post: <postObj> }`
+  - DELETE `/post/del?pid=` - `{ data: ok }`
