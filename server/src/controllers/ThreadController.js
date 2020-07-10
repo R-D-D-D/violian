@@ -1,5 +1,6 @@
 const {Exercise} = require('../models')
 const {Thread} = require('../models')
+const {User} = require('../models')
 
 module.exports = {
   async create (req, res) {
@@ -31,49 +32,23 @@ module.exports = {
     }
   },
 
-  async edit (req, res) {
-    try {
-      const {ThreadObj} = req.body
-      const Thread = await Thread.findOne({
-        where: {
-          id: ThreadObj.id
-        }
-      })
-
-      if (!Thread) {
-        res.status(403).send({
-          error: "Thread not found"
-        })
-      }
-
-      const course = await Thread.getCourse()
-      var differenceInDuration = parseInt(ThreadObj.duration) - Thread.duration
-      if (differenceInDuration != 0) {
-        if (differenceInDuration > 0) {
-          await course.increment('duration', { by: differenceInDuration })
-        } else {
-          await course.decrement('duration', { by: differenceInDuration })
-        }
-      }
-
-      Thread.name = ThreadObj.name
-      Thread.duration = ThreadObj.duration
-      await Thread.save()
-
-      res.send({
-        Thread: Thread.toJSON()
-      })
-
-    } catch (err) {
-      res.status(500).send({
-        error: "An error has occured in trying to edit Thread"
-      })
-    }
-  },
-
   async list (req, res) {
     try {
-      const {cid} = req.query
+      if (req.query.uid) {
+        const student = await User.findOne({
+          where: {
+            id: req.query.uid
+          }
+        })
+      } else if (req.query.eid) {
+        const exercise = await Exercise.findOne({
+          where: {
+            id: req.query.eid
+          }
+        })
+      } else {
+        throw new Error("Incorrect information provided")
+      }
 
       const course = await Course.findOne({
         where: {
