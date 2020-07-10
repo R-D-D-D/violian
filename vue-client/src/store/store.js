@@ -24,6 +24,21 @@ export default new Vuex.Store({
   },
 
   getters: {
+    isSubscribed: (state) => (id) => {
+      var course = state.userSubscribedCourses.find(course => course.id === id)
+      if (course)
+        return true
+      else
+        return false
+    },
+
+    isOwned: (state) => (id) => {
+      var course = state.userOwnedCourses.find(course => course.id === id)
+      if (course)
+        return true
+      else
+        return false
+    }
   },
 
   mutations: {
@@ -187,7 +202,9 @@ export default new Vuex.Store({
     async subscribe(store, payload) {
       try {
         await SubscriptionService.subscribe(payload);
-        store.dispatch("getCoursesForStudent", payload.studentId);
+        store.dispatch("getCoursesForStudent", {
+          id: payload.studentId
+        });
       } catch (err) {
         console.log(err);
       }

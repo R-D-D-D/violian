@@ -1,19 +1,22 @@
 <template lang="pug">
-  #show-course
+  #show-course(v-if="course")
     div(v-if="is_student")
       v-row.py-3
         v-col
           .text-h2.font-weight-bold {{ course.name }}
-      v-row(v-if="!is_subscribed")
+      v-row(v-if="!isSubscribed")
         v-col
-          v-btn(x-large color="red darken-3" dark) Subscribe!
+          v-btn(x-large color="red darken-3" dark @click="subscribe") Subscribe!
       
-      v-row 
-        v-col.mx-5
+      v-row.justify-center
+        v-col.pa-0(cols="11")
           v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
             v-tab.text-h4(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
-          v-tabs-items(v-model="tab")
-            v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id" :disabled="true")
+          v-tabs-items(v-model="tab" v-if="!isSubscribed")
+            v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id")
+              lesson(:lesson="lesson")
+          v-tabs-items(v-model="tab" v-else)
+            v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id" :disabled="idx != 0")
               lesson(:lesson="lesson")
         
     
@@ -23,7 +26,7 @@
           .text-h2.font-weight-bold {{ course.name }}
       
       v-row 
-        v-col.mx-5
+        v-col
           v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
             v-tab.text-h4(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
             v-tab.text-h4(:key="'+'")
@@ -77,7 +80,8 @@
 import Panel from "@/components/Panel";
 import { mapState } from "vuex";
 import ShowLesson from "@/components/Course/ShowLesson";
-import CourseService from "@/services/CourseService"
+import CourseService from "@/services/CourseService";
+import ThreadService from "@/services/ThreadService";
 
 export default {
   name: "ShowCourse",
@@ -110,13 +114,17 @@ export default {
       return this.user.isStudent;
     },
 
-    is_subscribed () {
+    isSubscribed () {
       if (this.is_student) {
-        var c = this.userSubscribedCourses.find(course => course.id = this.$route.params.course_id)
-        if (c)
-          return true
-        else
-          return false
+        return this.$store.getters.isSubscribed(this.course.id)
+      } else {
+        return null
+      }
+    },
+
+    isOwned () {
+      if (!this.is_student) {
+        return this.$store.getters.isOwned(this.course.id)
       } else {
         return null
       }
@@ -149,24 +157,36 @@ export default {
 
     open_dialogue () {
       this.dialog = true;
+    },
+
+    subscribe () {
+      if (confirm("Are you sure?")) {
+        this.$store.dispatch('subscribe', {
+          studentId: this.user.id,
+          courseId: this.course.id
+        })
+      }
     }
   },
 
   created: async function() {
-    if (this.userSubscribedCourses.find(course => course.id == this.$route.params.course_id)) {
-      this.course = this.userSubscribedCourses.find(course => course.id == this.$route.params.course_id)
-    } else if (this.userOwnedCourses.find(course => course.id == this.$route.params.course_id)) {
-      this.course = this.userOwnedCourses.find(course => course.id == this.$route.params.course_id)
-    } else {
-      var response = await CourseService.show(this.$route.params.course_id)
-      this.course = response.data.course
+    var response = await CourseService.show(this.$route.params.course_id)
+    console.log(response.data.course)
+    this.course = response.data.course
+    if (this.isSubscribed || this.isOwned) {
+      try {
+        this.course.lessons = await Promise.all(this.course.lessons.map(async (lesson) => {
+          var response = await ThreadService.show(lesson.id, this.user.id)
+          lesson.thread = response.data.thread
+          return lesson
+        }))
+      } catch (err) {
+        console.log(err)
+      }
     }
   },
 
   mounted: function () {
-    // if (this.course.rhythms) {
-    //   this.display_rhythm(null, this.course.rhythms[0])
-    // }
   }
 }
 </script>

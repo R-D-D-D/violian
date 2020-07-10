@@ -15,8 +15,12 @@ Vex.UI.highlightNoteStyle = {shadowBlur:15, shadowColor:'red', fillStyle:'black'
 Vex.UI.defaultNoteStyle = {shadowBlur:0, shadowColor:'black', fillStyle:'black', strokeStyle:'black'};
 Vex.UI.scale = 1.5;
 
-Vex.UI.Handler = function (containerId, options){
-	this.container = document.getElementById(containerId);
+Vex.UI.Handler = function (containerId, options, DOMNode){
+	if (DOMNode) {
+		this.container = DOMNode;
+	} else {
+		this.container = document.getElementById(containerId);
+	}
 
 	//Merge options with default options
 	var defaultOptions = {

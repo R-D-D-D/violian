@@ -40,15 +40,15 @@
 
 ## threads
 - thread management
-  - GET `/thread/list?lid=` - `{ threads: [<threadObj>] } // if lid is not specified, it is assumed to check the uid base on token`
-  - GET `/thread/show?tid=` - `{ thread: <threadObj> }`
+  - GET `/thread/list?lid=` - `{ threads: [<threadObj>] } // get threads of a specific lesson, should be called by tutor`
+  - GET `/thread/show?uid=&lid=` - `{ thread: <threadObj> }`
   - POST `/thread/new { lid }` - `{ thread: threadObj }`
-  - DELETE `/thread/del?tid=`
+  - DELETE `/thread/del?tid=` - `{ data: ok }`
 
 ## posts
 - post management
   - GET `/post/list?tid=` - `{ posts: [<postObj>] }` - `{ posts: [<postObj>] }`
   - GET `/post/show?pid=` - `{ post: <postObj> }`
-  - POST `/post/new { video, message, grade, id }` - `{ post: <postObj> }`
+  - POST `/post/new { video, message, grade, tid }` - `{ post: <postObj> }`
   - PUT `/post/edit { pid, video, message, grade }` - `{ post: <postObj> }`
   - DELETE `/post/del?pid=` - `{ data: ok }`

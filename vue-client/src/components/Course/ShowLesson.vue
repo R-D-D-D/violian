@@ -9,7 +9,7 @@
 
       v-row.justify-center
         v-col(cols="11").text-center.pa-0
-          video.vjs-big-play-centered(ref="videoPlayer" class="video-js" @timeupdate="timeUpdated")
+          video.vjs-big-play-centered(ref="videoPlayer" class="video-js" @timeupdate="timeUpdated" :id="`vexflow-video-${lesson.id}`")
           #vexflow-wrapper
           
       v-row
@@ -28,53 +28,71 @@
             v-icon(left dark) mdi-content-save-all-outline
             | Edit Lesson
 
-      v-row(v-else)
-        v-col
-          v-btn.mt-5(x-large light @click="$emit('play_sequence')" :loading="save_btn_loading")
-            v-icon(left dark) mdi-play-outline
-            | Play
+    v-row(v-if="is_student")
+      v-col.text-left(cols="11")
+        h1 Discussion
+      v-col.text-left(cols="11")
+        v-btn(large color="red darken-3" dark @click="dialog = true") Submit your playing!
+      v-col(cols="11")
+        v-expansion-panels
+          v-expansion-panel(v-for='(item,i) in 5' :key='i')
+            v-expansion-panel-header Item
+            v-expansion-panel-content
+              | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 
-      v-row
-        v-col
-          v-btn.mt-5.record(x-large light @click="")
-            v-icon(left dark color="red darken-3") mdi-circle-slice-8
-            | Record
-          v-btn.mt-5.stop(x-large light)
-            v-icon(left dark color="red darken-3") mdi-stop-circle-outline
-            | Stop
-  
-        //- Side bar
-        //- v-col(cols="3").p-0
-        //-   //- v-sheet.pa-8(color='indigo' :height="height" dark)
-        //-   v-card.elevation-12.pa-0(:height="height")
-        //-     v-toolbar(light v-if="lesson")
-        //-       v-toolbar-title.text-h4 {{ lesson.name }}
-        //-       v-spacer
-        //-     v-card-text.py-0(:class="{'rhythm-list-half': !is_student, 'rhythm-list-full': is_student}")
-        //-       v-list(v-if="lesson")
-        //-         v-list-item(v-for="rhythm in lesson.rhythms" :key="rhythm.id" @click="display_rhythm($event, rhythm)" active @dblclick="edit_rhythm_title")
-        //-           v-list-item-icon
-        //-             v-icon(color="pink" v-if='active_rhythm == rhythm') mdi-star
-        //-             v-icon(v-else) mdi-star
-        //-           v-list-item-content
-        //-             v-list-item-title.text-left.text-h5(v-text='rhythm.title' v-if="!title_editable || rhythm != active_rhythm")
-        //-             v-text-field#title_edit.py-0(v-model="active_rhythm_title" type="text" @input="enable_save_btn" v-else required :rules="nameRules")
-        //-           v-list-item-icon(v-if="!is_student")
-        //-             v-btn.delete_btn
-        //-               v-icon(color="indigo" @click="") mdi-trash-can-outline
-        //-     v-card-actions(v-if="!is_student")
-        //-       v-spacer
-        //-       v-btn#add_btn.mt-3(outlined color="indigo" @click="open_dialogue")
-        //-         v-icon(left) mdi-plus-thick
-        //-         |  Add Rhythm
-        //-       v-spacer
-        //-     v-toolbar(light flat v-if="!is_student")
-        //-       v-toolbar-title Current Rhythm
-        //-       v-spacer
-        //-     v-card-text(v-if="!is_student")
-        //-       v-select(:items="time_signatures" v-model="time_signature" label='Time Signature' @change="$emit('change_time_signature')" @click="enable_save_btn").pt-0
-        //-       v-slider(v-model='no_bars' min='0' max='4' :label='bars_label' @change="$emit('change_bars')" @click="enable_save_btn")
-        //-       v-slider(v-model='bpm' min='60' max='120' :label='bpm_label' @click="enable_save_btn")
+    v-row(v-else)
+      v-col.text-left(cols="11")
+        h1 Discussion
+      v-col.text-left(cols="11")
+        v-btn(large color="red darken-3" dark @click="dialog = true"  ) Reply to your student
+      v-col(cols="11")
+        v-expansion-panels
+          v-expansion-panel(v-for='(item,i) in 5' :key='i')
+            v-expansion-panel-header Item
+            v-expansion-panel-content
+              | Lorem ipsum dolor sit amet, consectetur 
+    
+    v-row(justify='center')
+      v-dialog(v-model='dialog' persistent max-width='600px')
+        template(v-slot:activator='{ on, attrs }')
+        v-card
+          v-card-title
+            span.headline Message
+          v-card-text.py-0
+            v-form(ref="studentform" v-if="is_student")
+              v-container
+                v-row
+                  v-col(cols='12')
+                    v-text-field(v-model="post_message" type="text" label='Message*' required)
+                  v-col(cols="12")                          
+                    v-file-input(
+                      accept="video/mp4, video/ogg" 
+                      placeholder="Upload" 
+                      prepend-icon="mdi-video"
+                      label="Practice Video"
+                      v-model="post_file"
+                      :rules="requiredRules")
+            v-form(ref="tutorform" v-else)
+              v-container
+                v-row
+                  v-col(cols='12')
+                    v-text-field(v-model="post_message" type="text" label='Message*' required)
+                  v-col(cols='12')
+                    v-slider(v-model="post_grade" min='0' max='100' thumb-label :thumb-size="24")
+                  v-col(cols="12")                          
+                    v-file-input(
+                      accept="video/mp4, video/ogg" 
+                      placeholder="Feedback" 
+                      prepend-icon="mdi-video"
+                      label="Feedback Video"
+                      v-model="post_file"
+                      :rules="requiredRules")
+          v-card-actions
+            v-spacer
+            v-btn(color='indigo' text @click='dialog = false') Close
+            v-btn(color='indigo' text @click="create_post") Save
+          v-card-text(v-if="error")
+            p {{ error }}  
 </template>
 
 <script>
@@ -111,14 +129,19 @@ export default {
       },
       videoHandler: null,
       hide: true,
-      // videoWidth: 0,
-      // videoHeight: 0,
-      // originalVideoWidth: 0,
-      // originalVideoHeight: 0,
       notesInBars: null,
       timePerTwoBars: 0,
       demoStartTime: 0,
-      currentDisplayedBar: null
+      currentDisplayedBar: null,
+      thread: null,
+      dialog: false,
+      requiredRules: [
+        v => !!v || "This field is required"
+      ],
+      post_message: '',
+      post_file: null,
+      post_grade: '',
+      error: null
     }
   },
   watch: {
@@ -145,7 +168,7 @@ export default {
   },
   methods: {
     timeUpdated (event) {
-      if (this.notesInBars && this.demoStartTime) {
+      if (this.notesInBars && this.demoStartTime != null) {
         if (this.currentDisplayedBar == null) {
           if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
             this.currentDisplayedBar = 0
@@ -201,11 +224,20 @@ export default {
       this.disable = false;
     },
 
-    disable_title_edit (event) {
-      if (event.target.id != "title_edit") {
-        this.title_editable = false;
+    create_post () {
+      var formValidated = false
+      if (this.is_student) {
+        formValidated = this.$refs.studentform.validate()
+      } else {
+        formValidated = this.$refs.tutorform.validate()
       }
-    },
+
+      if (formValidated) {
+        alert('form is gd')
+      } else {
+        return
+      }
+    }
 
     // adjustAspectRatioForFullScreen (width, height) {
     //   var aspectRatio = this.originalHeight / this.originalWidth;
@@ -224,21 +256,6 @@ export default {
   },
 
   mounted: function () {
-    // find out the aspect ratio of the video
-    // const videoElement = this.$refs.videoPlayer
-
-    // videoElement.addEventListener('loadeddata', () => {
-    //   //Video should now be loaded but we can add a second check
-
-    //   if(videoElement.readyState == 4){
-    //     console.log("height", videoElement.videoHeight) // returns the intrinsic height of the video
-    //     this.originalHeight = videoElement.videoHeight
-    //     console.log("width", videoElement.videoWidth) // returns the intrinsic width of the video
-    //     this.originalWidth = videoElement.videoWidth
-    //     this.adjustAspectRatioForFullScreen(window.innerWidth, window.innerHeight)
-    //   }
-    // });
-
     this.$on("play_sequence", () => {
       tone.init();
       // TODO disable edit when playing
@@ -272,9 +289,16 @@ export default {
     this.timePerTwoBars = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60) * 2
 
     this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
-        console.log('onPlayerReady', this);
+        console.log('onPlayerReady', this)
     });
 
+    var wrapper = document.createElement("div")
+    wrapper.setAttribute('id', `video-vexflow-wrapper${this.lesson.id}`)
+    wrapper.style.position = "absolute";
+    wrapper.style.background = "#FAFAFA";
+    wrapper.style.top = "0";
+    wrapper.style.left = "0";
+    wrapper.style.right = "0";
     console.log('video player:', this.$refs.videoPlayer.offsetWidth)
     this.videoHandler = new vexUI.Handler("vexflow-wrapper", {
       canEdit: false,
@@ -286,7 +310,7 @@ export default {
         height: 80 * vexUI.scale,
         tabindex: 1
       }
-    }).init();
+    }, wrapper).init();
 
     this.player.on('fullscreenchange', () => {
       if (this.player.isFullscreen_) {
@@ -296,7 +320,8 @@ export default {
       }
     })
 
-    document.getElementById("vjs_video_3").appendChild(document.getElementById("vexflow-wrapper"))
+    document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
+    console.log(this.player.id())
   },
 
   beforeDestroy() {

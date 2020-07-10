@@ -34,6 +34,39 @@ module.exports = {
     }
   },
 
+  async show (req, res) {
+    try {
+      var {lid} = req.query
+      var {uid} = req.query
+      const thread = await Thread.findOne({
+        where: {
+          UserId: uid,
+          LessonId: lid
+        }
+      })
+      
+      if (!thread) {
+        return res.send({
+          thread: {}
+        })
+      }
+      
+      var threadJson = thread.toJSON()
+      var posts = await thread.getPosts()
+      console.log(posts)
+      threadJson.posts = posts.map(post => post.toJSON())
+
+      // console.log(ThreadsJson)
+      res.send({
+        thread: threadJson
+      })
+    } catch (err) {
+      res.status(500).send({
+        error: "An error has occured in trying to retrieve thread"
+      })
+    }
+  },
+
   async list (req, res) {
     try {
       var threads = null

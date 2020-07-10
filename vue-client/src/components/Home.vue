@@ -31,7 +31,7 @@
             v-card-text.text-left.text--primary.pb-0
               div Whitehaven Beach
             v-card-actions
-              v-btn(color='indigo' text :to="`/course/show/${course.id}`")
+              v-btn(color='indigo' text @click="go_to_course($event, course.id)")
                 | Find out more
 
 
@@ -77,7 +77,13 @@ export default {
     },
   },
 
-  computed: mapState(['user', 'allCourses'])
+  computed: mapState(['user', 'allCourses']),
+
+  methods: {
+    go_to_course (event, id) {
+      this.$router.push(`/course/show/${id}`)
+    }
+  }
 }
 </script>
 

@@ -12,7 +12,7 @@
             v-btn(outlined color='indigo' @click="deleteCourse($event, course)")
               v-icon mdi-trash-can-outline
       v-list(v-else)
-        v-list-item(v-for="course in tutor.courses" :key="course.name" @click="showcourse($event, course.id)")
+        v-list-item(v-for="course in userSubscribedCourses" :key="course.name" @click="showCourse($event, course.id)")
           v-list-item-content
             v-list-item-title.text-h5.py-0(v-text="course.name")
           v-list-item-content
@@ -60,11 +60,8 @@ export default {
   },
   methods: {
     showCourse (event, id) {
-      if (this.is_student) {
-        this.$router.push(`/course/show/${id}`)
-      } else {
-        this.$router.push(`/course/show/${id}`)
-      }
+      console.log(id)
+      this.$router.push(`/course/show/${id}`)
     },
 
     async deleteCourse (event, course) {

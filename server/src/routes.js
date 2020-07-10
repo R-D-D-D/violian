@@ -109,6 +109,10 @@ module.exports = (app) => {
     isAuthenticated,
     ThreadController.list),
 
+  app.get('/thread/show',
+    isAuthenticated,
+    ThreadController.show),
+
   app.post('/thread/new',
     isAuthenticated,
     ThreadController.create),

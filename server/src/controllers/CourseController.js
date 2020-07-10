@@ -130,6 +130,7 @@ module.exports = {
         return lessonJson
       }))
 
+      console.log(courseJson)
       res.send({
         course: courseJson
       })
