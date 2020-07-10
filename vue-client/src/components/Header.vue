@@ -10,7 +10,8 @@
     )
       v-app-bar-nav-icon(@click="drawer = true")
 
-      v-toolbar-title Rhythmy
+      router-link.pl-3(to="/")
+        v-toolbar-title Rhythmy
 
       v-spacer
 
@@ -18,14 +19,14 @@
         v-btn(depressed to="/register" color="indigo") Register
         v-btn(depressed to="/login" color="indigo") Log In
       v-toolbar-items(v-if="$store.state.isUserLoggedIn")
-        v-btn(depressed to="/student" color="indigo" v-if="$store.state.user.isStudent") My Courses
+        v-btn(depressed to="/course/index" color="indigo" v-if="$store.state.user.isStudent") My Courses
         v-btn(depressed to="/course/index" color="indigo" v-if="$store.state.user.isTutor") My Courses
         v-btn(depressed @click="logout" color="indigo") Log Out
     
     v-navigation-drawer(v-model='drawer' absolute temporary)
       v-list(nav dense v-if="$store.state.isUserLoggedIn")
         v-list-item-group(active-class="text--accent-4" )
-          v-list-item(to="/home")
+          v-list-item(to="/")
             v-list-item-icon
               v-icon mdi-home
             v-list-item-title Home
@@ -33,10 +34,6 @@
             v-list-item-icon
               v-icon mdi-playlist-music
             v-list-item-title My Courses
-          v-list-item(@click="browseAllTutors" v-if="$store.state.user.isStudent")
-            v-list-item-icon
-              v-icon mdi-account
-            v-list-item-title All Courses
           v-list-item(to="/course/index" v-if="$store.state.user.isTutor")
             v-list-item-icon
               v-icon mdi-notebook-outline
@@ -47,7 +44,7 @@
             v-list-item-title Log Out
       v-list(nav dense v-else)
         v-list-item-group(active-class="text--accent-4")
-          v-list-item(to="/home")
+          v-list-item(to="/")
             v-list-item-icon
               v-icon mdi-home
             v-list-item-title Home
@@ -86,8 +83,13 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .hide {
   display: none !important;
+}
+
+a, a:link, a:visited, a:active, a:hover {
+  text-decoration: none;
+  color: white;
 }
 </style>

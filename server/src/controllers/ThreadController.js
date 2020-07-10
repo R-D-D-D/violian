@@ -1,26 +1,28 @@
-const {Exercise} = require('../models')
+const {Lesson} = require('../models')
+const {Course} = require('../models')
 const {Thread} = require('../models')
-const {User} = require('../models')
 
 module.exports = {
   async create (req, res) {
     try {
       const user = req.user
-      const eid = req.body.eid
-      const exercise = await Exercise.findOne({
+      const {lid} = req.body
+      const lesson = await Lesson.findOne({
         where: {
-          id: eid
+          id: lid
         }
       })
       
-      if (!exercise) {
+      if (!lesson) {
         return res.status(403).send({
-          error: "Exercise information is incorrect"
+          error: "Lesson information is incorrect"
         })
       }
 
-      const thread = await exercise.createThread()
-      thread.setUser(user)
+      const thread = await lesson.createThread()
+      await thread.setUser(user)
+      await thread.setCourse(lesson.CourseId)
+
 
       res.send({
         thread: thread.toJSON()
@@ -34,53 +36,40 @@ module.exports = {
 
   async list (req, res) {
     try {
-      if (req.query.uid) {
-        const student = await User.findOne({
+      var threads = null
+      if (req.query.lid) {
+        const lesson = await Lesson.findOne({
           where: {
-            id: req.query.uid
+            id: req.query.lid
           }
         })
-      } else if (req.query.eid) {
-        const exercise = await Exercise.findOne({
-          where: {
-            id: req.query.eid
-          }
-        })
-      } else {
-        throw new Error("Incorrect information provided")
-      }
-
-      const course = await Course.findOne({
-        where: {
-          id: cid
+        if (!lesson) {
+          return res.status(403).send({
+            error: "Lesson information provided is incorrect"
+          })
         }
-      })
-      
-      if (!course) {
-        return res.status(403).send({
-          error: "Course information is incorrect"
-        })
+        threads = await lesson.getThreads()
+      } else {
+        threads = await req.user.getThreads()
       }
-
-      var Threads = await course.getThreads()
-
-      if (!Threads) {
+      
+      if (!threads) {
         return res.status(403).send({
-          error: "No Thread found"
+          error: "Information provided is incorrect"
         })
       }
       
-      const ThreadsJson = []
-      Threads.forEach(Thread => {
-        ThreadsJson.push(Thread.toJSON())
+      const threadsJson = []
+      threads.forEach(thread => {
+        threadsJson.push(thread.toJSON())
       })
       // console.log(ThreadsJson)
       res.send({
-        Threads: ThreadsJson
+        threads: threadsJson
       })
     } catch (err) {
       res.status(500).send({
-        error: "An error has occured in trying to retrieve Threads"
+        error: "An error has occured in trying to retrieve threads"
       })
     }
   },

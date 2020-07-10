@@ -36,6 +36,10 @@ module.exports = (app) => {
   app.get('/course/listall', 
     isAuthenticated,
     CourseController.listAll),
+  
+  app.get('/course/show', 
+    isAuthenticated,
+    CourseController.show),
 
   app.delete('/course/del', 
     isAuthenticated,

@@ -56,7 +56,7 @@ export default {
       username: "",
       nameRules: [
         v => !!v || "Username is required",
-        v => new RegExp("^[a-zA-Z0-9]{1,32}$").test(v) || "Name must be alphanumeric characters and of length 8 - 32"
+        v => new RegExp(/^[a-zA-Z ]{2,30}$/).test(v) || "Name must be alphanumeric characters and of length 8 - 32"
       ],
       email: "",
       emailRules: [

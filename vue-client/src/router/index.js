@@ -4,9 +4,9 @@ import Home from "../components/Home"
 import Register from "../components/Register"
 import Student from "../components/StudentView/Student"
 import LogIn from "../components/LogIn"
-import ShowCourse from "../components/Course/ShowCourse"
-import CourseIndex from "../components/Course/CourseIndex"
-import NewCourse from "../components/Course/NewCourse"
+import ShowCourse from "../views/course/ShowCourse"
+import CourseIndex from "../views/course/CourseIndex"
+import NewCourse from "../views/course/NewCourse"
 import TutorIndex from "../components/TutorIndex"
 import Video from "../components/Video"
 
@@ -34,7 +34,7 @@ const routes = [
     component: Student
   },
   {
-    path: '/course/show/:tutor_id/:course_id',
+    path: '/course/show/:course_id',
     name: 'showcourse',
     component: ShowCourse
   },

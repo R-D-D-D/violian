@@ -13,6 +13,10 @@ export default {
     return Api().get('course/listall')
   },
 
+  show (cid) {
+    return Api().get(`course/show?cid=${cid}`)
+  },
+
   edit (courseInfo) {
     return Api().put('course/edit', courseInfo)
   },

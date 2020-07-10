@@ -1,6 +1,6 @@
 <template lang="pug">
   .home
-    helloword(msg="Welcome to Your Vue.js App")
+    helloword
   </div>
 </template>
 

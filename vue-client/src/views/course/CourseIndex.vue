@@ -61,9 +61,9 @@ export default {
   methods: {
     showCourse (event, id) {
       if (this.is_student) {
-        this.$router.push(`/course/show/${this.tutor.id}/${id}`)
+        this.$router.push(`/course/show/${id}`)
       } else {
-        this.$router.push(`/course/show/${this.user.id}/${id}`)
+        this.$router.push(`/course/show/${id}`)
       }
     },
 

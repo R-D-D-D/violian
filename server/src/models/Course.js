@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
       hooks: true
     })
+    Course.hasMany(models.Thread, {
+      onDelete: 'CASCADE',
+      hooks: true
+    })
   }
   
   return Course

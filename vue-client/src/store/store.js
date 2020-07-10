@@ -27,6 +27,20 @@ export default new Vuex.Store({
   },
 
   mutations: {
+    resetState (state) {
+      Object.assign(state, {
+        token: null,
+        user: null,
+        // this lessons array is for tutors when they log in as tutor
+        userOwnedCourses: [],
+        userSubscribedCourses: [],
+        allTutors: [],
+        allCourses: [],
+        isUserLoggedIn: false,
+        hideNav: false
+      })
+    },
+
     setToken (state, token) {
       state.token = token;
     },
@@ -114,8 +128,10 @@ export default new Vuex.Store({
       commit("setToken", token);
       if (token)
         commit("logIn");
-      else
+      else {
         commit("logOut");
+        commit("resetState");
+      }
     },
 
     setUser ({commit}, user) {
@@ -152,7 +168,6 @@ export default new Vuex.Store({
     },
 
     addExercise ({commit}, payload) {
-      payload.exercise.melody = payload.exercise.melody.split('-')
       commit("addExercise", payload)
     },
 
@@ -194,18 +209,6 @@ export default new Vuex.Store({
     async getCoursesForTutor ({commit}, tutor) {
       const response = await CourseService.list(tutor.id);
       var courses = response.data.courses
-      console.log(courses)
-      courses = courses.map(course => {
-        course.lessons = course.lessons.map(lesson => {
-          lesson.exercises = lesson.exercises.map(exercise => {
-            exercise.melody = exercise.melody.split('-')
-            return exercise
-          })
-          return lesson
-        });
-        return course
-      })
-      console.log(courses)
       commit("setUserOwnedCourses", courses);
     },
 
@@ -213,15 +216,6 @@ export default new Vuex.Store({
     async getCoursesForStudent ({commit}, student) {
       const response = await SubscriptionService.getSubscriptionInfoOfStudent(student.id);
       var courses = response.data.courses
-      courses = courses.map(course => {
-        course.lessons = course.lessons.map(lesson => {
-          lesson.exercises = lesson.exercises.map(exercise => {
-            exercise.melody = exercise.melody.split('-')
-            return exercise
-          })
-          return lesson
-        });
-      })
       commit("setUserSubscribedCourses", courses);
     },
 

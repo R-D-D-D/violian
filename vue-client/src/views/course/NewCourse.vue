@@ -333,7 +333,7 @@ export default {
           })
         }
 
-        this.$router.push(`/course/show/${this.user.id}/${courseResponse.data.course.id}`)
+        this.$router.push(`/course/show/${courseResponse.data.course.id}`)
       } catch (err) {
         this.error = err.response.data.error
       }

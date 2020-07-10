@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   Thread.associate = function (models) {
-    Thread.belongsTo(models.Exercise)
+    Thread.belongsTo(models.Lesson)
+    Thread.belongsTo(models.Course)
     Thread.belongsTo(models.User)
     Thread.hasMany(models.Post, {
       onDelete: 'CASCADE',

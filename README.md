@@ -14,6 +14,7 @@
 - course management
   - GET `/course/list?uid=` - `{ courses: [<courseObj>] }`
   - GET `/course/listall` - `{ courses: [<courseObj>] }`
+  - GET `/course/show?cid=` - `{ course: <courseObj> } gets detailed course obj including lessons`
   - POST `/course/new { name, price, description, langauge, level, instrument,  TutorId }` - `{ course: <courseObj> }`
   - PUT `/course/edit { courseObj }` - `{ course: <courseObj> }`
   - DELETE `/course/del?cid=` - `{ data: ok }`
@@ -39,13 +40,15 @@
 
 ## threads
 - thread management
-  - GET `/thread/list?eid=&uid=` - `{ threads: [<threadObj>] }`
-  - POST `/thread/new {eid, uid}` - `{ thread: threadObj }`
+  - GET `/thread/list?lid=` - `{ threads: [<threadObj>] } // if lid is not specified, it is assumed to check the uid base on token`
+  - GET `/thread/show?tid=` - `{ thread: <threadObj> }`
+  - POST `/thread/new { lid }` - `{ thread: threadObj }`
   - DELETE `/thread/del?tid=`
 
 ## posts
 - post management
   - GET `/post/list?tid=` - `{ posts: [<postObj>] }` - `{ posts: [<postObj>] }`
-  - POST `/post/new { video, message, grade, uid }` - `{ post: <postObj> }`
+  - GET `/post/show?pid=` - `{ post: <postObj> }`
+  - POST `/post/new { video, message, grade, id }` - `{ post: <postObj> }`
   - PUT `/post/edit { pid, video, message, grade }` - `{ post: <postObj> }`
   - DELETE `/post/del?pid=` - `{ data: ok }`

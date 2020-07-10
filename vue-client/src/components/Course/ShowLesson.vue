@@ -103,7 +103,8 @@ export default {
         fluid: true,
         sources: [
           {
-            src: this.lesson.exercises[0].demoUrl,
+            //src: this.lesson.exercises[0].demoUrl,
+            src: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
             type: "video/mp4"
           }
         ]
@@ -259,7 +260,7 @@ export default {
       }).init();
     }
 
-    this.melody = this.lesson.exercises[0].melody
+    this.melody = this.lesson.exercises[0].melody.split('-')
     this.bpm = parseInt(this.lesson.exercises[0].bpm)
     this.timeSignature = this.lesson.exercises[0].timeSignature
     this.handler.importNotes(this.melody, this.timeSignature)

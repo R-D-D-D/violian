@@ -106,6 +106,40 @@ module.exports = {
     }
   },
 
+  async show (req, res) {
+    try {
+      const {cid} = req.query
+      const course = await Course.findOne({
+        where : {
+          id: cid
+        }
+      })
+
+      if (!course) {
+        return req.status(403).send({
+          error: 'No course found'
+        })
+      }
+
+      var courseJson = course.toJSON()
+      var lessons = await course.getLessons()
+      courseJson.lessons = await Promise.all(lessons.map(async lesson => {
+        var lessonJson = lesson.toJSON()
+        var exercises = await lesson.getExercises()
+        lessonJson.exercises = exercises.map(exercise => exercise.toJSON())
+        return lessonJson
+      }))
+
+      res.send({
+        course: courseJson
+      })
+    } catch (err) {
+      res.status(500).send({
+        error: "An error has occured in trying to retrieve course"
+      })
+    }
+  },
+
   async destroy (req, res) {
     try {
       const {cid} = req.query

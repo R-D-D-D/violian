@@ -1,133 +1,187 @@
 const {Exercise} = require('../models')
+const {Post} = require('../models')
 const {Thread} = require('../models')
+const AWS = require('aws-sdk')
+
+const config = require('../config/config')
+
+const s3 = new AWS.S3({
+  accessKeyId: config.aws.id,
+  secretAccessKey: config.aws.secret
+});
 
 module.exports = {
   async create (req, res) {
     try {
-      const user = req.body.user
-      const eid = req.body.eid
-      const exercise = await Exercise.findOne({
+      const user = req.user
+      const {tid} = req.body
+      const thread = await Thread.findOne({
         where: {
-          id: eid
+          id: tid
         }
       })
       
-      if (!exercise) {
+      if (!thread) {
         return res.status(403).send({
-          error: "Exercise information is incorrect"
+          error: "Thread information is incorrect"
         })
       }
 
-      const thread = await exercise.createThread()
-      thread.setUser(user)
+      const course = await thread.getCourse()
+      if (thread.UserId != user.id || course.TutorId != user.id) {
+        return res.status(403).send({
+          error: 'you do not have access to this resource'
+        })
+      }
+
+      if (req.file) {
+        var params = {
+            Bucket: config.aws.bucket,
+            Key: `${user.email}/post/${tid}/${req.file.originalname}`,
+            Body: req.file.buffer
+        }
+    
+        // Uploading files to the bucket
+        const response = await s3.upload(params).promise()
+        req.body.videoUrl = response.Location
+      }
+
+      const post = await thread.createPost(req.body)
 
       res.send({
-        thread: thread.toJSON()
+        post: post.toJSON()
       })
     } catch (err) {
       res.status(500).send({
-        error: 'an error has occured trying to create the thread'
+        error: 'an error has occured trying to create the post'
       })
     }
   },
 
   async edit (req, res) {
     try {
-      const {lessonObj} = req.body
-      const lesson = await Lesson.findOne({
+      const postObj = req.body
+      const post = await Post.findOne({
         where: {
-          id: lessonObj.id
+          id: postObj.id
         }
       })
-
-      if (!lesson) {
+      const thread = await post.getThread()
+      
+      if (!post) {
         res.status(403).send({
-          error: "Lesson not found"
+          error: "Post information incorrect"
         })
       }
 
-      const course = await lesson.getCourse()
-      var differenceInDuration = parseInt(lessonObj.duration) - lesson.duration
-      if (differenceInDuration != 0) {
-        if (differenceInDuration > 0) {
-          await course.increment('duration', { by: differenceInDuration })
-        } else {
-          await course.decrement('duration', { by: differenceInDuration })
-        }
+      if (thread.UserId != req.user.id) {
+        return res.status(403).send({
+          error: 'you do not have access to this resource'
+        })
       }
 
-      lesson.name = lessonObj.name
-      lesson.duration = lessonObj.duration
-      await lesson.save()
+      if (req.file && post.videoUrl) {
+        // delete the previous video
+        var originalKeys = post.videoUrl.split('/')
+        var deleteParams = {
+          Bucket: config.aws.bucket,
+          Key: `${req.user.email}/post/${post.ThreadId}/${originalKeys[originalKeys.length - 1]}`
+        }
+
+        await s3.deleteObject(deleteParams).promise()
+
+        var params = {
+          Bucket: config.aws.bucket,
+          Key: `${req.user.email}/post/${thread.id}/${req.file.originalname}`,
+          Body: req.file.buffer
+        }
+    
+        // Uploading files to the bucket
+        const response = await s3.upload(params).promise()
+        postObj.videoUrl = response.Location
+      } else if (req.file) {
+        var params = {
+          Bucket: config.aws.bucket,
+          Key: `${req.user.email}/post/${thread.id}/${req.file.originalname}`,
+          Body: req.file.buffer
+        }
+    
+        // Uploading files to the bucket
+        const response = await s3.upload(params).promise()
+        postObj.videoUrl = response.Location
+      }
+
+      Object.assign(post, postObj)
+      await post.save()
 
       res.send({
-        lesson: lesson.toJSON()
+        post: post.toJSON()
       })
 
     } catch (err) {
+      console.log(err)
       res.status(500).send({
-        error: "An error has occured in trying to edit lesson"
+        error: "An error has occured in trying to edit post"
       })
     }
   },
 
   async list (req, res) {
     try {
-      const {cid} = req.query
+      const {tid} = req.query
 
-      const course = await Course.findOne({
+      const thread = await Thread.findOne({
         where: {
-          id: cid
+          id: tid
         }
       })
       
-      if (!course) {
+      if (!thread) {
         return res.status(403).send({
-          error: "Course information is incorrect"
+          error: "Thread information is incorrect"
         })
       }
 
-      var lessons = await course.getLessons()
-
-      if (!lessons) {
-        return res.status(403).send({
-          error: "No lesson found"
-        })
-      }
+      var posts = await thread.getPosts()
       
-      const lessonsJson = []
-      lessons.forEach(lesson => {
-        lessonsJson.push(lesson.toJSON())
+      const postsJson = []
+      posts.forEach(post => {
+        postsJson.push(post.toJSON())
       })
-      // console.log(lessonsJson)
+      // console.log(postsJson)
       res.send({
-        lessons: lessonsJson
+        posts: postsJson
       })
     } catch (err) {
       res.status(500).send({
-        error: "An error has occured in trying to retrieve lessons"
+        error: "An error has occured in trying to retrieve posts"
       })
     }
   },
 
   async destroy (req, res) {
     try {
-      const {lid} = req.query
-      const lesson = await Lesson.findOne({
+      const {pid} = req.query
+      const post = await Post.findOne({
         where: {
-          id: lid
+          id: pid
         }
       })
 
-      const course = await lesson.getCourse()
-      await course.decrement('duration', { by: lesson.duration })
-      await lesson.destroy()
+      const thread = await post.getThread()
+      if (thread.UserId != req.user.id) {
+        return res.status(403).send({
+          error: 'you do not have access to this resource'
+        })
+      }
+
+      await post.destroy()
       res.send({
         data: 'ok'
       })
     } catch (err) {
       res.status(500).send({
-        error: "An error has occured in trying to delete lesson"
+        error: "An error has occured in trying to delete post"
       })
     }
   }

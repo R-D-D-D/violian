@@ -23,17 +23,15 @@
       v-row.mt-10
         v-col.text-left(cols="12")
           h2 Popular Courses
-        v-col(v-for="course in allCourses" sm="6" md="4" large="3")
-          v-card.mx-auto(max-width='400')
+        v-col(v-for="course in allCourses" sm="6" md="4" lg="3")
+          v-card.mx-auto
             v-img.white--text.align-end(height="200px" src='https://images.pexels.com/photos/1246437/pexels-photo-1246437.jpeg?cs=srgb&dl=close-up-photo-of-person-playing-piano-1246437.jpg&fm=jpg')
               v-card-title(style="text-shadow: 1px 1px 2px #000000;") {{ course.name }}
-            v-card-subtitle.pb-0 Number 10
-            v-card-text.text--primary
+            v-card-subtitle.pb-0.text-left Drum
+            v-card-text.text-left.text--primary.pb-0
               div Whitehaven Beach
             v-card-actions
-              v-btn(color='orange' text)
-                | Subscribe
-              v-btn(color='orange' text)
+              v-btn(color='indigo' text :to="`/course/show/${course.id}`")
                 | Find out more
 
 
