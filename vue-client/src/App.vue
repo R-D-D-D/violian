@@ -37,4 +37,55 @@ export default {
   pointer-events: none;
   opacity: 0.4;
 }
+
+.speech-bubble-other, .speech-bubble-self {
+	position: relative;
+	background: #EEEEEE;
+	border-radius: .4em;
+  min-height: 40px;
+}
+
+.speech-bubble-other:after {
+	content: '';
+	position: absolute;
+	right: 0;
+	top: 60%;
+	width: 0;
+	height: 0;
+	border: 20px solid transparent;
+	border-left-color: #EEEEEE;
+	border-right: 0;
+	border-bottom: 0;
+	margin-top: -10px;
+	margin-right: -18px;
+}
+
+.speech-bubble-self:after {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 60%;
+	width: 0;
+	height: 0;
+	border: 20px solid transparent;
+	border-right-color: #EEEEEE;
+	border-left: 0;
+	border-bottom: 0;
+	margin-top: -10px;
+	margin-left: -18px;
+}
+
+.timestamp {
+  position: absolute;
+  right: 6px;
+  bottom: 3px;
+  font-size: 12px;
+  color: #757575;
+}
+
+.bottom-border {
+  border-left: 1px solid #BDBDBD;
+  border-right: 1px solid #BDBDBD;
+  border-bottom: 1px solid #BDBDBD;
+}
 </style>

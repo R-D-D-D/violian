@@ -12,6 +12,7 @@ import Video from "../components/Video"
 import CoursesThreadsIndex from "../views/thread/CoursesThreadsIndex"
 import CourseThreadsIndex from "../views/thread/CourseThreadsIndex"
 import ShowCourseThread from "../views/thread/ShowCourseThread"
+import store from "../store/store";
 
 Vue.use(VueRouter);
 
@@ -71,7 +72,9 @@ const routes = [
   },
   {
     path: '/course/threads/show/:course_id/:student_id',
-    component: ShowCourseThread
+    name: 'showthread',
+    component: ShowCourseThread,
+    props: true
   }
 
 ];
@@ -79,5 +82,11 @@ const routes = [
 const router = new VueRouter({
   routes
 });
+
+router.beforeEach((to, from, next) => {
+  if (to.name != 'login' && !store.state.isUserLoggedIn && to.name != 'home' && to.name != 'register') next({ name: 'login' });
+  else next();
+})
+
 
 export default router;

@@ -4,24 +4,24 @@
       h1 {{ course.name }}
       v-row
         v-col
-          v-expansion-panels
+          v-expansion-panels.elevation-2(hover multiple v-model="currentThread")
             v-expansion-panel(v-for='(thread, i) in threads' :key='thread.id')
               v-expansion-panel-header.font-weight-bold(style="font-size: 18px;") {{ course.lessons[i].name }}
               v-expansion-panel-content
                 v-list(v-if="thread.posts")
                   v-list-item(v-for='(post, idx) in thread.posts' :key='post.id')
                     v-list-item-content.pb-0
-                      v-container.pt-0.pb-4(fluid)
+                      v-container.pt-0.pb-4.px-0(fluid)
                         v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != thread.posts[idx - 1].updatedAt.substring(0, 10)")
                           v-col.py-0
                             v-chip(label color="indigo darken-3" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
-                        v-row
-                          v-col
-                            video.mt-5(width="100%" height="audo" controls)
-                              source(src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4")
+                        v-row.mt-5
+                          v-col.pb-0(style="margin-bottom: -3px;")
+                            video(width="100%" height="audo" controls)
+                              source(:src="post.videoUrl" type="video/mp4")
                               | Your browser does not support HTML video.
 
-                        v-row.justify-end(v-if="post.UserId != user.id")
+                        v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
                           v-col.pr-8.py-0(cols="6") 
                             .speech-bubble-other
                               v-row.ma-0(style="width: 100%;")
@@ -31,7 +31,7 @@
                           v-col.pa-0(cols="1")
                             v-avatar(color='indigo' size="40")
                               v-img(:src="avatar")
-                        v-row.justify-start(v-else)
+                        v-row.justify-start.bottom-border.mx-0.py-3(v-else)
                           v-col.pa-0(cols="1")
                             v-avatar(color='indigo' size="40")
                               v-img(:src="avatar")
@@ -74,6 +74,7 @@ import PostService from '@/services/PostService'
 
 export default {
   name: 'ShowCourseThread',
+  props: ['lesson_pos'],
   data () {
     return {
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
@@ -84,7 +85,8 @@ export default {
       grade: 0,
       requiredRules: [
         v => !!v || "This field is required"
-      ]
+      ],
+      currentThread: [this.lesson_pos]
     }
   },
 
@@ -124,6 +126,8 @@ export default {
         const response = await PostService.create(formData)
         // threadResponse = await ThreadService.show(this.lesson.id, this.user.id)
         this.threads[idx].posts.splice(this.threads[idx].posts.length, 0, response.data.post)
+        this.file = null
+        this.message = null
       } else {
         return
       }
@@ -149,50 +153,5 @@ export default {
   vertical-align: text-top !important;
   width: 64px !important;
   height: 64px !important;
-}
-
-.speech-bubble-other, .speech-bubble-self {
-	position: relative;
-	background: #EEEEEE;
-	border-radius: .4em;
-  min-height: 40px;
-}
-
-.speech-bubble-other:after {
-	content: '';
-	position: absolute;
-	right: 0;
-	top: 60%;
-	width: 0;
-	height: 0;
-	border: 20px solid transparent;
-	border-left-color: #EEEEEE;
-	border-right: 0;
-	border-bottom: 0;
-	margin-top: -10px;
-	margin-right: -18px;
-}
-
-.speech-bubble-self:after {
-	content: '';
-	position: absolute;
-	left: 0;
-	top: 60%;
-	width: 0;
-	height: 0;
-	border: 20px solid transparent;
-	border-right-color: #EEEEEE;
-	border-left: 0;
-	border-bottom: 0;
-	margin-top: -10px;
-	margin-left: -18px;
-}
-
-.timestamp {
-  position: absolute;
-  right: 6px;
-  bottom: 3px;
-  font-size: 12px;
-  color: #757575;
 }
 </style>

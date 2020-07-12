@@ -28,20 +28,72 @@
             v-icon(left dark) mdi-content-save-all-outline
             | Edit Lesson
 
-    v-row
+    v-row.justify-center
       v-col.text-left(cols="11")
-        h1 Discussion
-      v-col.text-left(cols="11")
-        v-btn(large color="red darken-3" dark @click="dialog = true" v-if="!is_student") Reply to your student
-        v-btn(large color="red darken-3" dark @click="dialog = true" v-else) Submit your playing!
-      v-col(cols="11" v-if="is_student")
-        v-expansion-panels(v-if="lesson.thread")
-          v-expansion-panel(v-for='(post, i) in lesson.thread.posts' :key='post.id')
-            v-expansion-panel-header {{ new Date(post.createdAt).toLocaleString() }}
-            v-expansion-panel-content
-              | {{ post.message }}
+        h1.pl-4 Discussion
+      //- v-col.text-left(cols="11")
+      //-   v-btn(large color="red darken-3" dark @click="dialog = true" v-if="!is_student") Reply to your student
+      //-   v-btn(large color="red darken-3" dark @click="dialog = true" v-else) Submit your playing!
+      //- v-col(cols="11" v-if="is_student")
+      //-   v-expansion-panels(v-if="lesson.thread")
+      //-     v-expansion-panel(v-for='(post, i) in lesson.thread.posts' :key='post.id')
+      //-       v-expansion-panel-header {{ new Date(post.createdAt).toLocaleString() }}
+      //-       v-expansion-panel-content
+      //-         | {{ post.message }}
+      v-col(cols="11" v-if="lesson.thread")
+        v-list(v-if="lesson.thread.posts")
+          v-list-item(v-for='(post, idx) in lesson.thread.posts' :key='post.id')
+            v-list-item-content.pb-0
+              v-container.pt-0.pb-4.px-0(fluid)
+                v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != lesson.thread.posts[idx - 1].updatedAt.substring(0, 10)")
+                  v-col.py-0
+                    v-chip(label color="indigo darken-3" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                v-row.mt-5
+                  v-col.pb-0(style="margin-bottom: -3px;")
+                    video(width="100%" height="audo" controls)
+                      source(:src="post.videoUrl" type="video/mp4")
+                      | Your browser does not support HTML video.
+
+                v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
+                  v-col.pr-8.py-0(cols="6") 
+                    .speech-bubble-other
+                      v-row.ma-0(style="width: 100%;")
+                        v-col.text-left
+                          div {{ post.message }}
+                      .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+                  v-col.pa-0(cols="1")
+                    v-avatar(color='indigo' size="40")
+                      v-img(:src="avatar")
+                v-row.justify-start.bottom-border.mx-0.py-3(v-else)
+                  v-col.pa-0(cols="1")
+                    v-avatar(color='indigo' size="40")
+                      v-img(:src="avatar")
+                  v-col.pl-8.py-0(cols="6") 
+                    .speech-bubble-self
+                      v-row.ma-0(style="width: 100%;")
+                        v-col.text-left
+                          div {{ post.message }}
+                      .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+        v-row.justify-center
+          v-col(cols="10")
+            v-form(:ref="`form`")
+              v-row
+                v-col(cols="12")
+                  v-textarea(outlined name='input-7-4' label='Any question for your tutor?' v-model="message")
+                v-col(cols="6")
+                  v-file-input(
+                    accept="video/mp4, video/ogg" 
+                    placeholder="Upload" 
+                    prepend-icon="mdi-video"
+                    label="Upload Video"
+                    v-model="file"
+                    :rules="requiredRules")
+
+              v-row
+                v-col
+                  v-btn(large color="red darken-3" dark @click="create_post") Submit practice video
     
-    v-row(justify='center')
+    //- v-row(justify='center')
       v-dialog(v-model='dialog' persistent max-width='600px')
         template(v-slot:activator='{ on, attrs }')
         v-card
@@ -52,29 +104,29 @@
               v-container
                 v-row
                   v-col(cols='12')
-                    v-text-field(v-model="post_message" type="text" label='Message*' required)
+                    v-text-field(v-model="message" type="text" label='Message*' required)
                   v-col(cols="12")                          
                     v-file-input(
                       accept="video/mp4, video/ogg" 
                       placeholder="Upload" 
                       prepend-icon="mdi-video"
                       label="Practice Video"
-                      v-model="post_file")
+                      v-model="file")
             v-form(ref="tutorform" v-else)
               v-container
                 v-row
                   v-col(cols='12')
-                    v-text-field(v-model="post_message" type="text" label='Message*' required)
+                    v-text-field(v-model="message" type="text" label='Message*' required)
                   v-col(cols='12')
                     v-subheader.pl-0 Grade
-                    v-slider(v-model="post_grade" min='0' max='100' thumb-label :thumb-size="24")
+                    v-slider(v-model="grade" min='0' max='100' thumb-label :thumb-size="24")
                   v-col(cols="12")                          
                     v-file-input(
                       accept="video/mp4, video/ogg" 
                       placeholder="Feedback" 
                       prepend-icon="mdi-video"
                       label="Feedback Video"
-                      v-model="post_file")
+                      v-model="file")
           v-card-actions
             v-spacer
             v-btn(color='indigo' text @click='dialog = false') Close
@@ -127,9 +179,10 @@ export default {
       requiredRules: [
         v => !!v || "This field is required"
       ],
-      post_message: '',
-      post_file: null,
-      post_grade: '',
+      message: '',
+      file: null,
+      grade: '',
+      avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
       error: null
     }
   },
@@ -213,28 +266,22 @@ export default {
       this.disable = false;
     },
 
-    async student_create_post () {
-      var formValidated = false
-      if (this.is_student) {
-        formValidated = this.$refs.studentform.validate()
-      } else {
-        formValidated = this.$refs.tutorform.validate()
-      }
-
-      if (formValidated) {
+    async create_post () {
+      if (this.$refs.form.validate()) {
         alert('form is gd')
         var formData = new FormData()
         formData.set('tid', this.lesson.thread.id)
-        formData.set('message', this.post_message)
-        formData.set('grade', this.post_grade)
-        formData.append('video', this.post_file)
+        formData.set('message', this.message)
+        formData.set('grade', this.grade)
+        formData.append('video', this.file)
         const response = await PostService.create(formData)
         // threadResponse = await ThreadService.show(this.lesson.id, this.user.id)
         if (this.lesson.thread.posts.length == 0)
           this.lesson.thread.posts.splice(this.lesson.thread.posts.length, 0, response.data.post)
         else
           this.lesson.thread.posts.splice(this.lesson.thread.posts.length - 1, 0, response.data.post)
-        this.dialog = false
+        this.message = ''
+        this.file = null
       } else {
         return
       }

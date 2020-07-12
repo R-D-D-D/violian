@@ -35,7 +35,13 @@ export default {
 
   methods: {
     showThread (event, student) {
-      this.$router.push(`/course/threads/show/${this.$route.params.course_id}/${student.id}`)
+      this.$router.push({
+        name: `showthread`,
+        params: {
+          course_id: this.$route.params.course_id,
+          student_id: student.id
+        }
+      })
     }
   },
 
