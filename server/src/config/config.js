@@ -14,6 +14,10 @@ module.exports = {
     url: process.env.DB_URL || './rhythmacademy.sqlite',
     dialect: process.env.DB_DIALECT || 'sqlite'
   },
+  mailgun: {
+    apiKey: process.env.MG_API_KEY,
+    domain: process.env.MG_DOMAIN
+  },
   aws: {
     id: process.env.AWS_ACCESS_KEY,
     bucket: process.env.BUCKET_NAME,

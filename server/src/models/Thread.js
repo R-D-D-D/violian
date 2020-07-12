@@ -1,5 +1,13 @@
 module.exports = (sequelize, DataTypes) => {
   const Thread = sequelize.define('Thread', {
+    unreadStudentPost: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    unreadTutorPost: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    }
   })
 
   Thread.associate = function (models) {

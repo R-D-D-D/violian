@@ -6,7 +6,6 @@
       app
       dense
       absolute
-      v-bind:class="{ hide: hidden }"
     )
       v-app-bar-nav-icon(@click="drawer = true")
 
@@ -18,9 +17,12 @@
       v-toolbar-items(v-if="!$store.state.isUserLoggedIn")
         v-btn(depressed to="/register" color="indigo") Register
         v-btn(depressed to="/login" color="indigo") Log In
-      v-toolbar-items(v-if="$store.state.isUserLoggedIn")
-        v-btn(depressed to="/course/index" color="indigo" v-if="$store.state.user.isStudent") My Courses
-        v-btn(depressed to="/course/index" color="indigo" v-if="$store.state.user.isTutor") My Courses
+      v-toolbar-items(v-else)
+        v-btn(depressed to="/course/index" color="indigo") My Courses
+        v-btn(depressed to="/courses/threads/index" color="indigo" style="position: relative;") Notifications
+          #notification {{ notifications }}
+
+
         v-btn(depressed @click="logout" color="indigo") Log Out
     
     v-navigation-drawer(v-model='drawer' absolute temporary)
@@ -59,11 +61,14 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+
 export default {
   name: 'Header',
   data () {
     return {
-      drawer: false
+      drawer: false,
+      messages: 0
     }
   },
 
@@ -76,20 +81,43 @@ export default {
   },
 
   computed: {
-    hidden () {
-      return this.$store.state.hideNav;
-    }
+    notifications () {
+      if (this.$store.state.isUserLoggedIn) {
+        if (this.user.isStudent) {
+          const reducer = (course, init) => course + init.unreadTutorPost
+          return this.userSubscribedCourses.reduce(reducer, 0)
+        } else {
+          const reducer = (course, init) => course + init.unreadStudentPost
+          return this.userOwnedCourses.reduce(reducer, 0)
+        }
+      } else {
+        return 0
+      }
+    },
+
+    ...mapState(['user', 'userOwnedCourses', 'userSubscribedCourses'])
+  },
+
+  mounted: function () {
   }
 }
 </script>
 
 <style scoped>
-.hide {
-  display: none !important;
-}
-
 a, a:link, a:visited, a:active, a:hover {
   text-decoration: none;
   color: white;
+}
+
+#notification {
+  position: absolute;
+  background: #C62828;
+  top: -14px;
+  right: -16px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1.35rem;
 }
 </style>

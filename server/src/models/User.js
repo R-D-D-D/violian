@@ -47,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     User.belongsToMany(User, { as: 'Tutors', through: 'StudentTutors', foreignKey: 'StudentId' }) // Student belongs to many tutors
     User.belongsToMany(models.Course, { as: 'SubscribedCourses', through: 'StudentCourses' })
     User.hasMany(models.Thread)
+    User.hasMany(models.Post)
   }
   return User
 }

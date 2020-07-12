@@ -1,5 +1,5 @@
 <template lang="pug">
-  #show-course(v-if="course")
+  v-container#show-course(v-if="course" fluid)
     div(v-if="is_student")
       v-row.py-3
         v-col
@@ -20,7 +20,7 @@
               lesson(:lesson="lesson")
         
     
-    div(v-else)
+    v-container(v-else fluid)
       v-row.py-3
         v-col
           .text-h2.font-weight-bold {{ course.name }}
@@ -159,9 +159,18 @@ export default {
       this.dialog = true;
     },
 
-    subscribe () {
+    async subscribe () {
       if (confirm("Are you sure?")) {
-        this.$store.dispatch('subscribe', {
+        Object.assign(this.course.lessons, await Promise.all(this.course.lessons.map(async lesson => {
+          var response = await ThreadService.create({
+            lid: lesson.id
+          })
+          response.data.thread.posts = []
+          lesson.thread = response.data.thread
+          return lesson
+        })))
+
+        await this.$store.dispatch('subscribe', {
           studentId: this.user.id,
           courseId: this.course.id
         })
@@ -171,18 +180,16 @@ export default {
 
   created: async function() {
     var response = await CourseService.show(this.$route.params.course_id)
-    console.log(response.data.course)
-    this.course = response.data.course
-    if (this.isSubscribed || this.isOwned) {
-      try {
-        this.course.lessons = await Promise.all(this.course.lessons.map(async (lesson) => {
-          var response = await ThreadService.show(lesson.id, this.user.id)
-          lesson.thread = response.data.thread
-          return lesson
-        }))
-      } catch (err) {
-        console.log(err)
-      }
+    try {
+      response.data.course.lessons = await Promise.all(response.data.course.lessons.map(async (lesson) => {
+        var threadResponse = null
+        threadResponse = await ThreadService.show(lesson.id, this.user.id)
+        lesson.thread = threadResponse.data.thread
+        return lesson
+      }))
+      this.course = response.data.course
+    } catch (err) {
+      console.log(err)
     }
   },
 

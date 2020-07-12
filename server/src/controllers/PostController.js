@@ -2,6 +2,7 @@ const {Exercise} = require('../models')
 const {Post} = require('../models')
 const {Thread} = require('../models')
 const AWS = require('aws-sdk')
+const mailgun = require('../lib/mailgun')
 
 const config = require('../config/config')
 
@@ -28,7 +29,7 @@ module.exports = {
       }
 
       const course = await thread.getCourse()
-      if (thread.UserId != user.id || course.TutorId != user.id) {
+      if (thread.UserId != user.id && course.TutorId != user.id) {
         return res.status(403).send({
           error: 'you do not have access to this resource'
         })
@@ -47,11 +48,29 @@ module.exports = {
       }
 
       const post = await thread.createPost(req.body)
+      await post.setUser(user)
+
+      if (user.isStudent) {
+        await thread.increment('unreadStudentPost', { by: 1})
+        await course.increment('unreadStudentPost', { by: 1})
+      } else {
+        await thread.increment('unreadTutorPost', { by: 1})
+        await course.increment('unreadTutorPost', { by: 1})
+      }
+
+
+      if (user.isStudent) {
+        const course = await thread.getCourse()
+        const tutor = await course.getTutor()
+ 
+        await mailgun.sendNotification(course, user, tutor)
+      }
 
       res.send({
         post: post.toJSON()
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to create the post'
       })
@@ -184,5 +203,19 @@ module.exports = {
         error: "An error has occured in trying to delete post"
       })
     }
+  },
+
+  async mail (req, res) {
+    try {
+      await mailgun.sendNotification()
+      res.send({
+        data: 'ok'
+      })
+    } catch {
+      res.status(500).send({
+        error: 'an error has occured trying to create the post'
+      })
+    }
+    await mailgun.sendNotification()
   }
 }

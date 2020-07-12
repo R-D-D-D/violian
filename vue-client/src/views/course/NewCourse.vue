@@ -278,6 +278,12 @@ export default {
           return
         }
       }
+      for (var j = 0; j< this.lessons.length; j++) {
+        if (this.lessons[j].melody.length == 0 && this.lessons[j].useScore && this.lessons[j].numberOfBars != 0) {
+          alert('Please input some notes or choose not to overlay score')
+          return
+        }
+      }
       this.e1 = 3
     },
 
@@ -300,7 +306,7 @@ export default {
           TutorId: this.user.id,
         })
 
-        this.$store.dispatch('addCourse', courseResponse.data.course)
+        await this.$store.dispatch('addCourse', courseResponse.data.course)
 
         // create lessons
         for (var i = 0; i < this.lessons.length; i++) {
@@ -311,7 +317,7 @@ export default {
             cid: courseResponse.data.course.id
           })
 
-          this.$store.dispatch('addLesson', lessonResponse.data.lesson)
+          await this.$store.dispatch('addLesson', lessonResponse.data.lesson)
 
           // create exercise that belongs to lessons
           var formData = new FormData()
@@ -327,7 +333,7 @@ export default {
 
           var exerciseResponse = await ExerciseService.create(formData)
 
-          this.$store.dispatch('addExercise', {
+          await this.$store.dispatch('addExercise', {
             exercise: exerciseResponse.data.exercise,
             CourseId: courseResponse.data.course.id
           })

@@ -79,9 +79,9 @@ export default {
         this.$store.dispatch('setUser', response.data.user)
         if (response.data.user.isStudent) {
           await this.$store.dispatch('getAllCourses')
-          this.$store.dispatch('getCoursesForStudent', response.data.user)
+          await this.$store.dispatch('getCoursesForStudent', response.data.user)
         } else {
-          this.$store.dispatch('getCoursesForTutor', response.data.user)
+          await this.$store.dispatch('getCoursesForTutor', response.data.user)
         }
         this.$router.push({
           name: 'home'

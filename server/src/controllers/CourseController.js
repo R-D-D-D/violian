@@ -116,7 +116,7 @@ module.exports = {
       })
 
       if (!course) {
-        return req.status(403).send({
+        return res.status(403).send({
           error: 'No course found'
         })
       }
@@ -135,6 +135,7 @@ module.exports = {
         course: courseJson
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to retrieve course"
       })

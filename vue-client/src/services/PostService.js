@@ -2,7 +2,9 @@ import Api from '@/services/Api'
 
 export default {
   create (postInfo) {
-    return Api().post('post/new', postInfo)
+    const instance = Api()
+    instance.defaults.headers.post['Content-Type'] = 'multipart/form-data'
+    return instance.post('post/new', postInfo)
   },
 
   list (threadId) {
@@ -10,7 +12,9 @@ export default {
   },
 
   edit (postInfo) {
-    return Api().put('post/edit', postInfo)
+    const instance = Api()
+    instance.defaults.headers.post['Content-Type'] = 'multipart/form-data'
+    return instance.post('post/edit', postInfo)
   },
 
   delete (postId) {

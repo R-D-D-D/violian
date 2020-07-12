@@ -23,6 +23,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     instrument: {
       type: DataTypes.STRING
+    },
+    unreadStudentPost: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    unreadTutorPost: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   })
 

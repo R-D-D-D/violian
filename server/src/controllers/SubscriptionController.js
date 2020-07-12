@@ -121,15 +121,7 @@ module.exports = {
       subscribedStudents.forEach(student => {
         studentsJson.push(student.toJSON())
       })
-      // if (user.isStudent) {
-      //   res.send({
-      //     tutors: usersJson
-      //   })
-      // } else {
-      //   res.send({
-      //     students: usersJson
-      //   })
-      // }
+
       res.send({
         students: studentsJson
       })

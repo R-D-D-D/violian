@@ -483,14 +483,16 @@ Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
 			var noteArr = notes[i].split('/')
 			var dur = noteArr[2]
 			var isDot = false
+			var isRest = false
 			if (dur.includes("r")) {
 				dur = dur.replace("r", "");
+				isRest = true
 			}
 			if (dur.includes("d")) {
 				dur = dur.replace("d", "");
 				isDot = true;
 			}
-			var staveNote = new Vex.Flow.StaveNote({clef: "treble", keys: [noteArr[0] + '/' + noteArr[1]], duration: dur })
+			var staveNote = new Vex.Flow.StaveNote({clef: "treble", keys: [noteArr[0] + '/' + noteArr[1]], duration: isRest ? dur + 'r' : dur })
 			staveNote.autoStem()
 			staveNote.setStyle(Vex.UI.defaultNoteStyle);
 			staveNote.setTickContext(new Vex.Flow.TickContext());

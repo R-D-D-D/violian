@@ -136,6 +136,9 @@ module.exports = (app) => {
 
   app.delete('/post/del',
     isAuthenticated,
-    PostController.destroy)
+    PostController.destroy),
+
+  app.post('/mail',
+    PostController.mail)
 }
   

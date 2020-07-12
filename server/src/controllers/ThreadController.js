@@ -23,11 +23,11 @@ module.exports = {
       await thread.setUser(user)
       await thread.setCourse(lesson.CourseId)
 
-
       res.send({
         thread: thread.toJSON()
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to create the thread'
       })
@@ -44,6 +44,8 @@ module.exports = {
           LessonId: lid
         }
       })
+      console.log(lid)
+      console.log(uid)
       
       if (!thread) {
         return res.send({
@@ -87,8 +89,8 @@ module.exports = {
       }
       
       if (!threads) {
-        return res.status(403).send({
-          error: "Information provided is incorrect"
+        return res.send({
+          threads: []
         })
       }
       

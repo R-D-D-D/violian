@@ -12,7 +12,7 @@
           video.vjs-big-play-centered(ref="videoPlayer" class="video-js" @timeupdate="timeUpdated" :id="`vexflow-video-${lesson.id}`")
           #vexflow-wrapper
           
-      v-row
+      v-row(v-if="melody[0] != ''")
         v-col(cols="12")
           .display-1 The score
         v-col(cols="12")
@@ -28,29 +28,18 @@
             v-icon(left dark) mdi-content-save-all-outline
             | Edit Lesson
 
-    v-row(v-if="is_student")
+    v-row
       v-col.text-left(cols="11")
         h1 Discussion
       v-col.text-left(cols="11")
-        v-btn(large color="red darken-3" dark @click="dialog = true") Submit your playing!
-      v-col(cols="11")
-        v-expansion-panels
-          v-expansion-panel(v-for='(item,i) in 5' :key='i')
-            v-expansion-panel-header Item
+        v-btn(large color="red darken-3" dark @click="dialog = true" v-if="!is_student") Reply to your student
+        v-btn(large color="red darken-3" dark @click="dialog = true" v-else) Submit your playing!
+      v-col(cols="11" v-if="is_student")
+        v-expansion-panels(v-if="lesson.thread")
+          v-expansion-panel(v-for='(post, i) in lesson.thread.posts' :key='post.id')
+            v-expansion-panel-header {{ new Date(post.createdAt).toLocaleString() }}
             v-expansion-panel-content
-              | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-    v-row(v-else)
-      v-col.text-left(cols="11")
-        h1 Discussion
-      v-col.text-left(cols="11")
-        v-btn(large color="red darken-3" dark @click="dialog = true"  ) Reply to your student
-      v-col(cols="11")
-        v-expansion-panels
-          v-expansion-panel(v-for='(item,i) in 5' :key='i')
-            v-expansion-panel-header Item
-            v-expansion-panel-content
-              | Lorem ipsum dolor sit amet, consectetur 
+              | {{ post.message }}
     
     v-row(justify='center')
       v-dialog(v-model='dialog' persistent max-width='600px')
@@ -70,14 +59,14 @@
                       placeholder="Upload" 
                       prepend-icon="mdi-video"
                       label="Practice Video"
-                      v-model="post_file"
-                      :rules="requiredRules")
+                      v-model="post_file")
             v-form(ref="tutorform" v-else)
               v-container
                 v-row
                   v-col(cols='12')
                     v-text-field(v-model="post_message" type="text" label='Message*' required)
                   v-col(cols='12')
+                    v-subheader.pl-0 Grade
                     v-slider(v-model="post_grade" min='0' max='100' thumb-label :thumb-size="24")
                   v-col(cols="12")                          
                     v-file-input(
@@ -85,12 +74,11 @@
                       placeholder="Feedback" 
                       prepend-icon="mdi-video"
                       label="Feedback Video"
-                      v-model="post_file"
-                      :rules="requiredRules")
+                      v-model="post_file")
           v-card-actions
             v-spacer
             v-btn(color='indigo' text @click='dialog = false') Close
-            v-btn(color='indigo' text @click="create_post") Save
+            v-btn(color='indigo' text @click="student_create_post") Save
           v-card-text(v-if="error")
             p {{ error }}  
 </template>
@@ -100,7 +88,8 @@ import tone from "@/plugins/tone";
 import vexUI from "@/plugins/vex";
 import { mapState } from "vuex";
 import utils from "@/utils";
-import videojs from 'video.js';
+import videojs from "video.js";
+import PostService from "@/services/PostService"
 
 export default {
   name: 'ShowLesson',
@@ -168,7 +157,7 @@ export default {
   },
   methods: {
     timeUpdated (event) {
-      if (this.notesInBars && this.demoStartTime != null) {
+      if (this.notesInBars) {
         if (this.currentDisplayedBar == null) {
           if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
             this.currentDisplayedBar = 0
@@ -224,7 +213,7 @@ export default {
       this.disable = false;
     },
 
-    create_post () {
+    async student_create_post () {
       var formValidated = false
       if (this.is_student) {
         formValidated = this.$refs.studentform.validate()
@@ -234,25 +223,22 @@ export default {
 
       if (formValidated) {
         alert('form is gd')
+        var formData = new FormData()
+        formData.set('tid', this.lesson.thread.id)
+        formData.set('message', this.post_message)
+        formData.set('grade', this.post_grade)
+        formData.append('video', this.post_file)
+        const response = await PostService.create(formData)
+        // threadResponse = await ThreadService.show(this.lesson.id, this.user.id)
+        if (this.lesson.thread.posts.length == 0)
+          this.lesson.thread.posts.splice(this.lesson.thread.posts.length, 0, response.data.post)
+        else
+          this.lesson.thread.posts.splice(this.lesson.thread.posts.length - 1, 0, response.data.post)
+        this.dialog = false
       } else {
         return
       }
     }
-
-    // adjustAspectRatioForFullScreen (width, height) {
-    //   var aspectRatio = this.originalHeight / this.originalWidth;
-    //   var desiredHeight = width * aspectRatio;
-    //   if (desiredHeight > height) {
-    //     this.videoHeight = height;
-    //     this.videoWidth = height / aspectRatio;
-    //   } else if (desiredHeight == height) {
-    //     this.videoHeight = height;
-    //     this.videoWidth = width;
-    //   } else {
-    //     this.videoHeight = desiredHeight;
-    //     this.videoWidth = width;
-    //   }
-    // }
   },
 
   mounted: function () {
@@ -263,65 +249,56 @@ export default {
       tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.numberOfBars) + 1, this.handler);
       // this.handler.enableEdit();
     });
+    this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
+      console.log('onPlayerReady', this)
+    });
 
     //window.addEventListener('resize', this.onResize);
     // this generates the score
-    if (this.user.isStudent) {
-      this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
-        numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars),
-        canEdit: false
-      }).init();
-    } else {
-      this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
-        numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars)
-      }).init();
-    }
 
     this.melody = this.lesson.exercises[0].melody.split('-')
     this.bpm = parseInt(this.lesson.exercises[0].bpm)
     this.timeSignature = this.lesson.exercises[0].timeSignature
-    this.handler.importNotes(this.melody, this.timeSignature)
+    if (this.melody[0] != "") {
+      if (this.user.isStudent) {
+        this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
+          numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars),
+          canEdit: false
+        }).init();
+      } else {
+        this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
+          numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars)
+        }).init();
+      }
+      this.handler.importNotes(this.melody, this.timeSignature)
+      this.notesInBars = this.handler.notesToBars(this.melody, this.timeSignature)
+
+      var wrapper = document.createElement("div")
+      wrapper.setAttribute('id', `video-vexflow-wrapper${this.lesson.id}`)
+      wrapper.style.position = "absolute";
+      wrapper.style.background = "#FAFAFA";
+      wrapper.style.top = "0";
+      wrapper.style.left = "0";
+      wrapper.style.right = "0";
+      this.videoHandler = new vexUI.Handler("vexflow-wrapper", {
+        canEdit: false,
+        numberOfStaves: 2,
+        lessStaveHeight: true,
+        canvasProperties: {
+          id: "vexflow-wrapper" + "-canvas",
+          width: this.$refs.videoPlayer.offsetWidth,
+          height: 80 * vexUI.scale,
+          tabindex: 1
+        }
+      }, wrapper).init();
+
+      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
+    }
     this.description = this.lesson.description
     this.demoStartTime = this.lesson.exercises[0].demoStartTime
     this.numberOfBars = parseInt(this.lesson.exercises[0].numberOfBars)
-    this.notesInBars = this.handler.notesToBars(this.melody, this.timeSignature)
 
     this.timePerTwoBars = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60) * 2
-
-    this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
-        console.log('onPlayerReady', this)
-    });
-
-    var wrapper = document.createElement("div")
-    wrapper.setAttribute('id', `video-vexflow-wrapper${this.lesson.id}`)
-    wrapper.style.position = "absolute";
-    wrapper.style.background = "#FAFAFA";
-    wrapper.style.top = "0";
-    wrapper.style.left = "0";
-    wrapper.style.right = "0";
-    console.log('video player:', this.$refs.videoPlayer.offsetWidth)
-    this.videoHandler = new vexUI.Handler("vexflow-wrapper", {
-      canEdit: false,
-      numberOfStaves: 2,
-      lessStaveHeight: true,
-      canvasProperties: {
-        id: "vexflow-wrapper" + "-canvas",
-        width: this.$refs.videoPlayer.offsetWidth,
-        height: 80 * vexUI.scale,
-        tabindex: 1
-      }
-    }, wrapper).init();
-
-    this.player.on('fullscreenchange', () => {
-      if (this.player.isFullscreen_) {
-        this.hide = false;
-      } else {
-        this.hide = true;
-      }
-    })
-
-    document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
-    console.log(this.player.id())
   },
 
   beforeDestroy() {

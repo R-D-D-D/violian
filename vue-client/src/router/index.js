@@ -9,6 +9,9 @@ import CourseIndex from "../views/course/CourseIndex"
 import NewCourse from "../views/course/NewCourse"
 import TutorIndex from "../components/TutorIndex"
 import Video from "../components/Video"
+import CoursesThreadsIndex from "../views/thread/CoursesThreadsIndex"
+import CourseThreadsIndex from "../views/thread/CourseThreadsIndex"
+import ShowCourseThread from "../views/thread/ShowCourseThread"
 
 Vue.use(VueRouter);
 
@@ -58,6 +61,19 @@ const routes = [
     name: 'video',
     component: Video
   },
+  {
+    path: '/courses/threads/index',
+    component: CoursesThreadsIndex
+  },
+  {
+    path: '/course/threads/index/:course_id',
+    component: CourseThreadsIndex
+  },
+  {
+    path: '/course/threads/show/:course_id/:student_id',
+    component: ShowCourseThread
+  }
+
 ];
 
 const router = new VueRouter({
