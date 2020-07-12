@@ -41,6 +41,8 @@
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
 import Panel from '@/components/Panel'
+import SubscriptionService from '@/services/SubscriptionService'
+import CourseService from '@/services/CourseService'
 
 export default {
   name: 'LogIn',
@@ -49,7 +51,7 @@ export default {
   },
   data () {
     return {
-      email: 'testing@gmail.com',
+      email: 'wangrunding@gmail.com',
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
@@ -77,6 +79,20 @@ export default {
         this.loading = false
         this.$store.dispatch('setToken', response.data.token)
         this.$store.dispatch('setUser', response.data.user)
+
+        if (response.data.user.isStudent) {
+          const studentResponse = await SubscriptionService.getSubscriptionInfoOfStudent(response.data.user.id)
+          const userSubscribedCourses = studentResponse.data.courses
+          const reducer = (course, init) => course + init.unreadTutorPost
+          this.$store.dispatch('setNotifications', userSubscribedCourses.reduce(reducer, 0))
+        } else {
+          const tutorResponse = await CourseService.list(response.data.user.id);
+          const userOwnedCourses = tutorResponse.data.courses
+          console.log('here')
+          const reducer = (course, init) => course + init.unreadStudentPost
+          this.$store.dispatch('setNotifications', userOwnedCourses.reduce(reducer, 0))
+        }
+        
         if (response.data.user.isStudent) {
           await this.$store.dispatch('getAllCourses')
           await this.$store.dispatch('getCoursesForStudent', response.data.user)
@@ -87,7 +103,8 @@ export default {
           name: 'home'
         })
       } catch (err) {
-        this.error = err.response.data.error
+        console.log(err)
+        //this.error = err.response.data.error
         this.loading = false
       }
     }

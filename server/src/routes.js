@@ -33,8 +33,7 @@ module.exports = (app) => {
     isAuthenticated,
     CourseController.list),
 
-  app.get('/course/listall', 
-    isAuthenticated,
+  app.get('/course/listall',
     CourseController.listAll),
   
   app.get('/course/show', 
@@ -112,6 +111,10 @@ module.exports = (app) => {
   app.get('/thread/show',
     isAuthenticated,
     ThreadController.show),
+
+  app.get('/thread/unread',
+    isAuthenticated,
+    ThreadController.getUnread)
 
   app.post('/thread/new',
     isAuthenticated,

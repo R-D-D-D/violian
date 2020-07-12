@@ -42,6 +42,7 @@
 - thread management
   - GET `/thread/list?lid=` - `{ threads: [<threadObj>] } // get threads of a specific lesson, should be called by tutor`
   - GET `/thread/show?uid=&lid=` - `{ thread: <threadObj> }`
+  - GET `/thread/unread?cid=&uid=` - `{ unread: int }`
   - POST `/thread/new { lid }` - `{ thread: threadObj }`
   - DELETE `/thread/del?tid=` - `{ data: ok }`
 

@@ -139,6 +139,11 @@ export default {
     this.course = courseResponse.data.course
     console.log(courseResponse.data.course.lessons.length)
     for (var i = 0; i < this.course.lessons.length; i++) {
+      if (this.user.isStudent) {
+        this.$store.dispatch('setNotifications', this.$store.state.notifications - this.course.unreadTutorPost)
+      } else {
+        this.$store.dispatch('setNotifications', this.$store.state.notifications - this.course.unreadStudentPost)
+      }
       const response = await ThreadService.show(this.course.lessons[i].id, this.$route.params.student_id)
       console.log(response.data)
       this.threads.push(response.data.thread)

@@ -81,21 +81,8 @@ export default {
   },
 
   computed: {
-    notifications () {
-      if (this.$store.state.isUserLoggedIn) {
-        if (this.user.isStudent) {
-          const reducer = (course, init) => course + init.unreadTutorPost
-          return this.userSubscribedCourses.reduce(reducer, 0)
-        } else {
-          const reducer = (course, init) => course + init.unreadStudentPost
-          return this.userOwnedCourses.reduce(reducer, 0)
-        }
-      } else {
-        return 0
-      }
-    },
 
-    ...mapState(['user', 'userOwnedCourses', 'userSubscribedCourses'])
+    ...mapState(['user', 'notifications'])
   },
 
   mounted: function () {

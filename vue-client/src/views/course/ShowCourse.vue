@@ -183,6 +183,7 @@ export default {
     try {
       response.data.course.lessons = await Promise.all(response.data.course.lessons.map(async (lesson) => {
         var threadResponse = null
+        this.$store.dispatch('setNotifications', this.$store.state.notifications - response.data.course.unreadTutorPost)
         threadResponse = await ThreadService.show(lesson.id, this.user.id)
         lesson.thread = threadResponse.data.thread
         return lesson

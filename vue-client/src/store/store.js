@@ -20,7 +20,7 @@ export default new Vuex.Store({
     allTutors: [],
     allCourses: [],
     isUserLoggedIn: false,
-    hideNav: false
+    notifications: null
   },
 
   getters: {
@@ -52,7 +52,7 @@ export default new Vuex.Store({
         allTutors: [],
         allCourses: [],
         isUserLoggedIn: false,
-        hideNav: false
+        notifications: 0
       })
     },
 
@@ -62,6 +62,10 @@ export default new Vuex.Store({
 
     setUser (state, user) {
       state.user = user;
+    },
+
+    setNotifications (state, notifications) {
+      state.notifications = notifications
     },
 
     logIn (state) {
@@ -151,6 +155,10 @@ export default new Vuex.Store({
 
     setUser ({commit}, user) {
       commit("setUser", user);
+    },
+
+    setNotifications ({commit}, notifications) {
+      commit('setNotifications', notifications)
     },
 
     // course management

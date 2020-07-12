@@ -275,11 +275,7 @@ export default {
         formData.set('grade', this.grade)
         formData.append('video', this.file)
         const response = await PostService.create(formData)
-        // threadResponse = await ThreadService.show(this.lesson.id, this.user.id)
-        if (this.lesson.thread.posts.length == 0)
-          this.lesson.thread.posts.splice(this.lesson.thread.posts.length, 0, response.data.post)
-        else
-          this.lesson.thread.posts.splice(this.lesson.thread.posts.length - 1, 0, response.data.post)
+        this.lesson.thread.posts.splice(this.lesson.thread.posts.length, 0, response.data.post)
         this.message = ''
         this.file = null
       } else {

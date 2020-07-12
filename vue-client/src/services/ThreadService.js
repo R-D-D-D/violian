@@ -15,5 +15,9 @@ export default {
 
   delete (threadId) {
     return Api().delete(`thread/del?tid=${threadId}`)
+  },
+
+  getUnread (courseId, studentId) {
+    return Api().get(`thread/unread?cid=${courseId}&uid=${studentId}`)
   }
 }

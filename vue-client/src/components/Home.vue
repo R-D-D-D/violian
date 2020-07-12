@@ -83,6 +83,10 @@ export default {
     go_to_course (event, id) {
       this.$router.push(`/course/show/${id}`)
     }
+  },
+
+  mounted: async function () {
+    await this.$store.dispatch('getAllCourses')
   }
 }
 </script>

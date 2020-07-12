@@ -44,13 +44,22 @@ module.exports = {
           LessonId: lid
         }
       })
-      console.log(lid)
-      console.log(uid)
-      
+
       if (!thread) {
         return res.send({
           thread: {}
         })
+      }
+
+      const course = await thread.getCourse()
+      if (req.user.isStudent) {
+        await course.decrement('unreadTutorPost', { by: thread.unreadTutorPost })
+        thread.unreadTutorPost = 0
+        await thread.save()
+      } else {
+        await course.decrement('unreadStudentPost', { by: thread.unreadStudentPost })
+        thread.unreadStudentPost = 0
+        await thread.save()
       }
       
       var threadJson = thread.toJSON()
@@ -63,6 +72,7 @@ module.exports = {
         thread: threadJson
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to retrieve thread"
       })
@@ -105,6 +115,47 @@ module.exports = {
     } catch (err) {
       res.status(500).send({
         error: "An error has occured in trying to retrieve threads"
+      })
+    }
+  },
+
+  async getUnread (req, res) {
+    try {
+      const {uid} = req.query
+      const {cid} = req.query
+      const course = await Course.findOne({
+        where: {
+          id: cid
+        },
+        include: Lesson
+      })
+
+      if (!course) {
+        res.status(403).send({
+          error: 'Course information incorrect'
+        })
+      }
+
+      var result = 0
+
+      for (var i = 0; i < course.Lessons.length; i++) {
+        console.log('lesson-----', course.Lessons[i].id)
+        var thread = await Thread.findOne({
+          where: {
+            LessonId: course.Lessons[i].id,
+            UserId: uid
+          }
+        })
+        result += thread.unreadStudentPost
+      }
+
+      res.send({
+        unread: result
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: "An error has occured in trying to get unread of thread"
       })
     }
   },
