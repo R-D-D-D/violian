@@ -195,6 +195,18 @@ export default {
   },
 
   mounted: function () {
+    // var stripe = window.Stripe('pk_test_51H4T51AAfWaljxm1ClFL60860vpMI5QDkhWYBEu4BKU39CVAUlTNo0fdnR6CDCv3puPd8ZRxdf5z7OiCztEEZ0rk00P5a6SI0s');
+    // var elements = stripe.elements();
+    // var card = elements.create("card", { 
+    //   style: {
+    //     base: {
+    //       color: "#32325d",
+    //     }
+    //   } 
+    // });
+    // console.log(document.getElementById('payment-form'))
+    // console.log(document.getElementById('card-element'))
+    // card.mount(document.getElementById('card-element'));
   }
 }
 </script>

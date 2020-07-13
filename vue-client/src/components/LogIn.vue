@@ -32,7 +32,7 @@
             v-model='password' 
             :rules="passwordRules")
           v-spacer
-          v-btn.mt-5(@click="login" :loading='loading') Log In
+          v-btn.mt-5(@click="login" :loading='loading' :disabled="loading") Log In
           v-spacer
       v-card-text
         .error(v-html="error") {{ error }}

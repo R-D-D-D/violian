@@ -5,6 +5,7 @@ const LessonController = require('./controllers/LessonController')
 const ExerciseController = require('./controllers/ExerciseController')
 const ThreadController = require('./controllers/ThreadController')
 const PostController = require('./controllers/PostController')
+const PaymentController = require('./controllers/PaymentController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
 const isAuthenticated = require('./policies/isAuthenticated')
@@ -143,5 +144,9 @@ module.exports = (app) => {
 
   app.post('/mail',
     PostController.mail)
+
+  app.get('/secret', 
+    isAuthenticated,
+    PaymentController.createPaymentIntent);
 }
   

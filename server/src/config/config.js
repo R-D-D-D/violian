@@ -23,6 +23,10 @@ module.exports = {
     bucket: process.env.BUCKET_NAME,
     secret: process.env.AWS_SECRET_ACCESS_KEY
   },
+  stripe: {
+    publicKey: process.env.STRIPE_PUBLIC_KEY,
+    secretKey: process.env.STRIPE_SECRET_KEY
+  },
   authentication: {
     jwtSecret: process.env.JWT_SECRET || 'secret'
   }

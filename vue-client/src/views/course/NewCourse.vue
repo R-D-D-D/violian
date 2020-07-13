@@ -143,7 +143,7 @@
                     v-col(cols="12" md="4")
                       p.text-h6 Number of Bars: {{ lesson.numberOfBars }}
 
-          v-btn(color="indigo" @click="submit" dark :loading="loading")
+          v-btn(color="indigo" @click="submit" dark :loading="loading" :disabled="loading")
             | Confirm
           v-btn(to="/course/index") Cancel
           v-row

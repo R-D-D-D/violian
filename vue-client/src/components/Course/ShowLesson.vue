@@ -2,6 +2,10 @@
   div
     v-card
       v-row.justify-center
+        v-col(cols="6")
+          form#payment-form
+            #card-element(ref="card")
+      v-row.justify-center
         v-col(cols="11")
           h1.display-1.text-left Description
         v-col(cols="11")
@@ -17,15 +21,15 @@
         v-col(cols="12")
           div(:id="'vexflow-wrapper-' + lesson.id"  @click="enable_save_btn")
 
-      v-row(v-if="!is_student")
-        v-col
-          v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
-            v-icon(left dark) mdi-content-save-all-outline
-            | Save Lesson
-        v-col
-          v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
-            v-icon(left dark) mdi-content-save-all-outline
-            | Edit Lesson
+      //- v-row(v-if="!is_student")
+      //-   v-col
+      //-     v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
+      //-       v-icon(left dark) mdi-content-save-all-outline
+      //-       | Save Lesson
+      //-   v-col
+      //-     v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
+      //-       v-icon(left dark) mdi-content-save-all-outline
+      //-       | Edit Lesson
 
     v-row.justify-center(v-if="user.isStudent")
       v-col.text-left(cols="11")
@@ -328,6 +332,7 @@ export default {
   },
 
   mounted: function () {
+    const paymentEl = document.getElementById('card-element')
     this.$on("play_sequence", () => {
       tone.init();
       // TODO disable edit when playing
@@ -398,6 +403,17 @@ export default {
     this.numberOfBars = parseInt(this.lesson.exercises[0].numberOfBars)
 
     this.timePerTwoBars = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60) * 2
+
+    var stripe = window.Stripe('pk_test_51H4T51AAfWaljxm1ClFL60860vpMI5QDkhWYBEu4BKU39CVAUlTNo0fdnR6CDCv3puPd8ZRxdf5z7OiCztEEZ0rk00P5a6SI0s');
+    var elements = stripe.elements();
+    var card = elements.create("card", { 
+      style: {
+        base: {
+          color: "#32325d",
+        }
+      } 
+    });
+    card.mount(paymentEl);
   },
 
   beforeDestroy() {

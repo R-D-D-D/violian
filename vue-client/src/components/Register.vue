@@ -36,7 +36,7 @@
             v-radio(label="Tutor" value="Tutor" color="indigo")
 
           v-spacer
-          v-btn.mt-5(@click="register" :loading="loading") Register
+          v-btn.mt-5(@click="register" :loading="loading" :disabled="loading") Register
           v-spacer
       v-card-text
         .error(v-html="error") {{ error }}

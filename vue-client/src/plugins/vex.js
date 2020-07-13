@@ -113,7 +113,6 @@ Vex.UI.Handler.prototype.createStaves = function() {
 		//TODO make it able to load notes
 		stave.setTickables([]);
 	}
-	console.log(staveList)
 
 	return staveList;
 };
@@ -133,7 +132,6 @@ Vex.UI.Handler.prototype.init = function(editable = true) {
 };
 
 Vex.UI.Handler.prototype.resize = function(width) {
-	console.log('width', width)
 	//Merge options with default options
 	var canvasProperties = {
 		id: this.canvas.id,
@@ -149,7 +147,6 @@ Vex.UI.Handler.prototype.resize = function(width) {
 	for(var i = 0; i<props.length; i++){
 		canvas[props[i]] = canvasProperties[props[i]];
 	}
-	console.log('new canvas', canvas)
 	this.container.removeChild(this.container.childNodes[0]);
 	this.container.appendChild(canvas);
 	this.convas = canvas;
@@ -157,8 +154,6 @@ Vex.UI.Handler.prototype.resize = function(width) {
 	this.ctx = this.renderer.getContext();
 	this.staveList = this.createStaves();
 	this.ctx.scale(Vex.UI.scale, Vex.UI.scale);
-
-	console.log(this.staveList)
 
 	this.currentNote = null;
 	this.currentStave = null;
@@ -218,7 +213,6 @@ Vex.UI.Handler.prototype.drawStaves = function(stave){
 		stave.draw();
 	} else {
 		for(var i = 0; i < this.staveList.length; i++){
-			console.log(i)
 			this.staveList[i].draw();
 		}
 	}
