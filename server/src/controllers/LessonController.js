@@ -105,7 +105,6 @@ module.exports = {
       lessons.forEach(lesson => {
         lessonsJson.push(lesson.toJSON())
       })
-      // console.log(lessonsJson)
       res.send({
         lessons: lessonsJson
       })

@@ -117,7 +117,6 @@ module.exports = {
       exercises.forEach(exercise => {
         exercisesJson.push(exercise.toJSON())
       })
-      // console.log(exercisesJson)
       res.send({
         exercises: exercisesJson
       })

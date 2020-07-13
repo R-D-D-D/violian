@@ -64,7 +64,6 @@ module.exports = {
       
       var threadJson = thread.toJSON()
       var posts = await thread.getPosts()
-      console.log(posts)
       threadJson.posts = posts.map(post => post.toJSON())
 
       // console.log(ThreadsJson)

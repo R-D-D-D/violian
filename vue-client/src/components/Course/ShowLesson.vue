@@ -10,8 +10,7 @@
       v-row.justify-center
         v-col(cols="11").text-center.pa-0
           video.vjs-big-play-centered(ref="videoPlayer" class="video-js" @timeupdate="timeUpdated" :id="`vexflow-video-${lesson.id}`")
-          #vexflow-wrapper
-          
+      
       v-row(v-if="melody[0] != ''")
         v-col(cols="12")
           .display-1 The score
@@ -86,12 +85,15 @@
                     placeholder="Upload" 
                     prepend-icon="mdi-video"
                     label="Upload Video"
-                    v-model="file"
-                    :rules="requiredRules")
+                    v-model="file")
 
               v-row
                 v-col
                   v-btn(large color="red darken-3" dark @click="create_post") Submit practice video
+    
+    v-row.bpm-control(:id="`slider-${lesson.id}`" :class="{ hide: userinactive }")
+      v-slider.mb-2(min="60" max="120" vertical color="white" track-color="rgba(115, 133, 159, 0.5)" thumb-label="always" v-model="playbackSpeed")
+      v-icon(color="white") $vuetify.icons.custom_bpm
     
     //- v-row(justify='center')
       v-dialog(v-model='dialog' persistent max-width='600px')
@@ -142,6 +144,7 @@ import { mapState } from "vuex";
 import utils from "@/utils";
 import videojs from "video.js";
 import PostService from "@/services/PostService"
+import "videojs-hotkeys"
 
 export default {
   name: 'ShowLesson',
@@ -151,23 +154,13 @@ export default {
       numberOfBars: 4,
       bpm: 60,
       timeSignature: '',
+      playbackSpeed: 1,
       handler: {},
       disable: true,
       save_btn_loading: false,
       add_btn_loading: false,
       description: '',
       melody: [],
-      options: {
-        controls: true,
-        fluid: true,
-        sources: [
-          {
-            //src: this.lesson.exercises[0].demoUrl,
-            src: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            type: "video/mp4"
-          }
-        ]
-      },
       videoHandler: null,
       hide: true,
       notesInBars: null,
@@ -183,7 +176,8 @@ export default {
       file: null,
       grade: '',
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-      error: null
+      error: null,
+      userinactive: true
     }
   },
   watch: {
@@ -268,7 +262,6 @@ export default {
 
     async create_post () {
       if (this.$refs.form.validate()) {
-        alert('form is gd')
         var formData = new FormData()
         formData.set('tid', this.lesson.thread.id)
         formData.set('message', this.message)
@@ -292,9 +285,54 @@ export default {
       tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.numberOfBars) + 1, this.handler);
       // this.handler.enableEdit();
     });
-    this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
-      console.log('onPlayerReady', this)
+
+    const player = videojs(this.$refs.videoPlayer, {
+        controls: true,
+        fluid: true,
+        sources: [
+          {
+            src: this.lesson.exercises[0].demoUrl,
+            type: "video/mp4"
+          }
+        ],
+        playbackRates: [0.8, 0.9, 1, 1.1, 1.2]
+      }, () => {
+        console.log('onPlayerReady', this)
+        player.hotkeys({
+          volumeStep: 0.1,
+          seekStep: 2,
+          enableModifiersForNumbers: false
+        })
+        player.on('userinactive', () => {
+          console.log('userinactive')
+          this.userinactive = true
+        })
+        player.on('useractive', () => {
+          console.log('userinactive')
+          this.userinactive = false
+        })
+        player.on('play', () => {
+          console.log('play')
+          this.userinactive = false
+        })
     });
+
+
+    // var Button = videojs.getComponent('Button');
+    // var button = new Button(player, {
+    //   clickHandler: function(event) {
+    //     console.log(event)
+    //     videojs.log('Clicked');
+    //   }
+    // });
+    // player.addChild('button')
+    // player.controlBar.el().appendChild(button.el());
+
+    this.player = player
+
+    console.log(videojs(`vexflow-video-3`))
+
+    // console.log(button.el());
 
     //window.addEventListener('resize', this.onResize);
     // this generates the score
@@ -336,6 +374,10 @@ export default {
       }, wrapper).init();
 
       document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
+      document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
+      document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
+      document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
+      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById('slider-3'))
     }
     this.description = this.lesson.description
     this.demoStartTime = this.lesson.exercises[0].demoStartTime
@@ -354,11 +396,25 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#vexflow-wrapper {
-  position: absolute;
-  background-color: #FAFAFA;
-  top: 0;
-  left: 0;
-  right: 0;
+ 
+/* 
+bg: #5d646e
+slider-bg: #72839d
+ */
+.hide {
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
+
+.bpm-control {
+  background-color: rgba(43, 51, 63, 0.7); 
+  position: absolute; 
+  bottom: 30px; 
+  left: 12px; 
+  width: 30px;
+  visibility: visible;
+  opacity: 1;
+  transition: visibility 1000ms, opacity 1000ms;
+}
+
 </style>

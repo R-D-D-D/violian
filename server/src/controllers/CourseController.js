@@ -70,7 +70,6 @@ module.exports = {
         return courseJson
       }))
 
-      // console.log(lessonsJson)
       res.send({
         courses: coursesJson
       })
@@ -95,7 +94,6 @@ module.exports = {
         return course.toJSON()
       })
 
-      // console.log(lessonsJson)
       res.send({
         courses: coursesJson
       })
@@ -130,7 +128,6 @@ module.exports = {
         return lessonJson
       }))
 
-      console.log(courseJson)
       res.send({
         course: courseJson
       })
