@@ -113,6 +113,7 @@ Vex.UI.Handler.prototype.createStaves = function() {
 		//TODO make it able to load notes
 		stave.setTickables([]);
 	}
+	console.log(staveList)
 
 	return staveList;
 };
@@ -131,45 +132,56 @@ Vex.UI.Handler.prototype.init = function(editable = true) {
 	return this;
 };
 
-Vex.UI.Handler.prototype.resize = function() {
+Vex.UI.Handler.prototype.resize = function(width) {
+	console.log('width', width)
 	//Merge options with default options
-	var defaultOptions = {
-		canEdit: true,
-		canPlay: true,
-		canAddStaves: true,
-		canChangeNoteValue: true,
-		showToolbar: true,
-		numberOfStaves: 4,
-		canvasProperties: {
-			id: containerId + "-canvas",
-			width: window.innerWidth * 0.9,
-			height: 320,
-			tabindex: 1
-		}
-	};
-
-	this.options = mergeProperties(this.options, {
-		canvasProperties: {
-			id: containerId + "-canvas",
-			width: window.innerWidth * 0.9,
-			height: 320,
-			tabindex: 1
-		}
-	});
+	var canvasProperties = {
+		id: this.canvas.id,
+		width: width,
+		height: this.canvas.height,
+		tabindex: 1
+	}
+	this.options.canvasProperties = canvasProperties
 
 	var canvas = document.createElement('canvas');
 	//Attach all properties to element
-	var props = Object.keys(this.options.canvasProperties);
+	var props = Object.keys(canvasProperties);
 	for(var i = 0; i<props.length; i++){
-		canvas[props[i]] = this.options.canvasProperties[props[i]];
+		canvas[props[i]] = canvasProperties[props[i]];
 	}
-	this.container.removeChild(this.container.childNodes[0]);  
+	console.log('new canvas', canvas)
+	this.container.removeChild(this.container.childNodes[0]);
 	this.container.appendChild(canvas);
 	this.convas = canvas;
 	this.renderer = new Vex.Flow.Renderer(this.canvas, Vex.Flow.Renderer.Backends.CANVAS);
 	this.ctx = this.renderer.getContext();
 	this.staveList = this.createStaves();
 	this.ctx.scale(Vex.UI.scale, Vex.UI.scale);
+
+	console.log(this.staveList)
+
+	this.currentNote = null;
+	this.currentStave = null;
+	//Tickable that will follow the mouse position
+	this.provisoryTickable = null;
+	
+	this.mouseListener = new Vex.UI.MouseListener(this, this.canvas, this.staveList);
+	
+	// this.keyboardListener = new Vex.UI.KeyboardListener(this, this.canvas, this.staveList);
+	
+	this.noteMenu = new Vex.UI.NoteMenu(this, this.canvas, this.ctx);
+	this.noteMenu.init();
+	
+	this.tipRenderer = new Vex.UI.TipRenderer(this.canvas);
+	this.tipRenderer.init();
+
+	this.redraw();
+
+	if(this.options.canEdit){
+		//Start the Listeners
+		this.mouseListener.startListening();
+		// this.keyboardListener.startListening();
+	}
 };
 
 Vex.UI.Handler.prototype.redraw = function(notesInserted){
@@ -206,6 +218,7 @@ Vex.UI.Handler.prototype.drawStaves = function(stave){
 		stave.draw();
 	} else {
 		for(var i = 0; i < this.staveList.length; i++){
+			console.log(i)
 			this.staveList[i].draw();
 		}
 	}

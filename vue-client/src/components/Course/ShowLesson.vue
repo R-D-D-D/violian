@@ -27,7 +27,7 @@
             v-icon(left dark) mdi-content-save-all-outline
             | Edit Lesson
 
-    v-row.justify-center
+    v-row.justify-center(v-if="user.isStudent")
       v-col.text-left(cols="11")
         h1.pl-4 Discussion
       //- v-col.text-left(cols="11")
@@ -91,9 +91,9 @@
                 v-col
                   v-btn(large color="red darken-3" dark @click="create_post") Submit practice video
     
-    v-row.bpm-control(:id="`slider-${lesson.id}`" :class="{ hide: userinactive }")
-      v-slider.mb-2(min="60" max="120" vertical color="white" track-color="rgba(115, 133, 159, 0.5)" thumb-label="always" v-model="playbackSpeed")
-      v-icon(color="white") $vuetify.icons.custom_bpm
+    v-row.bpm-control.pt-2(:id="`slider-${lesson.id}`" :class="{ hide: userinactive }")
+      v-icon(color="white" large) $vuetify.icons.custom_bpm
+      v-slider.pb-2(min="20" max="180" vertical color="white" track-color="rgba(115, 133, 159, 0.5)" thumb-label="always" v-model="playbackBpm")
     
     //- v-row(justify='center')
       v-dialog(v-model='dialog' persistent max-width='600px')
@@ -154,7 +154,7 @@ export default {
       numberOfBars: 4,
       bpm: 60,
       timeSignature: '',
-      playbackSpeed: 1,
+      playbackBpm: 0,
       handler: {},
       disable: true,
       save_btn_loading: false,
@@ -186,6 +186,9 @@ export default {
     },
     no_bars: function (val) {
       this.bars_label = "No. Bars: " + val;
+    },
+    playbackBpm: function (val) {
+      this.player.playbackRate(val / this.bpm)
     }
   },
   computed: {
@@ -274,73 +277,19 @@ export default {
       } else {
         return
       }
-    }
-  },
+    },
 
-  mounted: function () {
-    this.$on("play_sequence", () => {
-      tone.init();
-      // TODO disable edit when playing
-      // this.handler.disableEdit();
-      tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.numberOfBars) + 1, this.handler);
-      // this.handler.enableEdit();
-    });
-
-    const player = videojs(this.$refs.videoPlayer, {
-        controls: true,
-        fluid: true,
-        sources: [
-          {
-            src: this.lesson.exercises[0].demoUrl,
-            type: "video/mp4"
-          }
-        ],
-        playbackRates: [0.8, 0.9, 1, 1.1, 1.2]
-      }, () => {
-        console.log('onPlayerReady', this)
-        player.hotkeys({
-          volumeStep: 0.1,
-          seekStep: 2,
-          enableModifiersForNumbers: false
-        })
-        player.on('userinactive', () => {
-          console.log('userinactive')
-          this.userinactive = true
-        })
-        player.on('useractive', () => {
-          console.log('userinactive')
-          this.userinactive = false
-        })
-        player.on('play', () => {
-          console.log('play')
-          this.userinactive = false
-        })
-    });
-
-
-    // var Button = videojs.getComponent('Button');
-    // var button = new Button(player, {
-    //   clickHandler: function(event) {
-    //     console.log(event)
-    //     videojs.log('Clicked');
-    //   }
-    // });
-    // player.addChild('button')
-    // player.controlBar.el().appendChild(button.el());
-
-    this.player = player
-
-    console.log(videojs(`vexflow-video-3`))
-
-    // console.log(button.el());
-
-    //window.addEventListener('resize', this.onResize);
-    // this generates the score
-
-    this.melody = this.lesson.exercises[0].melody.split('-')
-    this.bpm = parseInt(this.lesson.exercises[0].bpm)
-    this.timeSignature = this.lesson.exercises[0].timeSignature
-    if (this.melody[0] != "") {
+    drawScores (isRedraw) {
+      if (isRedraw) {
+        const score = document.getElementById(`video-vexflow-wrapper${this.lesson.id}`)
+        while (score.firstChild) {
+          score.removeChild(score.lastChild);
+        }
+        const videoScore = document.getElementById(`vexflow-wrapper-${this.lesson.id}`)
+        while (videoScore.firstChild) {
+          videoScore.removeChild(videoScore.lastChild);
+        }
+      }
       if (this.user.isStudent) {
         this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
           numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars),
@@ -366,7 +315,7 @@ export default {
         numberOfStaves: 2,
         lessStaveHeight: true,
         canvasProperties: {
-          id: "vexflow-wrapper" + "-canvas",
+          id: `video-vexflow-wrapper${this.lesson.id}` + "-canvas",
           width: this.$refs.videoPlayer.offsetWidth,
           height: 80 * vexUI.scale,
           tabindex: 1
@@ -374,10 +323,75 @@ export default {
       }, wrapper).init();
 
       document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
+      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById('slider-3'))
+    }
+  },
+
+  mounted: function () {
+    this.$on("play_sequence", () => {
+      tone.init();
+      // TODO disable edit when playing
+      // this.handler.disableEdit();
+      tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.numberOfBars) + 1, this.handler);
+      // this.handler.enableEdit();
+    });
+
+    const player = videojs(this.$refs.videoPlayer, {
+        controls: true,
+        fluid: true,
+        sources: [
+          {
+            src: this.lesson.exercises[0].demoUrl,
+            type: "video/mp4"
+          }
+        ],
+        playbackRates: [0.8, 0.9, 1, 1.1, 1.2]
+      }, () => {
+        // console.log('onPlayerReady', this)
+        player.hotkeys({
+          volumeStep: 0.1,
+          seekStep: 2,
+          enableModifiersForNumbers: false
+        })
+        player.on('userinactive', () => {
+          this.userinactive = true
+        })
+        player.on('useractive', () => {
+          this.userinactive = false
+        })
+        player.on('play', () => {
+          this.userinactive = false
+        })
+        player.on('ratechange', () => {
+          this.playbackBpm = this.bpm * this.player.playbackRate()
+        })
+    });
+
+
+    this.player = player
+
+    console.log(videojs(`vexflow-video-3`))
+
+    //window.addEventListener('resize', this.onResize);
+
+    this.melody = this.lesson.exercises[0].melody.split('-')
+    this.bpm = parseInt(this.lesson.exercises[0].bpm)
+    this.playbackBpm = this.bpm
+    this.timeSignature = this.lesson.exercises[0].timeSignature
+    if (this.melody[0] != "") {
+      this.drawScores()
+
       document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
-      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById('slider-3'))
+
+      var doit;
+      window.onresize = () => {
+        clearTimeout(doit)
+        doit = setTimeout(() => {
+          this.drawScores(true)
+        }, 200)
+      }
     }
     this.description = this.lesson.description
     this.demoStartTime = this.lesson.exercises[0].demoStartTime
