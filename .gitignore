@@ -1,5 +1,6 @@
-client/node_modules/
+server/src/.env/
+vue-client/node_modules/
 server/node_modules/
-server/.env
+server/src/.env/
 server/rhythmacademy.sqlite
 .vscode/
