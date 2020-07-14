@@ -16,7 +16,7 @@
       //-     v-toolbar-title(dark v-bind='attrs' v-on='on') Login form
       //-   span Log in
       v-card-text
-        v-form(ref="form")
+        v-form(ref="form" v-on:submit.prevent="login")
           v-text-field(
             label='Email' 
             name='email' 
@@ -32,7 +32,7 @@
             v-model='password' 
             :rules="passwordRules")
           v-spacer
-          v-btn.mt-5(@click="login" :loading='loading' :disabled="loading") Log In
+          v-btn.mt-5(:loading='loading' :disabled="loading" type="submit") Log In
           v-spacer
       v-card-text
         .error(v-html="error") {{ error }}
@@ -88,7 +88,6 @@ export default {
         } else {
           const tutorResponse = await CourseService.list(response.data.user.id);
           const userOwnedCourses = tutorResponse.data.courses
-          console.log('here')
           const reducer = (course, init) => course + init.unreadStudentPost
           this.$store.dispatch('setNotifications', userOwnedCourses.reduce(reducer, 0))
         }

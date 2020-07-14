@@ -27,6 +27,11 @@ module.exports = {
     publicKey: process.env.STRIPE_PUBLIC_KEY,
     secretKey: process.env.STRIPE_SECRET_KEY
   },
+  braintree: {
+    merchantId: process.env.BRAINTREE_MERCHANT_ID,
+    publicKey: process.env.BRAINTREE_PUBLIC_KEY,
+    privateKey: process.env.BRAINTREE_PRIVATE_KEY
+  },
   authentication: {
     jwtSecret: process.env.JWT_SECRET || 'secret'
   }

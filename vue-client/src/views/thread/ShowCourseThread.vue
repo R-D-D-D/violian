@@ -59,7 +59,7 @@
                           //- v-slider(v-model="grade" min='0' max='100' thumb-label :thumb-size="24")
                 v-row
                   v-col
-                    v-btn(large color="red darken-3" dark @click="create_post($event, thread, i)") Reply your student
+                    v-btn(large color="#ec5252" dark @click="create_post($event, thread, i)") Reply your student
             //- v-expansion-panel-header {{ new Date(thread.updatedAt).toLocaleString() }}
             //- v-expansion-panel-content
             //-   | {{ post.message }}

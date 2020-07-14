@@ -147,6 +147,18 @@ module.exports = (app) => {
 
   app.get('/secret', 
     isAuthenticated,
-    PaymentController.createPaymentIntent);
+    PaymentController.createPaymentIntent),
+
+  app.get('/client-token',
+    isAuthenticated,
+    PaymentController.createClientToken),
+
+  app.post('/checkout',
+    isAuthenticated,
+    PaymentController.createTransaction),
+
+  app.post('/paypal-checkout',
+    isAuthenticated,
+    PaymentController.createPaypalTransaction)
 }
   

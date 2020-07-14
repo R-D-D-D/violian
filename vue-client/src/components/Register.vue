@@ -6,7 +6,7 @@
       //-     v-toolbar-title(dark v-bind="attrs" v-on="on") Login form
       //-   span Log in
       v-card-text
-        v-form(ref="form")
+        v-form(ref="form" v-on:submit.prevent="register")
           v-text-field(
             label='Username' 
             name='username' 
@@ -36,7 +36,7 @@
             v-radio(label="Tutor" value="Tutor" color="indigo")
 
           v-spacer
-          v-btn.mt-5(@click="register" :loading="loading" :disabled="loading") Register
+          v-btn.mt-5(type="submit" :loading="loading" :disabled="loading") Register
           v-spacer
       v-card-text
         .error(v-html="error") {{ error }}

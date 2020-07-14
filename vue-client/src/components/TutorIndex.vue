@@ -4,7 +4,7 @@
       v-list
         v-list-item(v-for='tutor in allTutors' :key='tutor.id')
           v-list-item-icon
-            v-btn(@click="subscribe($event, tutor)" dark color="red darken-3" v-if="!(subscribedTutorsId.includes(tutor.id))") Subscribe
+            v-btn(@click="subscribe($event, tutor)" dark color="#ec5252" v-if="!(subscribedTutorsId.includes(tutor.id))") Subscribe
             v-btn(@click="" dark color="grey darken-2" v-else disable) Subscribed
           v-list-item-content
             v-list-item-title.mr-5(v-text='tutor.username')

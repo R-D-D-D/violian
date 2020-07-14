@@ -12,6 +12,7 @@ import Video from "../components/Video"
 import CoursesThreadsIndex from "../views/thread/CoursesThreadsIndex"
 import CourseThreadsIndex from "../views/thread/CourseThreadsIndex"
 import ShowCourseThread from "../views/thread/ShowCourseThread"
+import Payment from "../views/Payment"
 import store from "../store/store";
 
 Vue.use(VueRouter);
@@ -75,6 +76,11 @@ const routes = [
     name: 'showthread',
     component: ShowCourseThread,
     props: true
+  },
+  {
+    path: '/payment/:course_id',
+    name: 'payment',
+    component: Payment
   }
 
 ];

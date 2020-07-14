@@ -3,15 +3,15 @@
     div(v-if="is_student")
       v-row.py-3
         v-col
-          .text-h2.font-weight-bold {{ course.name }}
+          h1.font-weight-bold {{ course.name }}
       v-row(v-if="!isSubscribed")
         v-col
-          v-btn(x-large color="red darken-3" dark @click="subscribe") Subscribe!
+          v-btn(x-large color="#ec5252" dark @click="subscribe") Buy now
       
       v-row.justify-center
         v-col.pa-0(cols="11")
           v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
-            v-tab.text-h4(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
+            v-tab.text-h5(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
           v-tabs-items(v-model="tab" v-if="!isSubscribed")
             v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id")
               lesson(:lesson="lesson")
@@ -160,21 +160,7 @@ export default {
     },
 
     async subscribe () {
-      if (confirm("Are you sure?")) {
-        Object.assign(this.course.lessons, await Promise.all(this.course.lessons.map(async lesson => {
-          var response = await ThreadService.create({
-            lid: lesson.id
-          })
-          response.data.thread.posts = []
-          lesson.thread = response.data.thread
-          return lesson
-        })))
-
-        await this.$store.dispatch('subscribe', {
-          studentId: this.user.id,
-          courseId: this.course.id
-        })
-      }
+      this.$router.push(`/payment/${this.course.id}`)
     }
   },
 

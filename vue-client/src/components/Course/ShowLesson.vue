@@ -1,10 +1,10 @@
 <template lang="pug">
   div
     v-card
-      v-row.justify-center
-        v-col(cols="6")
-          form#payment-form
-            #card-element(ref="card")
+      //- v-row.justify-center
+      //-   v-col(cols="6")
+      //-     form#payment-form
+      //-       #card-element(ref="card")
       v-row.justify-center
         v-col(cols="11")
           h1.display-1.text-left Description
@@ -93,7 +93,7 @@
 
               v-row
                 v-col
-                  v-btn(large color="red darken-3" dark @click="create_post") Submit practice video
+                  v-btn(large color="#ec5252" dark @click="create_post") Submit practice video
     
     v-row.bpm-control.pt-2(:id="`slider-${lesson.id}`" :class="{ hide: userinactive }")
       v-icon(color="white" large) $vuetify.icons.custom_bpm
@@ -327,12 +327,12 @@ export default {
       }, wrapper).init();
 
       document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
-      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById('slider-3'))
+      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById(`slider-${this.lesson.id}`))
     }
   },
 
   mounted: function () {
-    const paymentEl = document.getElementById('card-element')
+    // const paymentEl = document.getElementById('card-element')
     this.$on("play_sequence", () => {
       tone.init();
       // TODO disable edit when playing
@@ -375,8 +375,6 @@ export default {
 
     this.player = player
 
-    console.log(videojs(`vexflow-video-3`))
-
     //window.addEventListener('resize', this.onResize);
 
     this.melody = this.lesson.exercises[0].melody.split('-')
@@ -404,16 +402,16 @@ export default {
 
     this.timePerTwoBars = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60) * 2
 
-    var stripe = window.Stripe('pk_test_51H4T51AAfWaljxm1ClFL60860vpMI5QDkhWYBEu4BKU39CVAUlTNo0fdnR6CDCv3puPd8ZRxdf5z7OiCztEEZ0rk00P5a6SI0s');
-    var elements = stripe.elements();
-    var card = elements.create("card", { 
-      style: {
-        base: {
-          color: "#32325d",
-        }
-      } 
-    });
-    card.mount(paymentEl);
+    // var stripe = window.Stripe('pk_test_51H4T51AAfWaljxm1ClFL60860vpMI5QDkhWYBEu4BKU39CVAUlTNo0fdnR6CDCv3puPd8ZRxdf5z7OiCztEEZ0rk00P5a6SI0s');
+    // var elements = stripe.elements();
+    // var card = elements.create("card", { 
+    //   style: {
+    //     base: {
+    //       color: "#32325d",
+    //     }
+    //   } 
+    // });
+    // card.mount(paymentEl);
   },
 
   beforeDestroy() {
