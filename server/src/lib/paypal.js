@@ -117,6 +117,7 @@ module.exports = {
   },
 
   async createOrder (accessToken, transactionAmount) {
+    console.log('amount------------------', transactionAmount)
     return axios({
       url: PAYPAL_ORDER_API,
       method: 'post',
@@ -129,7 +130,7 @@ module.exports = {
         purchase_units: [{
           amount: {
             currency_code: 'SGD',
-            value: transactionAmount
+            value: `${transactionAmount}`
           }
         }]
       }
