@@ -143,22 +143,40 @@ module.exports = (app) => {
     PostController.destroy),
 
   app.post('/mail',
-    PostController.mail)
-
-  app.get('/secret', 
-    isAuthenticated,
-    PaymentController.createPaymentIntent),
-
-  app.get('/client-token',
+    PostController.mail),
+    
+  // braintree
+  app.get('/braintree-client-token',
     isAuthenticated,
     PaymentController.createClientToken),
 
-  app.post('/checkout',
+  app.post('/braintree-checkout',
     isAuthenticated,
     PaymentController.createTransaction),
 
-  app.post('/paypal-checkout',
+  app.post('/braintree-paypal-checkout',
     isAuthenticated,
-    PaymentController.createPaypalTransaction)
+    PaymentController.createPaypalTransaction),
+
+  // paypal direct
+  app.get('/paypal-access-token',
+    isAuthenticated,
+    PaymentController.generatePaypalToken),
+
+  app.post('/paypal-new-payout',
+    isAuthenticated,
+    PaymentController.generatePaypalPayout),
+
+  app.get('/paypal-client-token',
+    isAuthenticated,
+    PaymentController.generatePaypalClientToken),
+
+  app.post('/paypal-create-order',
+    isAuthenticated,
+    PaymentController.createOrder),
+
+  app.post('/paypal-capture-order',
+    isAuthenticated,
+    PaymentController.captureOrder)
 }
   

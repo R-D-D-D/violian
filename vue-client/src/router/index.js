@@ -13,7 +13,8 @@ import CoursesThreadsIndex from "../views/thread/CoursesThreadsIndex"
 import CourseThreadsIndex from "../views/thread/CourseThreadsIndex"
 import ShowCourseThread from "../views/thread/ShowCourseThread"
 import Payment from "../views/Payment"
-import store from "../store/store";
+import store from "../store/store"
+import AdvancedPayment from "../views/AdvancedPayment"
 
 Vue.use(VueRouter);
 
@@ -81,6 +82,10 @@ const routes = [
     path: '/payment/:course_id',
     name: 'payment',
     component: Payment
+  },
+  {
+    path: '/advanced-payment',
+    component: AdvancedPayment
   }
 
 ];

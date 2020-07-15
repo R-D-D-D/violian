@@ -32,6 +32,10 @@ module.exports = {
     publicKey: process.env.BRAINTREE_PUBLIC_KEY,
     privateKey: process.env.BRAINTREE_PRIVATE_KEY
   },
+  paypal: {
+    clientId: process.env.PAYPAL_CLIENT_ID,
+    secret: process.env.PAYPAL_SECRET
+  },
   authentication: {
     jwtSecret: process.env.JWT_SECRET || 'secret'
   }

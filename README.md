@@ -53,3 +53,13 @@
   - POST `/post/new { video, message, grade, tid }` - `{ post: <postObj> }`
   - PUT `/post/edit { pid, video, message, grade }` - `{ post: <postObj> }`
   - DELETE `/post/del?pid=` - `{ data: ok }`
+
+## payments
+- manage with braintree
+  - GET `/braintree-client-token` - `{ clientToken: client_token }`
+  - POST `/braintree-checkout { amount, nonce, deviceData }` - `{ result: responseObj }`
+  - POST `/braintree-paypal-checkout` - `{ result: responseObj }`
+- manage with paypal directly
+  - GET `/paypal-access-token` - `{ token: access_token }`
+  - GET `/paypal-client-token` - `{ token: client_token }`
+  - POST `/paypal-new-payout { accessToken, amount, courseId }` - `{ result: responseObj }`
