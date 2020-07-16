@@ -23,7 +23,6 @@ module.exports = {
     try {
       const {amount, nonce, deviceData} = req.body
       const result = await braintree.createTransaction(amount, nonce, deviceData)
-      console.log(result)
       res.json({
         result: result
       })
@@ -39,7 +38,6 @@ module.exports = {
     try {
       const {amount, nonce, deviceData} = req.body
       const result = await braintree.createPaypalTransaction(amount, nonce, deviceData)
-      console.log(result)
       res.json({
         result: result
       })

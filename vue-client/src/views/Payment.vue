@@ -8,8 +8,8 @@
               h2.font-weight-bold Checkout
           
           v-radio-group(v-model="paymentMethod" :mandatory="true")
-            v-radio(label="Credit Card" value="credit card")
             v-radio(label="Paypal" value="paypal")
+            v-radio(label="Credit Card" value="credit card")
 
           v-row.justify-center(:class="{ hide: paymentMethod == 'paypal' }")
             v-col.px-4
@@ -22,21 +22,28 @@
                   v-col
                     h2.font-weight-bold Summary
                 v-row.px-3
-                  v-col.px-4
+                  v-col(cols="12").px-4
                     p.alignleft {{ course.name }}:
                     p.alignright S$ {{ course.price }}
+                  v-col(cols="12").px-4
+                    p.alignleft GST:
+                    p.alignright S$ {{ (course.price * 0.07).toFixed(2) }}
                     div(style="clear: both;")
                 v-divider.px-3
                 v-row.px-3
                   v-col
                     p.alignleft.font-weight-bold Total:
-                    p.alignright.font-weight-bold S$ {{ course.price }}
+                    p.alignright.font-weight-bold S$ {{ (course.price + (course.price * 0.07)).toFixed(2) }}
                     div(style="clear: both;")
                 v-btn.mb-5(large color="#ec5252" dark @click="requestPaymentMethod" style="width: 50%;" :class="{ hide: paymentMethod == 'paypal' }") Complete Payment
   
+                //- v-row.justify-center(:class="{ hide: paymentMethod != 'paypal' }")
+                //-   v-col.px-4
+                //-     div(id="paypal-button")
+
                 v-row.justify-center(:class="{ hide: paymentMethod != 'paypal' }")
-                  v-col.px-4
-                    div(id="paypal-button")
+                  v-col
+                    div#paypal-button-container
 
                 div.error(v-model="error") {{ error }}
 </template>
@@ -57,7 +64,7 @@ export default {
       deviceData: null,
       transaction: null,
       error: null,
-      paymentMethod: 'credit card'
+      paymentMethod: 'paypal'
     }
   },
 
@@ -128,54 +135,101 @@ export default {
 
     this.deviceData = dataCollectorInstance.deviceData
 
-    // paypal
+    // paypal braintree
     // Create a client.
-    const paypalCheckoutInstance = await window.braintree.paypalCheckout.create({
-        client: clientInstance
-    })
+    // const paypalCheckoutInstance = await window.braintree.paypalCheckout.create({
+    //     client: clientInstance
+    // })
     
-    const paypalButton = await window.paypal.Button.render({
-      env: 'sandbox', // or 'production'
+    // const paypalButton = await window.paypal.Button.render({
+    //   env: 'sandbox', // or 'production'
 
-      payment: async () => {
-        return await paypalCheckoutInstance.createPayment({
-          // Your PayPal options here. For available options, see
-          // http://braintree.github.io/braintree-web/current/PayPalCheckout.html#createPayment
-          flow: 'checkout',
-          amount: this.course.price,
-          currency: 'SGD',
-          intent: 'capture'
-        })
-      },
+    //   payment: async () => {
+    //     return await paypalCheckoutInstance.createPayment({
+    //       // Your PayPal options here. For available options, see
+    //       // http://braintree.github.io/braintree-web/current/PayPalCheckout.html#createPayment
+    //       flow: 'checkout',
+    //       amount: this.course.price,
+    //       currency: 'SGD',
+    //       intent: 'capture'
+    //     })
+    //   },
 
-      onAuthorize: async (data, actions) => {
-        const response =  await paypalCheckoutInstance.tokenizePayment(data)
-        console.log('data', data)
-        console.log('response', response)
-        console.log('actions', actions)
-        this.transaction = (await PaymentService.createPaypalTransaction({
-          amount: this.course.price,
-          nonce: response.nonce,
-          deviceData: this.deviceData
-        })).data.result
-        if (this.transaction.success) {
-          this.subscribe()
-        } else {
-          this.error = this.transaction.message
+    //   onAuthorize: async (data) => {
+    //     const response =  await paypalCheckoutInstance.tokenizePayment(data)
+    //     this.transaction = (await PaymentService.createPaypalTransaction({
+    //       amount: this.course.price,
+    //       nonce: response.nonce,
+    //       deviceData: this.deviceData
+    //     })).data.result
+    //     if (this.transaction.success) {
+    //       this.subscribe()
+    //     } else {
+    //       this.error = this.transaction.message
+    //     }
+    //   },
+
+    //   onCancel: function (data) {
+    //     console.log('checkout.js payment cancelled', JSON.stringify(data, 0, 2))
+    //   },
+
+    //   onError: function (err) {
+    //     console.error('checkout.js error', err)
+    //   }
+    // }, '#paypal-button')
+
+    // console.log(paypalButton)
+
+    // pure paypal api
+    let paypalScript = document.createElement('script')
+    paypalScript.src = 'https://www.paypal.com/sdk/js?client-id=AepgsiQK_rhw-m-bTjjuZ5lRxPWadsmSzn9dH_Lsn8o5uzSsTHsIRuxfaCfyg0odhrZFxq6_qpsmu-P7&currency=SGD'
+    paypalScript.addEventListener('load', () => {
+      
+      window.paypal.Buttons({
+        locale: 'en_US',
+
+        createOrder: async () => {
+          const orderId = (await PaymentService.createOrder({
+            amount: (this.course.price + (this.course.price * 0.07)).toFixed(2)
+          })).data.order.id
+          this.orderId = orderId
+          return orderId
+        },
+        onApprove: async () => {
+          const result = (await PaymentService.captureOrder({
+            orderId: this.orderId
+          })).data.result
+          this.result = result
+          if (this.result.status == "COMPLETED") {
+            alert('Success!')
+            this.subscribe()
+          }
+        },
+        onError: err => {
+          console.log(err)
         }
-      },
+      }).render('#paypal-button-container');
 
-      onCancel: function (data) {
-        console.log('checkout.js payment cancelled', JSON.stringify(data, 0, 2))
-      },
-
-      onError: function (err) {
-        console.error('checkout.js error', err)
-      }
-    }, '#paypal-button')
-
-    console.log(paypalButton)
-
+      let connectScript = document.createElement('script')  
+      connectScript.src = 'https://www.paypalobjects.com/js/external/connect/api.js'
+      connectScript.addEventListener("load", () => {
+        window.paypal.use(['login'], function (login) {
+          login.render ({
+            "appid":"AepgsiQK_rhw-m-bTjjuZ5lRxPWadsmSzn9dH_Lsn8o5uzSsTHsIRuxfaCfyg0odhrZFxq6_qpsmu-P7",
+            "authend":"sandbox",
+            "scopes":"openid",
+            "containerid":"connect-button",
+            "responseType":"code",
+            "locale":"en-us",
+            "buttonShape":"rectangle",
+            "buttonSize":"lg",
+            "returnurl":"https://example.com"
+          })
+        })
+      })
+      document.body.appendChild(connectScript)
+    })
+    document.body.appendChild(paypalScript)
   }
 }
 </script>

@@ -36,6 +36,10 @@ module.exports = {
     clientId: process.env.PAYPAL_CLIENT_ID,
     secret: process.env.PAYPAL_SECRET
   },
+  paypalLive: {
+    clientId: process.env.LIVE_PAYPAL_CLIENT_ID,
+    secret: process.env.LIVE_PAYPAL_SECRET
+  },
   authentication: {
     jwtSecret: process.env.JWT_SECRET || 'secret'
   }

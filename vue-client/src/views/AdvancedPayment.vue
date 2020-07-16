@@ -3,46 +3,51 @@
     //- div(ref='paypal')
     v-row.justify-center
       v-col(cols=6)
+        span#connect-button
+
+    v-row.justify-center
+      v-col(cols=6)
         div#paypal-button-container
 
-        div#or  or 
-    // Advanced credit and debit card payments form
-    v-row
-      v-col
-        .card_container
-          form#my-sample-form(v-if="isEligible")
-            label(for='card-number') Card Number
-            #card-number.card_field
-            div
-              label(for='expiration-date') Expiration Date
-              #expiration-date.card_field
-            div
-              label(for='cvv') CVV
-              #cvv.card_field
-            label(for='card-holder-name') Name on Card
-            input#card-holder-name(type='text' name='card-holder-name' autocomplete='off' placeholder='card holder name')
-            div
-              label(for='card-billing-address-street') Billing Address
-              input#card-billing-address-street(type='text' name='card-billing-address-street' autocomplete='off' placeholder='street address')
-            div
-              label(for='card-billing-address-unit') &nbsp;
-              input#card-billing-address-unit(type='text' name='card-billing-address-unit' autocomplete='off' placeholder='unit')
-            div
-              input#card-billing-address-city(type='text' name='card-billing-address-city' autocomplete='off' placeholder='city')
-            div
-              input#card-billing-address-state(type='text' name='card-billing-address-state' autocomplete='off' placeholder='state')
-            div
-              input#card-billing-address-zip(type='text' name='card-billing-address-zip' autocomplete='off' placeholder='zip / postal code')
-            div
-              input#card-billing-address-country(type='text' name='card-billing-address-country' autocomplete='off' placeholder='country code')
-            br
-            br
-            button#submit.btn(value='submit') Pay
+        //- div#or  or 
+    //- // Advanced credit and debit card payments form
+    //- v-row
+    //-   v-col
+    //-     .card_container
+    //-       form#my-sample-form(v-if="isEligible")
+    //-         label(for='card-number') Card Number
+    //-         #card-number.card_field
+    //-         div
+    //-           label(for='expiration-date') Expiration Date
+    //-           #expiration-date.card_field
+    //-         div
+    //-           label(for='cvv') CVV
+    //-           #cvv.card_field
+    //-         label(for='card-holder-name') Name on Card
+    //-         input#card-holder-name(type='text' name='card-holder-name' autocomplete='off' placeholder='card holder name')
+    //-         div
+    //-           label(for='card-billing-address-street') Billing Address
+    //-           input#card-billing-address-street(type='text' name='card-billing-address-street' autocomplete='off' placeholder='street address')
+    //-         div
+    //-           label(for='card-billing-address-unit') &nbsp;
+    //-           input#card-billing-address-unit(type='text' name='card-billing-address-unit' autocomplete='off' placeholder='unit')
+    //-         div
+    //-           input#card-billing-address-city(type='text' name='card-billing-address-city' autocomplete='off' placeholder='city')
+    //-         div
+    //-           input#card-billing-address-state(type='text' name='card-billing-address-state' autocomplete='off' placeholder='state')
+    //-         div
+    //-           input#card-billing-address-zip(type='text' name='card-billing-address-zip' autocomplete='off' placeholder='zip / postal code')
+    //-         div
+    //-           input#card-billing-address-country(type='text' name='card-billing-address-country' autocomplete='off' placeholder='country code')
+    //-         br
+    //-         br
+    //-         button#submit.btn(value='submit') Pay
 
 </template>
 
 <script>
 import PaymentService from '@/services/PaymentService'
+// import Vue from 'vue'
 
 export default {
   name: 'AdvancedPayment',
@@ -51,7 +56,7 @@ export default {
       loaded: false,
       paidFor: false,
       course: {
-        price: 17.77,
+        price: 2.0,
         description: "leg lamp from that one movie"
       },
       isEligible: true,
@@ -148,28 +153,60 @@ export default {
     // script.src = `https://www.paypal.com/sdk/js?client-id=AepgsiQK_rhw-m-bTjjuZ5lRxPWadsmSzn9dH_Lsn8o5uzSsTHsIRuxfaCfyg0odhrZFxq6_qpsmu-P7&currency=SGD`;
     // script.addEventListener("load", this.setLoaded);
     // document.body.appendChild(script);
-    window.paypal.Buttons({
-      createOrder: async () => {
-        const orderId = (await PaymentService.createOrder({
-          amount: this.course.price
-        })).data.order.id
-        this.orderId = orderId
-        return orderId
-      },
-      onApprove: async () => {
-        const result = (await PaymentService.captureOrder({
-          orderId: this.orderId
-        })).data.result
-        this.result = result
-        if (this.result.status == "COMPLETED") {
-          alert('Success!')
+    // await Vue.loadScript('https://www.paypal.com/sdk/js?client-id=ATu_HUpmHi7gl16B8tUX18ClH5cg1KDkq1BLNkjAN2brQJjDjBNic3Uf43VWWPGLqP9bfg4BiT9I1PbT&currency=SGD')
+    // await Vue.loadScript('https://www.paypalobjects.com/js/external/connect/api.js')
+    let paypalScript = document.createElement('script')
+    // sandbox
+    // paypalScript.src = 'https://www.paypal.com/sdk/js?client-id=AepgsiQK_rhw-m-bTjjuZ5lRxPWadsmSzn9dH_Lsn8o5uzSsTHsIRuxfaCfyg0odhrZFxq6_qpsmu-P7&currency=SGD'
+    
+    // live
+    paypalScript.src = 'https://www.paypal.com/sdk/js?client-id=AbwBSbdR82bJexDTQGyi-ZJ7jKRSAOsfmh651obC8P5TcAEr70Wan7xICW3eOoWFGwHtj-xOnZQbfyib&currency=SGD'
+    paypalScript.addEventListener('load', () => {
+      
+      window.paypal.Buttons({
+        locale: 'en_US',
+
+        createOrder: async () => {
+          const orderId = (await PaymentService.createOrder({
+            amount: this.course.price
+          })).data.order.id
+          this.orderId = orderId
+          return orderId
+        },
+        onApprove: async () => {
+          const result = (await PaymentService.captureOrder({
+            orderId: this.orderId
+          })).data.result
+          this.result = result
+          if (this.result.status == "COMPLETED") {
+            alert('Success!')
+          }
+        },
+        onError: err => {
+          console.log(err)
         }
-      },
-      onError: err => {
-        console.log(err)
-      }
+      }).render('#paypal-button-container');
+
+      let connectScript = document.createElement('script')  
+      connectScript.src = 'https://www.paypalobjects.com/js/external/connect/api.js'
+      connectScript.addEventListener("load", () => {
+        window.paypal.use(['login'], function (login) {
+          login.render ({
+            "appid":"AepgsiQK_rhw-m-bTjjuZ5lRxPWadsmSzn9dH_Lsn8o5uzSsTHsIRuxfaCfyg0odhrZFxq6_qpsmu-P7",
+            "authend":"sandbox",
+            "scopes":"openid",
+            "containerid":"connect-button",
+            "responseType":"code",
+            "locale":"en-us",
+            "buttonShape":"rectangle",
+            "buttonSize":"lg",
+            "returnurl":"https://example.com"
+          })
+        })
+      })
+      document.body.appendChild(connectScript)
     })
-    .render('#paypal-button-container');
+    document.body.appendChild(paypalScript)
   }
 }
 </script>
@@ -210,164 +247,5 @@ export default {
     max-width: 760px;
     width: 100%;
     margin: 0 auto;
-}
-.card_container {
-    border-radius: 5px;
-    background-color: #FFFFFF;
-    padding: 20px;
-    max-width: 760px;
-    width: 100%;
-    margin: 0 auto;
-}
-.card_field{
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    resize: vertical;
-    height:40px;
-    background:white;
-    font-size:17px;
-    color:#3a3a3a;
-    font-family:helvetica, tahoma, calibri, sans-serif;
-}
-.card_field_50{
-    width: 50%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    resize: vertical;
-    height:40px;
-    background:white;
-    font-size:17px;
-    color:#3a3a3a;
-    font-family:helvetica, tahoma, calibri, sans-serif;
-}
-.card_field_75{
-    width: 75%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    resize: vertical;
-    height:40px;
-    background:white;
-    font-size:17px;
-    color:#3a3a3a;
-    font-family:helvetica, tahoma, calibri, sans-serif;
-}
-.row {
-    display: -ms-flexbox; /* IE10 */
-    display: flex;
-    -ms-flex-wrap: wrap; /* IE10 */
-    flex-wrap: wrap;
-    margin: 0 -16px;
-}
-.col-25 {
-    -ms-flex: 25%; /* IE10 */
-    flex: 25%;
-}
-.col-50 {
-    -ms-flex: 50%; /* IE10 */
-    flex: 50%;
-}
-input[type=text], select, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    resize: vertical;
-    height:40px;
-    background:white;
-    font-size:17px;
-    color:#3a3a3a;
-    font-family:helvetica, tahoma, calibri, sans-serif;
-}
-input[type=submit] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.message_container {
-    border-radius: 5px;
-    background:#FFFFFF;
-    font-size:13px;
-    font-family:monospace;
-    padding: 20px;
-}
-#loading {
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    position: fixed;
-    display: block;
-    opacity: 0.7;
-    background-color: #fff;
-    z-index: 99;
-    text-align: center;
-}
-#loading-image {
-    position: absolute;
-    z-index: 15;
-    top: 50%;
-    left: 50%;
-    margin: -100px 0 0 -150px;
-}
-.spinner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-left: -50px; /* half width of the spinner gif */
-    margin-top: -50px; /* half height of the spinner gif */
-    text-align:center;
-    z-index:1234;
-    overflow: auto;
-    width: 100px; /* width of the spinner gif */
-    height: 102px; /* height of the spinner gif +2px to fix IE8 issue */
-}
-.button_container {
-    display: flex;
-    justify-content: center;
-}
-button:hover {
-    background-color: powderblue;
-}
-button {
-    width:229px;
-    height:49px;
-    background:lightblue;
-    border:1px dotted black;
-    font-size:17px;
-    color:#3a3a3a;
-    padding: 12px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 0 auto;
-}
-.btn_small{
-    width:130px;
-    height:39px;
-    background:lightblue;
-    border:1px dotted black;
-    font-size:14px;
-    color:#3a3a3a;
-}
-.btn_small:hover {
-    background-color: powderblue;
 }
 </style>

@@ -60,7 +60,6 @@ export default {
   },
   methods: {
     showCourse (event, id) {
-      console.log(id)
       this.$router.push(`/course/show/${id}`)
     },
 

@@ -115,7 +115,6 @@ export default new Vuex.Store({
     },
 
     addLesson (state, lesson) {
-      console.log(lesson)
       const course = state.userOwnedCourses.find(course => course.id == lesson.CourseId)
       if (course.lessons == null)
         course.lessons = []
@@ -124,14 +123,12 @@ export default new Vuex.Store({
     },
 
     deleteLesson (state, lesson) {
-      console.log(lesson)
       const course = state.userOwnedCourses.find(course => course.id == lesson.CourseId)
       var idx = course.lessons.indexOf(lesson)
       course.lessons.splice(idx, 1)
     },
 
     addExercise (state, payload) {
-      console.log(payload)
       const course = state.userOwnedCourses.find(course => course.id == payload.CourseId);
       const lesson = course.lessons.find(lesson => lesson.id == payload.exercise.LessonId);
       if (lesson.exercises == null)

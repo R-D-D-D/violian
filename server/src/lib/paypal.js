@@ -4,60 +4,63 @@ const uniqid = require('uniqid')
 const paypal = require('@paypal/checkout-server-sdk')
 const PAYPAL_OAUTH_API = 'https://api.sandbox.paypal.com/v1/oauth2/token/'
 const PAYPAL_ORDER_API = 'https://api.sandbox.paypal.com/v2/checkout/orders/'
+const PAYPAL_OAUTH_API_LIVE = 'https://api.paypal.com/v1/oauth2/token/'
+const PAYPAL_ORDER_API_LIVE = 'https://api.paypal.com/v2/checkout/orders/'
 
-/**
- *
- * Returns PayPal HTTP client instance with environment that has access
- * credentials context. Use this instance to invoke PayPal APIs, provided the
- * credentials have access.
- */
-function client() {
-  return new paypal.core.PayPalHttpClient(environment());
-}
+// /**
+//  *
+//  * Returns PayPal HTTP client instance with environment that has access
+//  * credentials context. Use this instance to invoke PayPal APIs, provided the
+//  * credentials have access.
+//  */
+// function client() {
+//   return new paypal.core.PayPalHttpClient(environment());
+// }
 
-/**
- *
- * Set up and return PayPal JavaScript SDK environment with PayPal access credentials.
- * This sample uses SandboxEnvironment. In production, use LiveEnvironment.
- *
- */
-function environment() {
-  let clientId = process.env.PAYPAL_CLIENT_ID || 'PAYPAL-SANDBOX-CLIENT-ID'
-  let clientSecret = process.env.PAYPAL_CLIENT_SECRET || 'PAYPAL-SANDBOX-CLIENT-SECRET'
+// /**
+//  *
+//  * Set up and return PayPal JavaScript SDK environment with PayPal access credentials.
+//  * This sample uses SandboxEnvironment. In production, use LiveEnvironment.
+//  *
+//  */
+// function environment() {
+//   let clientId = process.env.PAYPAL_CLIENT_ID || 'PAYPAL-SANDBOX-CLIENT-ID'
+//   let clientSecret = process.env.PAYPAL_CLIENT_SECRET || 'PAYPAL-SANDBOX-CLIENT-SECRET'
 
-  return new checkoutNodeJssdk.core.SandboxEnvironment(
-    config.paypal.clientId, config.paypal.secret
-  )
-}
+//   return new checkoutNodeJssdk.core.SandboxEnvironment(
+//     config.paypal.clientId, config.paypal.secret
+//   )
+// }
 
-async function prettyPrint(jsonData, pre=""){
-  let pretty = "";
-  function capitalize(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-  }
-  for (let key in jsonData){
-      if (jsonData.hasOwnProperty(key)){
-          if (isNaN(key))
-            pretty += pre + capitalize(key) + ": ";
-          else
-            pretty += pre + (parseInt(key) + 1) + ": ";
-          if (typeof jsonData[key] === "object"){
-              pretty += "\n";
-              pretty += await prettyPrint(jsonData[key], pre + "    ");
-          }
-          else {
-              pretty += jsonData[key] + "\n";
-          }
+// async function prettyPrint(jsonData, pre=""){
+//   let pretty = "";
+//   function capitalize(string) {
+//       return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+//   }
+//   for (let key in jsonData){
+//       if (jsonData.hasOwnProperty(key)){
+//           if (isNaN(key))
+//             pretty += pre + capitalize(key) + ": ";
+//           else
+//             pretty += pre + (parseInt(key) + 1) + ": ";
+//           if (typeof jsonData[key] === "object"){
+//               pretty += "\n";
+//               pretty += await prettyPrint(jsonData[key], pre + "    ");
+//           }
+//           else {
+//               pretty += jsonData[key] + "\n";
+//           }
 
-      }
-  }
-  return pretty;
-}
+//       }
+//   }
+//   return pretty;
+// }
 
 module.exports = {
   async generatePaypalToken () {
     return axios({
       url: PAYPAL_OAUTH_API,
+      // url: PAYPAL_OAUTH_API_LIVE,
       method: 'post',
       headers: {
         'Accept': 'application/json',
@@ -67,6 +70,10 @@ module.exports = {
         username: config.paypal.clientId,
         password: config.paypal.secret
       },
+      // auth: {
+      //   username: config.paypalLive.clientId,
+      //   password: config.paypalLive.secret
+      // },
       params: {
         grant_type: 'client_credentials'
       }
@@ -117,9 +124,9 @@ module.exports = {
   },
 
   async createOrder (accessToken, transactionAmount) {
-    console.log('amount------------------', transactionAmount)
     return axios({
       url: PAYPAL_ORDER_API,
+      // url: PAYPAL_ORDER_API_LIVE,
       method: 'post',
       headers: {
         Accept:        `application/json`,
@@ -140,6 +147,7 @@ module.exports = {
   async captureOrder (accessToken, orderId) {
     return axios({
       url: PAYPAL_ORDER_API + orderId + '/capture',
+      // url: PAYPAL_ORDER_API_LIVE + orderId + '/capture',
       method: 'post',
       headers: {
         'Content-Type':        `application/json`,
