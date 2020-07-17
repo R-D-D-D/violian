@@ -1,6 +1,6 @@
 <template lang="pug">
   #score
-    div(class="score" ref="scorediv" v-show="!scoreLoading")
+    div.ma-0#score(ref="scorediv" v-show="!scoreLoading" style="height:130px; overflow:hidden;")
 
     v-btn(@click="changeBars") Change Bars
 </template>
@@ -14,18 +14,23 @@ export default {
   data () {
     return {
       scoreLoading: false,
-      osmd: null
+      osmd: null,
+      from: 1,
+      to: 2
     }
   },
  
   methods: {
-    changeBars () {
+    async changeBars () {
+      this.from += 2
+      this.to += 2
       this.osmd.setOptions({
-        drawFromMeasureNumber: 5,
-        drawUpToMeasureNumber: 8
+        drawFromMeasureNumber: this.from,
+        drawUpToMeasureNumber: this.to
       })
-      this.osmd.zoom = 1.5
-      this.osmd.render()
+      await this.osmd.render()
+      console.log(this.osmd.GraphicSheet.measureList.map(measure => measure[0].boundingBox))
+
     }
   },
 
@@ -33,32 +38,37 @@ export default {
     this.osmd = new OpenSheetMusicDisplay(
       this.$refs.scorediv, 
       {
-        followCursor: true,
-        drawFromMeasureNumber: 0,
-        drawUpToMeasureNumber: 4,
+        drawFromMeasureNumber: 1,
+        drawUpToMeasureNumber: 2,
         fillEmptyMeasuresWithWholeRest: true,
         drawComposer: false,
         drawTitle: false,
         renderSingleHorizontalStaffline: true,
-        measureNumberInterval: 1,
         drawPartNames: false,
-        backend: 'Canvas'
+        autoResize: true,
+        drawMetronomeMarks: false,
+        // backend: 'Canvas',
+        drawingParameters: 'compacttight'
       }
-    );
+    )
+    // this.osmd.setCustomPageFormat({
+    //   width: 1000,
+    //   height: 300
+    // })
+    // this.osmd.setCustomPageFormat(1000)
     this.scoreLoading = true;
-    let scoreXml = await axios({
-      url: "https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/twinkle-twinkle-little-star.musicxml",
-      method: 'get',
-      headers: {
-        'Cache-Control': null,
-        'X-Requested-With': null,
-      }
-    })
+    let scoreXml = await axios.get("https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/twinkle-twinkle-little-star.musicxml");    
+    // let scoreXml = await axios.get("https://opensheetmusicdisplay.github.io/demo/sheets/MuzioClementi_SonatinaOpus36No3_Part1.xml");
+
     await this.osmd.load(scoreXml.data);
     this.scoreLoading = false;
     await this.$nextTick();
-    this.osmd.zoom = 1.5
+    // this.osmd.zoom = 1.3
+    // this.osmd.setCustomPageFormat(1, .3)
     await this.osmd.render();
+
+    console.log(this.osmd.graphic.musicPages[0].boundingBox)
+    console.log(this.osmd.GraphicSheet.measureList.map(measure => measure[0].boundingBox))
   }
 }
 </script>
