@@ -15,6 +15,7 @@ import ShowCourseThread from "../views/thread/ShowCourseThread"
 import Payment from "../views/Payment"
 import store from "../store/store"
 import AdvancedPayment from "../views/AdvancedPayment"
+import OSMD from "../components/OSMD"
 
 Vue.use(VueRouter);
 
@@ -86,8 +87,11 @@ const routes = [
   {
     path: '/advanced-payment',
     component: AdvancedPayment
+  },
+  {
+    path: '/osmd',
+    component: OSMD
   }
-
 ];
 
 const router = new VueRouter({

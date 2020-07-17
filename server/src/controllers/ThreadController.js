@@ -138,7 +138,6 @@ module.exports = {
       var result = 0
 
       for (var i = 0; i < course.Lessons.length; i++) {
-        console.log('lesson-----', course.Lessons[i].id)
         var thread = await Thread.findOne({
           where: {
             LessonId: course.Lessons[i].id,
