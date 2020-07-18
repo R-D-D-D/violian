@@ -10,6 +10,8 @@
           h1.display-1.text-left Description
         v-col(cols="11")
           p {{ description }}
+        v-col
+          v-btn(@click="changeBars") Change Bars
 
       v-row.justify-center
         v-col(cols="11").text-center.pa-0
@@ -142,6 +144,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import tone from "@/plugins/tone";
 import vexUI from "@/plugins/vex";
 import { mapState } from "vuex";
@@ -149,6 +152,8 @@ import utils from "@/utils";
 import videojs from "video.js";
 import PostService from "@/services/PostService"
 import "videojs-hotkeys"
+import axios from "axios"
+import { OpenSheetMusicDisplay } from "opensheetmusicdisplay"
 
 export default {
   name: 'ShowLesson',
@@ -181,7 +186,10 @@ export default {
       grade: '',
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
       error: null,
-      userinactive: true
+      userinactive: true,
+      osmd: null,
+      from: 1,
+      to: 2
     }
   },
   watch: {
@@ -283,7 +291,81 @@ export default {
       }
     },
 
+    async changeBars () {
+      this.from += 2
+      this.to += 2
+      this.osmd.setOptions({
+        drawFromMeasureNumber: this.from,
+        drawUpToMeasureNumber: this.to
+      })
+      var score = document.getElementById(`video-score-${this.lesson.id}`)
+      score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop - this.osmd.graphic.musicPages[0].boundingBox.boundingMarginRectangle.y) * 10 * -1}px`
+      console.log('top', score.style.top)
+      await this.osmd.render()
+      console.log(this.osmd.graphic)
+      console.log(this.osmd.graphic.musicPages[0].boundingBox)
+
+      // console.log(this.osmd.GraphicSheet.measureList.map(measure => measure[0].boundingBox))
+    },
+
+    async drawOsmdScores () {
+      var wrapper = document.createElement("div")
+      wrapper.setAttribute('id', `video-vexflow-wrapper${this.lesson.id}`)
+      wrapper.style.position = "absolute";
+      wrapper.style.background = "#FAFAFA";
+      wrapper.style.top = "0";
+      wrapper.style.left = "0";
+      wrapper.style.right = "0";
+      wrapper.style.height = "130px";
+      wrapper.style.overflow = "hidden"
+
+      var score = document.createElement("div")
+      score.setAttribute('id', `video-score-${this.lesson.id}`)
+      score.style.position = "absolute";
+      score.style.background = "#FAFAFA";
+      score.style.top = "0";
+      score.style.left = "0";
+      score.style.right = "0";
+
+      this.osmd = new OpenSheetMusicDisplay(
+        score, 
+        {
+          drawFromMeasureNumber: 1,
+          drawUpToMeasureNumber: 2,
+          fillEmptyMeasuresWithWholeRest: true,
+          drawComposer: false,
+          drawTitle: false,
+          renderSingleHorizontalStaffline: true,
+          drawPartNames: false,
+          autoResize: false,
+          drawMetronomeMarks: false,
+          backend: 'Canvas',
+          drawingParameters: 'compacttight'
+        }
+      )
+      let scoreXml = await axios.get("https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/twinkle-twinkle-little-star.musicxml");    
+      // let scoreXml = await axios.get("https://opensheetmusicdisplay.github.io/demo/sheets/MuzioClementi_SonatinaOpus36No3_Part1.xml");
+
+      await this.osmd.load(scoreXml.data);
+      this.scoreLoading = false;
+      await this.$nextTick();
+      // this.osmd.zoom = 1.3
+      // this.osmd.setCustomPageFormat(1, .3)
+      await this.osmd.preCalculate();
+      score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop + this.osmd.graphic.musicPages[0].boundingBox.absolutePosition.y) * 10 * -1}px`
+      console.log('top', score.style.top)
+      await this.osmd.render();
+      console.log(this.osmd.graphic)
+      console.log(this.osmd.graphic.musicPages[0].musicSystem)
+      console.log(this.osmd)
+      // console.log(this.osmd.graphic)
+
+      wrapper.appendChild(score)
+      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
+    },
+
     drawScores (isRedraw) {
+      // TODO implement this
       if (isRedraw) {
         const score = document.getElementById(`video-vexflow-wrapper${this.lesson.id}`)
         while (score.firstChild) {
@@ -314,7 +396,7 @@ export default {
       wrapper.style.top = "0";
       wrapper.style.left = "0";
       wrapper.style.right = "0";
-      this.videoHandler = new vexUI.Handler("vexflow-wrapper", {
+      this.videoHandler = new vexUI.Handler(`video-vexflow-wrapper${this.lesson.id}`, {
         canEdit: false,
         numberOfStaves: 2,
         lessStaveHeight: true,
@@ -332,6 +414,41 @@ export default {
   },
 
   mounted: function () {
+    OpenSheetMusicDisplay.prototype.preCalculate = function () {
+      if (!this.graphic) {
+          throw new Error("OpenSheetMusicDisplay: Before rendering a music sheet, please load a MusicXML file");
+      }
+      if (this.drawer) {
+          this.drawer.clear(); // clear canvas before setting width
+      }
+
+      let width = this.container.offsetWidth;
+      if (this.rules.RenderSingleHorizontalStaffline) {
+          width = 32767; // set safe maximum (browser limit), will be reduced later
+          // reduced later in MusicSheetCalculator.calculatePageLabels (sets sheet.pageWidth to page.PositionAndShape.Size.width before labels)
+          // rough calculation:
+          // width = 600 * this.sheet.SourceMeasures.length;
+      }
+      console.log("[OSMD] render width: " + width);
+
+      this.sheet.pageWidth = width / this.zoom / 10.0;
+      if (this.rules.PageFormat && !this.rules.PageFormat.IsUndefined) {
+          this.rules.PageHeight = this.sheet.pageWidth / this.rules.PageFormat.aspectRatio;
+          console.log("[OSMD] PageHeight: " + this.rules.PageHeight);
+      } else {
+          console.log("[OSMD] endless/undefined pageformat, id: " + this.rules.PageFormat.idString);
+          this.rules.PageHeight = 100001; // infinite page height // TODO maybe Number.MAX_VALUE or Math.pow(10, 20)?
+      }
+
+      // Before introducing the following optimization (maybe irrelevant), tests
+      // have to be modified to ensure that width is > 0 when executed
+      //if (isNaN(width) || width === 0) {
+      //    return;
+      //}
+
+      // Calculate again
+      this.graphic.reCalculate();
+    }
     // const paymentEl = document.getElementById('card-element')
     this.$on("play_sequence", () => {
       tone.init();
@@ -382,36 +499,25 @@ export default {
     this.playbackBpm = this.bpm
     this.timeSignature = this.lesson.exercises[0].timeSignature
     if (this.melody[0] != "") {
-      this.drawScores()
-
+      // this.drawScores()
+      this.drawOsmdScores()
       document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
 
       var doit;
-      window.onresize = () => {
-        clearTimeout(doit)
-        doit = setTimeout(() => {
-          this.drawScores(true)
-        }, 200)
-      }
+      // window.onresize = () => {
+      //   clearTimeout(doit)
+      //   doit = setTimeout(() => {
+      //     this.drawScores(true)
+      //   }, 200)
+      // }
     }
     this.description = this.lesson.description
     this.demoStartTime = this.lesson.exercises[0].demoStartTime
     this.numberOfBars = parseInt(this.lesson.exercises[0].numberOfBars)
 
     this.timePerTwoBars = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60) * 2
-
-    // var stripe = window.Stripe('pk_test_51H4T51AAfWaljxm1ClFL60860vpMI5QDkhWYBEu4BKU39CVAUlTNo0fdnR6CDCv3puPd8ZRxdf5z7OiCztEEZ0rk00P5a6SI0s');
-    // var elements = stripe.elements();
-    // var card = elements.create("card", { 
-    //   style: {
-    //     base: {
-    //       color: "#32325d",
-    //     }
-    //   } 
-    // });
-    // card.mount(paymentEl);
   },
 
   beforeDestroy() {
