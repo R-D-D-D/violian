@@ -28,7 +28,22 @@ module.exports = {
       }
 
       const user = await lesson.Course.getTutor()
+
+      // format to present score
+      if (req.body.useXml) {
+        if (req.files['musicXml'] && req.files['musicXml'].length > 0) {
+          var params = {
+              Bucket: config.aws.bucket,
+              Key: `${user.email}/musicXml/${lesson.id}/${req.files['musicXml'][0].originalname}`,
+              Body: req.files['musicXml'][0].buffer
+          }
       
+          // Uploading files to the bucket
+          const response = await s3.upload(params).promise()
+          req.body.musicXmlUrl = response.Location
+        }
+      }
+
       if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) {
         var params = {
             Bucket: config.aws.bucket,

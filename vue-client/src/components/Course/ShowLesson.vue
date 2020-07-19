@@ -97,7 +97,7 @@
                 v-col
                   v-btn(large color="#ec5252" dark @click="create_post") Submit practice video
     
-    v-row.bpm-control.pt-2(:id="`slider-${lesson.id}`" :class="{ hide: userinactive }")
+    v-row.bpm-control.pt-2(:id="`slider-${lesson.id}`" :class="{ hide: (userinactive && !paused) }")
       v-icon(color="white" large) $vuetify.icons.custom_bpm
       v-slider.pb-2(min="20" max="180" vertical color="white" track-color="rgba(115, 133, 159, 0.5)" thumb-label="always" v-model="playbackBpm")
     
@@ -187,6 +187,7 @@ export default {
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
       error: null,
       userinactive: true,
+      paused: true,
       osmd: null,
       from: 1,
       to: 2
@@ -292,47 +293,52 @@ export default {
     },
 
     async changeBars () {
-      this.from += 2
-      this.to += 2
-      this.osmd.setOptions({
-        drawFromMeasureNumber: this.from,
-        drawUpToMeasureNumber: this.to
-      })
-      var score = document.getElementById(`video-score-${this.lesson.id}`)
-      score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop - this.osmd.graphic.musicPages[0].boundingBox.boundingMarginRectangle.y) * 10 * -1}px`
-      console.log('top', score.style.top)
-      await this.osmd.render()
-      console.log(this.osmd.graphic)
-      console.log(this.osmd.graphic.musicPages[0].boundingBox)
+      // this.from += 2
+      // this.to += 2
+      // this.osmd.setOptions({
+      //   drawFromMeasureNumber: this.from,
+      //   drawUpToMeasureNumber: this.to
+      // })
+      // var score = document.getElementById(`video-score-${this.lesson.id}`)
+      // score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop - this.osmd.graphic.musicPages[0].boundingBox.boundingMarginRectangle.y) * 10 * -1}px`
+      // console.log('top', score.style.top)
+      // await this.osmd.render()
+      // console.log(this.osmd.graphic)
+      // console.log(this.osmd.graphic.musicPages[0].boundingBox)
 
       // console.log(this.osmd.GraphicSheet.measureList.map(measure => measure[0].boundingBox))
     },
 
     async drawOsmdScores () {
-      var wrapper = document.createElement("div")
-      wrapper.setAttribute('id', `video-vexflow-wrapper${this.lesson.id}`)
-      wrapper.style.position = "absolute";
-      wrapper.style.background = "#FAFAFA";
-      wrapper.style.top = "0";
-      wrapper.style.left = "0";
-      wrapper.style.right = "0";
-      wrapper.style.height = "130px";
-      wrapper.style.overflow = "hidden"
+      var background = document.createElement("div")
+      background.setAttribute('id', `video-vexflow-background${this.lesson.id}`)
+      background.style.position = "absolute";
+      background.style.background = "#FAFAFA";
+      background.style.top = "0";
+      background.style.left = "0";
+      background.style.right = "0";
+      background.style.height = "130px";
+      background.style.overflow = "hidden"
 
-      var score = document.createElement("div")
-      score.setAttribute('id', `video-score-${this.lesson.id}`)
-      score.style.position = "absolute";
-      score.style.background = "#FAFAFA";
-      score.style.top = "0";
-      score.style.left = "0";
-      score.style.right = "0";
+      var scoreWrapper = document.createElement("div")
+      scoreWrapper.setAttribute('id', `video-scoreWrapper-${this.lesson.id}`)
+      scoreWrapper.style.position = "absolute";
+      scoreWrapper.style.background = "#FAFAFA";
+      scoreWrapper.style.top = "0";
+      scoreWrapper.style.left = "0";
+      scoreWrapper.style.right = "0";
+
+      var score = document.createElement('div')
+      background.appendChild(scoreWrapper)
+      scoreWrapper.appendChild(score)
+      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(background)
+
 
       this.osmd = new OpenSheetMusicDisplay(
         score, 
         {
           drawFromMeasureNumber: 1,
           drawUpToMeasureNumber: 2,
-          fillEmptyMeasuresWithWholeRest: true,
           drawComposer: false,
           drawTitle: false,
           renderSingleHorizontalStaffline: true,
@@ -351,17 +357,15 @@ export default {
       await this.$nextTick();
       // this.osmd.zoom = 1.3
       // this.osmd.setCustomPageFormat(1, .3)
-      await this.osmd.preCalculate();
-      score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop + this.osmd.graphic.musicPages[0].boundingBox.absolutePosition.y) * 10 * -1}px`
+      // await this.osmd.preCalculate();
+      // score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop + this.osmd.graphic.musicPages[0].boundingBox.absolutePosition.y) * 10 * -1}px`
       console.log('top', score.style.top)
       await this.osmd.render();
+      // await this.osmd.render();
       console.log(this.osmd.graphic)
-      console.log(this.osmd.graphic.musicPages[0].musicSystem)
+      console.log(this.osmd.graphic.musicPages[0].musicSystems)
       console.log(this.osmd)
       // console.log(this.osmd.graphic)
-
-      wrapper.appendChild(score)
-      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
     },
 
     drawScores (isRedraw) {
@@ -409,7 +413,6 @@ export default {
       }, wrapper).init();
 
       document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
-      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById(`slider-${this.lesson.id}`))
     }
   },
 
@@ -425,9 +428,6 @@ export default {
       let width = this.container.offsetWidth;
       if (this.rules.RenderSingleHorizontalStaffline) {
           width = 32767; // set safe maximum (browser limit), will be reduced later
-          // reduced later in MusicSheetCalculator.calculatePageLabels (sets sheet.pageWidth to page.PositionAndShape.Size.width before labels)
-          // rough calculation:
-          // width = 600 * this.sheet.SourceMeasures.length;
       }
       console.log("[OSMD] render width: " + width);
 
@@ -483,9 +483,13 @@ export default {
         })
         player.on('play', () => {
           this.userinactive = false
+          this.paused = false
         })
         player.on('ratechange', () => {
           this.playbackBpm = this.bpm * this.player.playbackRate()
+        })
+        player.on('pause', () => {
+          this.paused = true
         })
     });
 
@@ -501,6 +505,7 @@ export default {
     if (this.melody[0] != "") {
       // this.drawScores()
       this.drawOsmdScores()
+      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById(`slider-${this.lesson.id}`))
       document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"

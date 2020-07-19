@@ -67,7 +67,8 @@ module.exports = (app) => {
     [{ name: 'demo', maxCount: 1 }, 
     { name: 'video', maxCount: 1 },
     { name: 'demoPoster', maxCount: 1 },
-    { name: 'videoPoster', maxCount: 1 }]), 
+    { name: 'videoPoster', maxCount: 1 },
+    { name: 'musicXml', maxCount: 1 }]), 
     isAuthenticated, 
     ExerciseController.create),
 
@@ -75,7 +76,8 @@ module.exports = (app) => {
     [{ name: 'demo', maxCount: 1 }, 
     { name: 'video', maxCount: 1 },
     { name: 'demoPoster', maxCount: 1 },
-    { name: 'videoPoster', maxCount: 1 }]), 
+    { name: 'videoPoster', maxCount: 1 },
+    { name: 'musicXml', maxCount: 1 }]), 
     isAuthenticated, 
     ExerciseController.edit),
 

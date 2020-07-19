@@ -21,15 +21,15 @@
 
 ## lessons
 - lesson management
-  - POST `/lesson/new { name, duration, description, video, demoVideo, cid }` - `{ lesson: <lessonObj> }`
+  - POST `/lesson/new { name, duration, description, cid }` - `{ lesson: <lessonObj> }`
   - PUT `/lesson/edit { lessonObj }` - `{ lesson: <lessonObj> }`
   - GET `/lesson/list?cid=` - `{ lessons: [<lessonObj>] }`
   - DELETE `/lesson/del?lid=` - `{ data: ok }`
 
 ## exercises
 - exercise management
-  - POST `/exercise/new { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, lid }` - `{ exercise: <exerciseObj> }`
-  - PUT `/exercise/edit { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, eid }` - `{ exercise: <exerciseObj> }`
+  - POST `/exercise/new { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, useXml, musicXml, lid }` - `{ exercise: <exerciseObj> }`
+  - PUT `/exercise/edit { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, useXml, musicXml, eid }` - `{ exercise: <exerciseObj> }`
   - GET `/exercise/list?lid=` - `{ exercises: [<exerciseObj>] }`
   - DELETE `/exercise/del?eid=` - `{ data: ok }`
 

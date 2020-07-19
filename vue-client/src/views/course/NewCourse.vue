@@ -27,9 +27,12 @@
                     v-select(label='Level' :items="levels" v-model="level" solo)
                   v-col(cols="12" md="4")
                     v-select(label='Instrument' :items="instruments" v-model="instrument" solo)
-          v-btn(color="indigo" @click='goStepTwo' dark)
-            | Continue
-          v-btn(to="/course/index") Cancel
+          
+          v-row.justify-center
+            v-col
+              v-btn(color="indigo" @click='goStepTwo' dark)
+                | Continue
+              v-btn(to="/course/index") Cancel
         v-stepper-content(step='2')
           v-row.justify-center
             v-col(cols="12" md="11")
@@ -47,46 +50,83 @@
                         v-col(cols="12")
                           v-textarea(label="Description" auto-grow v-model='lessons[idx].description')
                       v-row
-                        v-col(cols="12" md="4")
+                        v-col(cols="12" md="6")
                           v-file-input(
                             accept="video/mp4, video/ogg" 
                             placeholder="Choose Explanation Video" 
                             prepend-icon="mdi-video" 
                             label="Explanation Video"
                             v-model="lessons[idx].video")
-                        v-col(cols="12" md="4")
+                        v-col(cols="12" md="6")
+                          v-file-input(
+                            accept="image/*" 
+                            placeholder="Choose coverpage for video" 
+                            prepend-icon="mdi-image" 
+                            label="Explanation Video Poster"
+                            v-model="lessons[idx].videoPoster")
+                      v-row
+                        v-col(cols="12" md="6")
                           v-file-input(
                             accept="video/mp4, video/ogg" 
                             placeholder="Choose Explanation Video" 
                             prepend-icon="mdi-video"
                             label="Demo Video"
-                            v-model="lessons[idx].demoVideo")
+                            v-model="lessons[idx].demo")
+                        v-col(cols="12" md="6")
+                          v-file-input(
+                            accept="image/*" 
+                            placeholder="Choose coverpage for demo video" 
+                            prepend-icon="mdi-image"
+                            label="Demo Video Poster"
+                            v-model="lessons[idx].demoPoster")
                       v-row
-                        v-col(cols="12" md="4")
-                          v-switch(v-model="lessons[idx].useScore" :label="`Overlay score on your demo video`" @change="toggleVex($event, idx)")
-                        v-col(cols="12" md="4" v-if="lessons[idx].useScore")
+                        v-col(cols="12" md="6")
+                          v-switch(v-model="lessons[idx].useScore" :label="`Overlay score on your demo video`" @change="showVex($event, idx)")
+                      v-row  
+                        v-col(cols="12" md="6" v-if="lessons[idx].useScore")
+                          v-radio-group(v-model="lessons[idx].scoreOption" :mandatory="true")
+                            v-radio(label="Upload musicXML file" value="xml")
+                            v-radio(label="Design your own score" value="vex")
+                        v-col(cols="12" md="6" v-if="lessons[idx].useScore")
                           v-text-field(label='Demo Start Time' v-model='lessons[idx].demoStartTime' clearable color="indigo" prepend-icon="mdi-alarm" persistent-hint hint="At roughly which second did you start playing in demo video" :rules="demoStartTimeRules")
+                    
+                    div#optionvex(v-show="(lessons[idx].scoreOption == 'vex' && lessons[idx].useScore)")
+                      v-row
+                        v-col(:id="`pannel-content-${idx}`" @click="changeMelody($event, idx)")
+                      v-row
+                        v-col(cols="12" md="6")
+                          v-subheader.pl-0 No. Bars
+                          v-slider(v-model='lessons[idx].numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, idx)")
+                        v-col(cols="12" md="6")
+                          v-subheader.pl-0 BPM
+                          v-slider(v-model='lessons[idx].bpm' min='60' max='120' thumb-label :thumb-size="24")
+                        v-col(cols="12" md="6")
+                          v-select(:items="time_signatures" v-model="lessons[idx].timeSignature" label='Time Signature' @change="changeTimeSignature($event, idx)")
+                    div#optionxml(v-show="(lessons[idx].scoreOption == 'xml' && lessons[idx].useScore)")
+                      v-row
+                        v-col(cols="12" md="6")
+                          v-file-input(
+                            accept="text/xml, .musicxml" 
+                            placeholder="Music XML file" 
+                            prepend-icon="mdi-file-document-outline"
+                            label="Upload musicxml file"
+                            v-model="lessons[idx].musicXml")
+                      v-row
+                        v-col(cols="12" md="6")
+                          v-subheader.pl-0 BPM
+                          v-slider(v-model='lessons[idx].bpm' min='60' max='120' thumb-label :thumb-size="24")
 
-                    v-row
-                      v-col(:id="`pannel-content-${idx}`" @click="changeMelody($event, idx)")
-                    v-row(v-if="lessons[idx].useScore")
-                      v-col(cols="12" md="6")
-                        v-subheader.pl-0 No. Bars
-                        v-slider(v-model='lessons[idx].numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, idx)")
-                      v-col(cols="12" md="6")
-                        v-subheader.pl-0 BPM
-                        v-slider(v-model='lessons[idx].bpm' min='60' max='120' thumb-label :thumb-size="24")
-                      v-col(cols="12" md="6")
-                        v-select(:items="time_signatures" v-model="lessons[idx].timeSignature" label='Time Signature' @change="changeTimeSignature($event, idx)")
-                        
+
                 v-expansion-panel(@click="newLesson" readonly)
                   v-expansion-panel-header.text-h5(disable-icon-rotate) Add Lesson 
                     template(v-slot:actions)
                       v-icon mdi-plus
 
-          v-btn(color="indigo" @click='goStepThree' dark)
-            | Continue
-          v-btn(to="/course/index") Cancel
+          v-row.justify-center
+            v-col
+              v-btn(color="indigo" @click='goStepThree' dark)
+                | Continue
+              v-btn(to="/course/index") Cancel
         v-stepper-content(step='3')
           v-row.justify-center
             v-col(cols="12" md="11")
@@ -129,11 +169,11 @@
                   v-row
                     v-col(cols="12")
                       p.text-h6 Description: {{ lesson.description }}
-                  v-row
+                  v-row(v-if="lesson.video && lesson.demo")
                     v-col(cols="12" md="4")
-                      p.text-h6 Explanation Video: {{ lesson.video }}
+                      p.text-h6 Explanation Video: {{ lesson.video.originalname }}
                     v-col(cols="12" md="4")
-                      p.text-h6 Demo Video: {{ lesson.demoVideo }}
+                      p.text-h6 Demo Video: {{ lesson.demo.originalname }}
                   v-row
                     v-col
                       div(:id="`vexflow-review-wrapper-${idx}`")
@@ -143,9 +183,11 @@
                     v-col(cols="12" md="4")
                       p.text-h6 Number of Bars: {{ lesson.numberOfBars }}
 
-          v-btn(color="indigo" @click="submit" dark :loading="loading" :disabled="loading")
-            | Confirm
-          v-btn(to="/course/index") Cancel
+          v-row.justify-center
+            v-col
+              v-btn(color="indigo" @click="submit" dark :loading="loading" :disabled="loading")
+                | Confirm
+              v-btn(to="/course/index") Cancel
           v-row
             v-col
               p.error {{ error }}
@@ -192,14 +234,18 @@ export default {
         duration: '',
         description: '',
         video: null,
-        demoVideo: null,
+        videoPoster: null,
+        demo: null,
+        demoPoster: null,
         useScore: true,
         handler: null,
         timeSignature: '4/4',
         bpm: 60,
         numberOfBars: 4,
         melody: [],
-        demoStartTime: "0"
+        demoStartTime: "0",
+        scoreOption: 'vex',
+        musicXml: null
       }],
       durationRules: [
         v => !!v || "Duration is required",
@@ -279,7 +325,7 @@ export default {
         }
       }
       for (var j = 0; j< this.lessons.length; j++) {
-        if (this.lessons[j].melody.length == 0 && this.lessons[j].useScore && this.lessons[j].numberOfBars != 0) {
+        if (this.lessons[j].useScore && this.lessons[j].scoreOption == 'vex' && this.lessons[j].melody.length == 0 && this.lessons[j].useScore && this.lessons[j].numberOfBars != 0) {
           alert('Please input some notes or choose not to overlay score')
           return
         }
@@ -320,16 +366,31 @@ export default {
           await this.$store.dispatch('addLesson', lessonResponse.data.lesson)
 
           // create exercise that belongs to lessons
+          var tempLesson = this.lessons[i]
           var formData = new FormData()
           formData.set('name', '')
-          formData.set('melody', this.lessons[i].melody.join('-'))
-          formData.set('timeSignature', this.lessons[i].timeSignature)
-          formData.set('bpm', this.lessons[i].bpm)
+          formData.set('melody', tempLesson.melody.join('-'))
+          formData.set('timeSignature', tempLesson.timeSignature)
+          formData.set('bpm', tempLesson.bpm)
           formData.set('lid', lessonResponse.data.lesson.id)
-          formData.set('numberOfBars', this.lessons[i].numberOfBars)
-          formData.set('demoStartTime', parseInt(this.lessons[i].demoStartTime))
-          formData.append('video', this.lessons[i].video)
-          formData.append('demo', this.lessons[i].demoVideo)
+          formData.set('numberOfBars', tempLesson.numberOfBars)
+          formData.set('demoStartTime', parseInt(tempLesson.demoStartTime))
+          formData.set('useScore', tempLesson.useScore)
+          if (tempLesson.useScore) {
+            if (tempLesson.scoreOption == 'vex') {
+              formData.set('useXml', false)
+            } else {
+              formData.set('useXml', true)
+            }
+          }
+          formData.append('video', tempLesson.video)
+          if (tempLesson.videoPoster) {
+            formData.append('videoPoster', tempLesson.videoPoster)
+          } 
+          formData.append('demo', tempLesson.demo)
+          if (tempLesson.videoPoster) {
+            formData.append('demoPoster', tempLesson.demoPoster)
+          } 
 
           var exerciseResponse = await ExerciseService.create(formData)
 
@@ -363,29 +424,19 @@ export default {
       this.lesson.push(this.lessons.length)
     },
 
-    toggleVex (event, idx) {
-      if (event) {
-        if (this.lessons[idx].handler == null) {
-          var div = document.createElement("div")
-          div.id = `vexflow-wrapper-${idx}`
-          var pannel = document.getElementById(`pannel-content-${idx}`)
-          pannel.appendChild(div)
-          this.lessons[idx].handler = new vexUI.Handler(div.id, {
-            canvasProperties: {
-              id: div.id + '-canvas',
-              width: window.innerWidth * 5 / 6,
-              tabindex: 1
-            }
-          }).init();
-        } else {
-          var pannelToShow = document.getElementById(`pannel-content-${idx}`)
-          pannelToShow.classList.remove("hide")
-          document.getElementById(`vexflow-review-wrapper-${idx}`).classList.remove("hide")
-        }
-      } else {
-        var pannelToHide = document.getElementById(`pannel-content-${idx}`)
-        pannelToHide.classList.add("hide")
-        document.getElementById(`vexflow-review-wrapper-${idx}`).classList.add("hide")
+    showVex (event, idx) {
+      if (this.lessons[idx].handler == null) {
+        var div = document.createElement("div")
+        div.id = `vexflow-wrapper-${idx}`
+        var pannel = document.getElementById(`pannel-content-${idx}`)
+        pannel.appendChild(div)
+        this.lessons[idx].handler = new vexUI.Handler(div.id, {
+          canvasProperties: {
+            id: div.id + '-canvas',
+            width: window.innerWidth * 5 / 6,
+            tabindex: 1
+          }
+        }).init();
       }
     },
 
