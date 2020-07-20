@@ -7,16 +7,20 @@
 
       v-row.mb-12
         v-col(cols="8")
-          v-autocomplete(v-model='model' :items='items' :loading='isLoading' :search-input.sync='search' chips clearable hide-details hide-selected item-text='name' item-value='symbol' label='Search for a course...' solo append-icon="mdi-magnify")
+          v-autocomplete(v-model='model' :items='items' :loading='isLoading' :search-input.sync='search' clearable hide-details hide-selected item-text='name' item-value='symbol' label='Search for a course...' solo)
             template(v-slot:no-data)
               v-list-item
                 v-list-item-title
                   | Search for your favorite 
                   strong Course
-            template(v-slot:selection='{ attr, on, item, selected }')
-              v-chip.white--text(v-bind='attr' :input-value='selected' color='indigo' v-on='on')
-                v-icon(left) mdi-coin
-                span(v-text='item')
+            //- template(v-slot:selection='{ attr, on, item, selected }')
+            //-   v-chip.white--text(v-bind='attr' :input-value='selected' color='indigo' v-on='on')
+            //-     v-icon(left) mdi-coin
+            //-     span(v-text='item')
+            template(v-slot:item='{ item }')
+              v-list-item
+                span(v-text='item.title')
+                span(v-text='item.date')
 
       v-divider
 
@@ -46,18 +50,23 @@ export default {
   data () {
     return {
       isLoading: false,
-      items: ['piano', 'guitar'],
+      items: [{
+        title: 'piano',
+        date: '2017/01/01'
+      }, {
+        title: 'guitar',
+        date: '2017/01/01'
+      }],
       model: null,
       search: null,
-      tab: null,
     }
   },
 
   watch: {
     model (val) {
-      if (val != null) this.tab = 0
-      else this.tab = null
+      console.log(val)
     },
+
     search () {
       // Items have already been loaded
       if (this.items.length > 0) return

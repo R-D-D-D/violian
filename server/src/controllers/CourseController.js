@@ -1,5 +1,6 @@
 const {Course} = require('../models')
 const {User} = require('../models')
+const {Sequelize} = require('sequelize')
 
 module.exports = {
   async create (req, res) {
@@ -82,7 +83,10 @@ module.exports = {
 
   async listAll (req, res) {
     try {
-      const courses = await Course.findAll()
+      const courses = await Course.findAll({ 
+        order: Sequelize.literal('random()'), 
+        limit: 12 
+      })
 
       if (!courses) {
         return res.status(403).send({
@@ -98,6 +102,7 @@ module.exports = {
         courses: coursesJson
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to retrieve courses"
       })
