@@ -8,36 +8,19 @@ const s3 = new AWS.S3({
 
 module.exports = (sequelize, DataTypes) => {
   const Exercise = sequelize.define('Exercise', {
-    name: {
-      type: DataTypes.STRING
-    },
-    melody: {
-      type: DataTypes.TEXT
-    },
-    timeSignature: {
-      type: DataTypes.STRING
-    },
-    numberOfBars: {
-      type: DataTypes.INTEGER
-    },
-    bpm: {
-      type: DataTypes.INTEGER
-    },
-    demoUrl: {
-      type: DataTypes.STRING
-    },
-    demoPosterUrl: {
-      type: DataTypes.STRING
-    },
-    videoUrl: {
-      type: DataTypes.STRING
-    },
-    videoPosterUrl: {
-      type: DataTypes.STRING
-    },
-    demoStartTime: {
-      type: DataTypes.INTEGER
-    }
+    name: DataTypes.STRING,
+    melody: DataTypes.TEXT,
+    timeSignature:  DataTypes.STRING,
+    numberOfBars: DataTypes.INTEGER,
+    bpm: DataTypes.INTEGER,
+    demoUrl: DataTypes.STRING,
+    demoPosterUrl: DataTypes.STRING,
+    videoUrl:  DataTypes.STRING,
+    videoPosterUrl:  DataTypes.STRING,
+    demoStartTime: DataTypes.INTEGER,
+    useScore: DataTypes.BOOLEAN,
+    useXml: DataTypes.BOOLEAN,
+    musicXmlUrl: DataTypes.STRING
   })
 
   Exercise.associate = function (models) {

@@ -169,12 +169,17 @@
                   v-row
                     v-col(cols="12")
                       p.text-h6 Description: {{ lesson.description }}
-                  v-row(v-if="lesson.video && lesson.demo")
-                    v-col(cols="12" md="4")
-                      p.text-h6 Explanation Video: {{ lesson.video.originalname }}
-                    v-col(cols="12" md="4")
-                      p.text-h6 Demo Video: {{ lesson.demo.originalname }}
-                  v-row
+                  v-row(v-if="lesson.video && lesson.videoPoster")
+                    v-col(cols="12" md="6")
+                      p.text-h6 Explanation Video: {{ lesson.video.name }}
+                    v-col(cols="12" md="6")
+                      p.text-h6 Video Poster: {{ lesson.videoPoster.name }}
+                  v-row(v-if="lesson.demo && lesson.demoPoster")
+                    v-col(cols="12" md="6")
+                      p.text-h6 Demo Video: {{ lesson.demo.name }}
+                    v-col(cols="12" md="6")
+                      p.text-h6 Demo Poster: {{ lesson.demoPoster.name }}
+                  v-row(v-show="lesson.useScore && !lesson.useXml")
                     v-col
                       div(:id="`vexflow-review-wrapper-${idx}`")
                   v-row
@@ -383,14 +388,21 @@ export default {
               formData.set('useXml', true)
             }
           }
-          formData.append('video', tempLesson.video)
+          if (tempLesson.video) {
+            formData.append('video', tempLesson.video)
+          }
           if (tempLesson.videoPoster) {
             formData.append('videoPoster', tempLesson.videoPoster)
-          } 
-          formData.append('demo', tempLesson.demo)
-          if (tempLesson.videoPoster) {
+          }
+          if (tempLesson.demo) {
+            formData.append('demo', tempLesson.demo)
+          }
+          if (tempLesson.demoPoster) {
             formData.append('demoPoster', tempLesson.demoPoster)
-          } 
+          }
+          if (tempLesson.musicXml) {
+            formData.append('musicXml', tempLesson.musicXml)
+          }
 
           var exerciseResponse = await ExerciseService.create(formData)
 

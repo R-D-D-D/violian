@@ -31,13 +31,27 @@ Object.keys(db).forEach(function (modelName) {
   }
 })
 
+// declare hooks to delete exercises
+db.Lesson.beforeDestroy(async (lesson, options) => {
+  await db.Exercise.destroy({
+    where: {
+      LessonId: lesson.id
+    }
+  })
+})
+
+
 const umzug = new Umzug({
   migrations: {
     path: path.join(__dirname, '..', 'migrations'),
     params: [
       sequelize.getQueryInterface(),
       Sequelize
-    ]
+    ],
+    storage: 'sequelize',
+    storageOptions: {
+      sequelize: sequelize
+    }
   }
 });
 

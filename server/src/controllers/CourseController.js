@@ -145,7 +145,8 @@ module.exports = {
       await Course.destroy({
         where: {
           id: cid
-        }
+        },
+        individualHooks: true
       })
 
       res.send({

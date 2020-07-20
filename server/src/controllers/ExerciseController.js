@@ -29,10 +29,11 @@ module.exports = {
 
       const user = await lesson.Course.getTutor()
 
+      // console.log(req.files)
       // format to present score
       if (req.body.useXml) {
         if (req.files['musicXml'] && req.files['musicXml'].length > 0) {
-          var params = {
+          let params = {
               Bucket: config.aws.bucket,
               Key: `${user.email}/musicXml/${lesson.id}/${req.files['musicXml'][0].originalname}`,
               Body: req.files['musicXml'][0].buffer
@@ -41,11 +42,12 @@ module.exports = {
           // Uploading files to the bucket
           const response = await s3.upload(params).promise()
           req.body.musicXmlUrl = response.Location
+          console.log('in xml', response)
         }
       }
 
       if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) {
-        var params = {
+        let params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/demoPoster/${lesson.id}/${req.files['demoPoster'][0].originalname}`,
             Body: req.files['demoPoster'][0].buffer
@@ -57,7 +59,7 @@ module.exports = {
       }
 
       if (req.files['demo'] && req.files['demo'].length > 0) {
-        var params = {
+        let params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/demo/${lesson.id}/${req.files['demo'][0].originalname}`,
             Body: req.files['demo'][0].buffer
@@ -69,7 +71,7 @@ module.exports = {
       }
 
       if (req.files['video'] && req.files['video'].length > 0) {
-        var params = {
+        let params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/video/${lesson.id}/${req.files['video'][0].originalname}`,
             Body: req.files['video'][0].buffer
@@ -81,7 +83,7 @@ module.exports = {
       }
 
       if (req.files['videoPoster'] && req.files['videoPoster'].length > 0) {
-        var params = {
+        let params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/videoPoster/${lesson.id}/${req.files['videoPoster'][0].originalname}`,
             Body: req.files['videoPoster'][0].buffer
@@ -92,6 +94,7 @@ module.exports = {
         req.body.videoPosterUrl = response.Location
       }
 
+      console.log(req.body)
       const exercise = await lesson.createExercise(req.body)
       await exercise.setLesson(lesson)
 
@@ -120,7 +123,7 @@ module.exports = {
         })
       }
 
-      var exercises = await lesson.getExercises()
+      let exercises = await lesson.getExercises()
 
       if (!exercises) {
         return res.status(403).send({
@@ -179,8 +182,8 @@ module.exports = {
 
       const course = await exercise.Lesson.getCourse()
       const user = await course.getTutor()
-      var possibleAttr = ['demo', 'demoPoster', 'video', 'videoPoster']
-      var changedAttr = []
+      let possibleAttr = ['demo', 'demoPoster', 'video', 'videoPoster']
+      let changedAttr = []
       if (req.files['demo'] && req.files['demo'].length > 0) 
         changedAttr.push(0)
       if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) 
@@ -190,8 +193,8 @@ module.exports = {
       if (req.files['videoPoster'] && req.files['videoPoster'].length > 0) 
         changedAttr.push(3)
       
-      for (var i = 0; i < changedAttr.length; i++) {
-        var originalKey = null
+      for (let i = 0; i < changedAttr.length; i++) {
+        let originalKey = null
         if (changedAttr[i] == 0 && exercise.demoUrl)
           originalKey = exercise.demoUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
         if (changedAttr[i] == 1 && exercise.demoPosterUrl)
@@ -203,7 +206,7 @@ module.exports = {
 
         if (originalKey != null) {
           // delete the previous video
-          var deleteParams = {
+          let deleteParams = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/${originalKey}`
           }
@@ -211,7 +214,7 @@ module.exports = {
           await s3.deleteObject(deleteParams).promise()
         }
 
-        var params = {
+        let params = {
             Bucket: config.aws.bucket,
             Key: `${user.email}/${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/${req.files[`${possibleAttr[changedAttr[i]]}`][0].originalname}`,
             Body: req.files[`${possibleAttr[changedAttr[i]]}`][0].buffer

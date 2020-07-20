@@ -10,28 +10,16 @@
           h1.display-1.text-left Description
         v-col(cols="11")
           p {{ description }}
-        v-col
-          v-btn(@click="changeBars") Change Bars
 
       v-row.justify-center
         v-col(cols="11").text-center.pa-0
-          video.vjs-big-play-centered(ref="videoPlayer" class="video-js" @timeupdate="timeUpdated" :id="`vexflow-video-${lesson.id}`")
+          video.vjs-big-play-centered(ref="videoPlayer" class="video-js" :id="`video-${lesson.id}`")
       
-      v-row(v-if="melody[0] != ''")
-        v-col(cols="12")
-          .display-1 The score
-        v-col(cols="12")
-          div(:id="'vexflow-wrapper-' + lesson.id"  @click="enable_save_btn")
-
-      //- v-row(v-if="!is_student")
-      //-   v-col
-      //-     v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
-      //-       v-icon(left dark) mdi-content-save-all-outline
-      //-       | Save Lesson
-      //-   v-col
-      //-     v-btn.mt-5(x-large light :disabled="disable" @click="update_rhythms" :loading="save_btn_loading")
-      //-       v-icon(left dark) mdi-content-save-all-outline
-      //-       | Edit Lesson
+      v-row.justify-center(v-show="useScore")
+        v-col(cols="12" v-if="!useXml")
+          div(:id="'vexflow-wrapper-' + lesson.id")
+        v-col(cols="12" v-else)
+          div(:id="'osmd-wrapper-' + lesson.id")
 
     v-row.justify-center(v-if="user.isStudent")
       v-col.text-left(cols="11")
@@ -97,7 +85,7 @@
                 v-col
                   v-btn(large color="#ec5252" dark @click="create_post") Submit practice video
     
-    v-row.bpm-control.pt-2(:id="`slider-${lesson.id}`" :class="{ hide: (userinactive && !paused) }")
+    v-row.bpm-control.pt-2(:id="`slider-${lesson.id}`" :class="{ hide: hide }")
       v-icon(color="white" large) $vuetify.icons.custom_bpm
       v-slider.pb-2(min="20" max="180" vertical color="white" track-color="rgba(115, 133, 159, 0.5)" thumb-label="always" v-model="playbackBpm")
     
@@ -160,22 +148,23 @@ export default {
   props: ['lesson'],
   data () {
     return {
-      numberOfBars: 4,
-      bpm: 60,
-      timeSignature: '',
-      playbackBpm: 0,
-      handler: {},
+      // exercise info
+      numberOfBars: null,
+      bpm: null,
+      timeSignature: null,
       disable: true,
       save_btn_loading: false,
       add_btn_loading: false,
       description: '',
       melody: [],
-      videoHandler: null,
-      hide: true,
+      useScore: false,
+      useXml: false,
       notesInBars: null,
-      timePerTwoBars: 0,
-      demoStartTime: 0,
-      currentDisplayedBar: null,
+      playbackBpm: 0,
+      handler: {},
+      videoHandler: null,
+
+      // thread info
       thread: null,
       dialog: false,
       requiredRules: [
@@ -186,9 +175,18 @@ export default {
       grade: '',
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
       error: null,
-      userinactive: true,
-      paused: true,
+
+      // video events
+      hide: true,
+      timePerTwoBars: 0,
+      timePerBar: 0,
+      demoStartTime: 0,
+      demoEndTime: null,
+      currentDisplayedBar: 0,
+
+      // osmd renderer
       osmd: null,
+      videoOsmd: null,
       from: 1,
       to: 2
     }
@@ -220,30 +218,93 @@ export default {
   },
   methods: {
     timeUpdated (event) {
-      if (this.notesInBars) {
-        if (this.currentDisplayedBar == null) {
-          if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
+      let currTime = this.player.currentTime()
+      let offset = currTime - this.demoStartTime
+      let currBar = Math.floor(offset / this.timePerTwoBars)
+      if (currBar != this.currentDisplayedBar) {
+        if (currBar >= 0 && currBar < Math.floor(this.numberOfBars / 2)) {
+          this.currentDisplayedBar = currBar
+          this.videoHandler.importNotes(this.notesInBars[currBar * 2].concat(this.notesInBars[currBar * 2 + 1]), this.timeSignature)
+        } else if (currBar < 0 && this.currentDisplayedBar != 0) {
+          this.currentDisplayedBar = 0
+          this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1]), this.timeSignature)
+        } else if (currBar > Math.floor(this.numberOfBars / 2)) {
+          if (this.numberOfBars < 2) {
             this.currentDisplayedBar = 0
             this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1]), this.timeSignature)
           } else {
-            return
+            this.currentDisplayedBar = Math.floor(this.numberOfBars / 2)
+            this.videoHandler.importNotes(this.notesInBars[this.numberOfBars - 1].concat(this.notesInBars[this.numberOfBars - 1]), this.timeSignature)
           }
         }
+      }
+      // if (this.notesInBars) {
+      //   console.log('here')
+      //   if (this.currentDisplayedBar == 0) {
+      //     if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
+      //       console.log('here')
+      //       this.currentDisplayedBar = 0
+      //       this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1]), this.timeSignature)
+      //     } else {
+      //       return
+      //     }
+      //   }
 
-        if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars - this.currentDisplayedBar >= 1) {
-          var currBar = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
-          if (currBar >= this.notesInBars.length / 2)
-            return
+      //   if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars - this.currentDisplayedBar >= 1) {
+      //     var currBar = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
+      //     if (currBar >= this.notesInBars.length / 2)
+      //       return
+      //     this.currentDisplayedBar = currBar
+      //     this.videoHandler.importNotes(this.notesInBars[currBar * 2].concat(this.notesInBars[currBar * 2 + 1]), this.timeSignature)
+      //     return
+      //   }
+      //   if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars < this.currentDisplayedBar) {
+      //     var currBar1 = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
+      //     if (currBar1 < 0)
+      //       return
+      //     this.currentDisplayedBar = currBar1
+      //     this.videoHandler.importNotes(this.notesInBars[currBar1 * 2].concat(this.notesInBars[currBar1 * 2 + 1]), this.timeSignature)
+      //   }
+      // }
+    },
+
+    async timeUpdatedOsmd (event) {
+      let currTime = this.player.currentTime()
+      let offset = currTime - this.demoStartTime
+      let currBar = Math.floor(offset / this.timePerTwoBars)
+      if (currBar != this.currentDisplayedBar) {
+        if (currBar >= 0 && currBar < Math.floor(this.numberOfBars / 2)) {
+          console.log(currBar)
+          this.videoOsmd.setOptions({
+            drawFromMeasureNumber: (currBar * 2) + 1,
+            drawUpToMeasureNumber: (currBar * 2) + 2
+          })
           this.currentDisplayedBar = currBar
-          this.videoHandler.importNotes(this.notesInBars[currBar * 2].concat(this.notesInBars[currBar * 2 + 1]), this.timeSignature)
-          return
-        }
-        if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars < this.currentDisplayedBar) {
-          var currBar1 = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
-          if (currBar1 < 0)
-            return
-          this.currentDisplayedBar = currBar1
-          this.videoHandler.importNotes(this.notesInBars[currBar1 * 2].concat(this.notesInBars[currBar1 * 2 + 1]), this.timeSignature)
+          await this.videoOsmd.render()
+        } else if (currBar < 0 && this.currentDisplayedBar != 0) {
+          console.log(currBar)
+          this.videoOsmd.setOptions({
+            drawFromMeasureNumber: 1,
+            drawUpToMeasureNumber: 2
+          })
+          this.currentDisplayedBar = 0
+          await this.videoOsmd.render()
+        } else if (currBar > Math.floor(this.numberOfBars / 2)) {
+          console.log(currBar, 'from third clause')
+          if (this.numberOfBars < 2) {
+            this.videoOsmd.setOptions({
+              drawFromMeasureNumber: 0,
+              drawUpToMeasureNumber: 0
+            })
+            this.currentDisplayedBar = 0
+          } else {
+            this.videoOsmd.setOptions({
+              drawFromMeasureNumber: this.numberOfBars - 1,
+              drawUpToMeasureNumber: this.numberOfBars
+            })
+            this.currentDisplayedBar = Math.floor((currTime - this.demoStartTime) / this.timePerTwoBars)
+          }
+          await this.videoOsmd.render()
         }
       }
     },
@@ -292,26 +353,10 @@ export default {
       }
     },
 
-    async changeBars () {
-      // this.from += 2
-      // this.to += 2
-      // this.osmd.setOptions({
-      //   drawFromMeasureNumber: this.from,
-      //   drawUpToMeasureNumber: this.to
-      // })
-      // var score = document.getElementById(`video-score-${this.lesson.id}`)
-      // score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop - this.osmd.graphic.musicPages[0].boundingBox.boundingMarginRectangle.y) * 10 * -1}px`
-      // console.log('top', score.style.top)
-      // await this.osmd.render()
-      // console.log(this.osmd.graphic)
-      // console.log(this.osmd.graphic.musicPages[0].boundingBox)
-
-      // console.log(this.osmd.GraphicSheet.measureList.map(measure => measure[0].boundingBox))
-    },
-
     async drawOsmdScores () {
+      // video osmd
       var background = document.createElement("div")
-      background.setAttribute('id', `video-vexflow-background${this.lesson.id}`)
+      background.setAttribute('id', `video-overlay-background-${this.lesson.id}`)
       background.style.position = "absolute";
       background.style.background = "#FAFAFA";
       background.style.top = "0";
@@ -321,7 +366,7 @@ export default {
       background.style.overflow = "hidden"
 
       var scoreWrapper = document.createElement("div")
-      scoreWrapper.setAttribute('id', `video-scoreWrapper-${this.lesson.id}`)
+      scoreWrapper.setAttribute('id', `video-osmd-wrapper-${this.lesson.id}`)
       scoreWrapper.style.position = "absolute";
       scoreWrapper.style.background = "#FAFAFA";
       scoreWrapper.style.top = "0";
@@ -331,14 +376,13 @@ export default {
       var score = document.createElement('div')
       background.appendChild(scoreWrapper)
       scoreWrapper.appendChild(score)
-      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(background)
+      document.getElementById(`video-${this.lesson.id}`).appendChild(background)
 
-
-      this.osmd = new OpenSheetMusicDisplay(
+      this.videoOsmd = new OpenSheetMusicDisplay(
         score, 
         {
-          drawFromMeasureNumber: 1,
-          drawUpToMeasureNumber: 2,
+          drawFromMeasureNumber: this.from,
+          drawUpToMeasureNumber: this.to,
           drawComposer: false,
           drawTitle: false,
           renderSingleHorizontalStaffline: true,
@@ -349,43 +393,56 @@ export default {
           drawingParameters: 'compacttight'
         }
       )
-      let scoreXml = await axios.get("https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/twinkle-twinkle-little-star.musicxml");    
-      // let scoreXml = await axios.get("https://opensheetmusicdisplay.github.io/demo/sheets/MuzioClementi_SonatinaOpus36No3_Part1.xml");
+      let scoreXml = await axios.get(this.lesson.exercises[0].musicXmlUrl);    
 
-      await this.osmd.load(scoreXml.data);
-      this.scoreLoading = false;
-      await this.$nextTick();
-      // this.osmd.zoom = 1.3
-      // this.osmd.setCustomPageFormat(1, .3)
-      // await this.osmd.preCalculate();
-      // score.style.top = `${(this.osmd.graphic.musicPages[0].boundingBox.borderMarginTop + this.osmd.graphic.musicPages[0].boundingBox.absolutePosition.y) * 10 * -1}px`
-      console.log('top', score.style.top)
-      await this.osmd.render();
-      // await this.osmd.render();
-      console.log(this.osmd.graphic)
-      console.log(this.osmd.graphic.musicPages[0].musicSystems)
-      console.log(this.osmd)
-      // console.log(this.osmd.graphic)
+      await this.videoOsmd.load(scoreXml.data);
+      await this.$nextTick()
+      this.videoOsmd.zoom = 1.2
+      // this.videoOsmd.setCustomPageFormat(1, .3)
+      // await this.videoOsmd.preCalculate() 
+      // score.style.top = `${(this.videoOsmd.graphic.musicPages[0].boundingBox.borderMarginTop + this.videoOsmd.graphic.musicPages[0].boundingBox.absolutePosition.y) * 10 * -1}px`
+      // console.log('top', score.style.top)
+      await this.videoOsmd.render()
+      console.log(this.videoOsmd.graphic)
+      console.log(this.videoOsmd.graphic.music)
+      // console.log(this.videoOsmd.graphic.musicPages[0].musicSystems)
+      // console.log(this.videoOsmd)
+
+
+      this.osmd = new OpenSheetMusicDisplay(
+        `osmd-wrapper-${this.lesson.id}`, 
+        {
+          drawPartNames: false,
+          drawComposer: false
+        }
+      )
+      await this.osmd.load(scoreXml.data)
+      await this.$nextTick()
+      this.osmd.zoom = 1.2
+      await this.osmd.render()
+
     },
 
     drawScores (isRedraw) {
       // TODO implement this
-      if (isRedraw) {
-        const score = document.getElementById(`video-vexflow-wrapper${this.lesson.id}`)
-        while (score.firstChild) {
-          score.removeChild(score.lastChild);
-        }
-        const videoScore = document.getElementById(`vexflow-wrapper-${this.lesson.id}`)
-        while (videoScore.firstChild) {
-          videoScore.removeChild(videoScore.lastChild);
-        }
-      }
+      // if (isRedraw) {
+      //   const score = document.getElementById(`video-vexflow-wrapper${this.lesson.id}`)
+      //   while (score.firstChild) {
+      //     score.removeChild(score.lastChild);
+      //   }
+      //   const videoScore = document.getElementById(`vexflow-wrapper-${this.lesson.id}`)
+      //   while (videoScore.firstChild) {
+      //     videoScore.removeChild(videoScore.lastChild);
+      //   }
+      // }
       if (this.user.isStudent) {
         this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
           numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars),
           canEdit: false
         }).init();
       } else {
+        console.log(`vexflow-wrapper-${this.lesson.id}`)
+        console.log(document.getElementById(`vexflow-wrapper-${this.lesson.id}`))
         this.handler = new vexUI.Handler(`vexflow-wrapper-${this.lesson.id}`, {
           numberOfStaves: parseInt(this.lesson.exercises[0].numberOfBars)
         }).init();
@@ -394,29 +451,31 @@ export default {
       this.notesInBars = this.handler.notesToBars(this.melody, this.timeSignature)
 
       var wrapper = document.createElement("div")
-      wrapper.setAttribute('id', `video-vexflow-wrapper${this.lesson.id}`)
+      wrapper.setAttribute('id', `video-vexflow-wrapper-${this.lesson.id}`)
       wrapper.style.position = "absolute";
       wrapper.style.background = "#FAFAFA";
       wrapper.style.top = "0";
       wrapper.style.left = "0";
       wrapper.style.right = "0";
-      this.videoHandler = new vexUI.Handler(`video-vexflow-wrapper${this.lesson.id}`, {
+      this.videoHandler = new vexUI.Handler(`video-vexflow-wrapper-${this.lesson.id}`, {
         canEdit: false,
         numberOfStaves: 2,
         lessStaveHeight: true,
         canvasProperties: {
-          id: `video-vexflow-wrapper${this.lesson.id}` + "-canvas",
+          id: `video-vexflow-wrapper-${this.lesson.id}` + "-canvas",
           width: this.$refs.videoPlayer.offsetWidth,
           height: 80 * vexUI.scale,
           tabindex: 1
         }
       }, wrapper).init();
 
-      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(wrapper)
+      this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1])  , this.timeSignature)
+
+      document.getElementById(`video-${this.lesson.id}`).appendChild(wrapper)
     }
   },
 
-  mounted: function () {
+  mounted: async function () {
     OpenSheetMusicDisplay.prototype.preCalculate = function () {
       if (!this.graphic) {
           throw new Error("OpenSheetMusicDisplay: Before rendering a music sheet, please load a MusicXML file");
@@ -449,14 +508,6 @@ export default {
       // Calculate again
       this.graphic.reCalculate();
     }
-    // const paymentEl = document.getElementById('card-element')
-    this.$on("play_sequence", () => {
-      tone.init();
-      // TODO disable edit when playing
-      // this.handler.disableEdit();
-      tone.playSequence(this.time_signature, this.bpm, this.handler.exportNotes(), parseInt(this.numberOfBars) + 1, this.handler);
-      // this.handler.enableEdit();
-    });
 
     const player = videojs(this.$refs.videoPlayer, {
         controls: true,
@@ -467,7 +518,8 @@ export default {
             type: "video/mp4"
           }
         ],
-        playbackRates: [0.8, 0.9, 1, 1.1, 1.2]
+        playbackRates: [0.8, 0.9, 1, 1.1, 1.2],
+        poster: this.lesson.exercises[0].demoPosterUrl ? this.lesson.exercises[0].demoPosterUrl : null
       }, () => {
         // console.log('onPlayerReady', this)
         player.hotkeys({
@@ -476,53 +528,75 @@ export default {
           enableModifiersForNumbers: false
         })
         player.on('userinactive', () => {
-          this.userinactive = true
+          if (player.paused()) {
+            this.hide = false
+          } else {
+            this.hide = true
+          }
         })
         player.on('useractive', () => {
-          this.userinactive = false
+          this.hide = false
         })
         player.on('play', () => {
-          this.userinactive = false
-          this.paused = false
+          this.hide = false
+        })
+        player.on('firstplay', () => {
+          this.hide = false
         })
         player.on('ratechange', () => {
           this.playbackBpm = this.bpm * this.player.playbackRate()
         })
-        player.on('pause', () => {
-          this.paused = true
-        })
+        if (this.useScore && this.useXml) {
+          player.on('timeupdate', (e) => {
+            this.timeUpdatedOsmd(e)
+          })
+        } else if (this.useScore && !this.useXml) {
+          player.on('timeupdate', (e) => {
+            this.timeUpdated(e)
+          })
+        }
     });
 
 
     this.player = player
+    let exercise = this.lesson.exercises[0]
 
-    //window.addEventListener('resize', this.onResize);
-
-    this.melody = this.lesson.exercises[0].melody.split('-')
-    this.bpm = parseInt(this.lesson.exercises[0].bpm)
-    this.playbackBpm = this.bpm
-    this.timeSignature = this.lesson.exercises[0].timeSignature
-    if (this.melody[0] != "") {
-      // this.drawScores()
-      this.drawOsmdScores()
-      document.getElementById(`vexflow-video-${this.lesson.id}`).appendChild(document.getElementById(`slider-${this.lesson.id}`))
-      document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
-      document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
-      document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
-
-      var doit;
-      // window.onresize = () => {
-      //   clearTimeout(doit)
-      //   doit = setTimeout(() => {
-      //     this.drawScores(true)
-      //   }, 200)
-      // }
+    if (exercise.useScore) {
+      this.useScore = exercise.useScore
+      this.useXml = exercise.useXml
+      this.bpm = parseInt(exercise.bpm)
+      this.playbackBpm = this.bpm
+      this.demoStartTime = exercise.demoStartTime
+      if (exercise.useXml) {
+        await this.drawOsmdScores()
+        let timeSignature = this.osmd.sheet.sourceMeasures[0].activeTimeSignature
+        this.timeSignature = `${timeSignature.numerator}/${timeSignature.denominator}`
+        this.numberOfBars = this.osmd.sheet.sourceMeasures.length
+      } else {
+        this.melody = exercise.melody.split('-')
+        this.timeSignature = exercise.timeSignature
+        this.numberOfBars = parseInt(exercise.numberOfBars)
+        this.drawScores()
+      }
+      this.timePerBar = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60)
+      this.timePerTwoBars = this.timePerBar * 2
+      this.demoEndTime = this.demoStartTime + (this.timePerBar * this.numberOfBars)
     }
-    this.description = this.lesson.description
-    this.demoStartTime = this.lesson.exercises[0].demoStartTime
-    this.numberOfBars = parseInt(this.lesson.exercises[0].numberOfBars)
 
-    this.timePerTwoBars = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60) * 2
+    this.description = this.lesson.description
+
+    document.getElementById(`video-${this.lesson.id}`).appendChild(document.getElementById(`slider-${this.lesson.id}`))
+    document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
+    document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
+    document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
+
+    // var doit;
+    // window.onresize = () => {
+    //   clearTimeout(doit)
+    //   doit = setTimeout(() => {
+    //     this.drawScores(true)
+    //   }, 200)
+    // }
   },
 
   beforeDestroy() {
