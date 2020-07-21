@@ -11,6 +11,7 @@
     "aws-sdk": "^2.708.0",
     "axios": "^0.19.2",
     "core-js": "^3.6.5",
+    "lodash": "^4.17.19",
     "opensheetmusicdisplay": "^0.8.2",
     "tone": "^13.8.25",
     "video.js": "^7.8.3",

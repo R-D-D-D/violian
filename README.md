@@ -24,6 +24,7 @@
   - POST `/lesson/new { name, duration, description, cid }` - `{ lesson: <lessonObj> }`
   - PUT `/lesson/edit { lessonObj }` - `{ lesson: <lessonObj> }`
   - GET `/lesson/list?cid=` - `{ lessons: [<lessonObj>] }`
+  - GET `/listall?search=` - `{ courses: [<courseObj>] }`
   - DELETE `/lesson/del?lid=` - `{ data: ok }`
 
 ## exercises

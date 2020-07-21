@@ -1,25 +1,18 @@
 <template lang="pug">
   div
-    v-card
-      //- v-row.justify-center
-      //-   v-col(cols="6")
-      //-     form#payment-form
-      //-       #card-element(ref="card")
-      v-row.justify-center
-        v-col(cols="11")
-          h1.display-1.text-left Description
-        v-col(cols="11")
-          p {{ description }}
-
-      v-row.justify-center
-        v-col(cols="11").text-center.pa-0
-          video.vjs-big-play-centered(ref="videoPlayer" class="video-js" :id="`video-${lesson.id}`")
-      
-      v-row.justify-center(v-show="useScore")
-        v-col(cols="12" v-if="!useXml")
-          div(:id="'vexflow-wrapper-' + lesson.id")
-        v-col(cols="12" v-else)
-          div(:id="'osmd-wrapper-' + lesson.id")
+    //- v-row.justify-center
+    //-   v-col(cols="6")
+    //-     form#payment-form
+    //-       #card-element(ref="card")
+    v-row.justify-center
+      v-col(cols="11").text-center.pa-0
+        video.vjs-big-play-centered(ref="videoPlayer" class="video-js" :id="`video-${lesson.id}`")
+    
+    v-row.justify-center(v-show="useScore")
+      v-col(cols="12" v-if="!useXml")
+        div(:id="'vexflow-wrapper-' + lesson.id")
+      v-col(cols="12" v-else)
+        div(:id="'osmd-wrapper-' + lesson.id")
 
     v-row.justify-center(v-if="user.isStudent")
       v-col.text-left(cols="11")

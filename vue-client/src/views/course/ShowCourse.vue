@@ -1,38 +1,73 @@
 <template lang="pug">
-  v-container#show-course(v-if="course" fluid)
-    div(v-if="is_student")
-      v-row.py-3
-        v-col
-          h1.font-weight-bold {{ course.name }}
-      v-row(v-if="!isSubscribed")
-        v-col
-          v-btn(x-large color="#ec5252" dark @click="subscribe") Buy now
+  div#show-course(v-if="course" fluid)
+    v-container#course-info(fluid)
+      v-row.px-sm-16.mx-md-8
+        v-col(cols="12" md="8")
+          v-row
+            v-col.text-left
+              h1(style="font-size: 40px;").font-weight-bold {{ course.name }}
+          v-row
+            v-col.pt-0
+              h3 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce aliquam orci sed mi tempus ullamcorper. Quisque vitae lacus ut ipsum ultrices rhoncus quis a arcu. Sed placerat nisl sed tellus malesuada, id ornare augue vulputate. Pellentesque laoreet ipsum quis tempor aliquet.
       
-      v-row.justify-center
-        v-col.pa-0(cols="11")
-          v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
-            v-tab.text-h5(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
-          v-tabs-items(v-model="tab" v-if="!isSubscribed")
-            v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id")
-              lesson(:lesson="lesson")
-          v-tabs-items(v-model="tab" v-else)
-            v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id" :disabled="idx != 0")
-              lesson(:lesson="lesson")
+          v-row
+            v-col.py-0
+              h4.font-weight-bold Created by: {{ course.TutorId }}
+            
+          v-row
+            v-col(sm="4" lg="3")
+              v-row
+                v-col.pr-0(sm="4" md="3")
+                  v-icon(color="white" size="30") mdi-guitar-acoustic
+                v-col.pl-0.my-auto(sm="8" md="9")
+                  p.ma-0 Instrument: Drum
+            v-col(sm="4" lg="3")
+              v-row
+                v-col.pr-0(sm="4" md="3")
+                  v-icon(color="white" size="24") mdi-earth
+                v-col.my-auto(sm="8" md="9")
+                  p.ma-0 English
+            v-col(sm="4" lg="3")
+              v-row
+                v-col.pr-0(sm="4" md="3")
+                  v-icon(color="white" size="24") mdi-calendar-clock
+                v-col.my-auto(sm="8" md="9")
+                  p.ma-0 English
+
+        v-col(cols="12" md="4" v-if="is_student && !isSubscribed")
+          v-card
+            v-img.white--text.align-end(gradient="to top right, rgba(0,0,0,.5), rgba(0,0,0,.5)" height="200px" src='https://images.pexels.com/photos/1246437/pexels-photo-1246437.jpeg?cs=srgb&dl=close-up-photo-of-person-playing-piano-1246437.jpg&fm=jpg' @click="alert('hey')" style="cursor: pointer;")
+              div(style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;")
+               img#play-button(:src="require('../../assets/play_button.png')" style="position: absolute; width: 60px; left: calc(50% - 30px); top: calc(50% - 30px); height: 60px;" color="white" size="62" )
+               h3.text--white(style="bottom: 12px; text-align: center; position: absolute; left:0; right:0;") Preview this course
+            v-row
+              v-col.text-left
+                h1.pl-5.font-weight-bold(style="font-size: 36px;") S${{ course.price.toFixed(2) }}
+            v-row
+              v-col.text-center
+                v-btn(color="#ec5252" dark @click="subscribe" style="width:90%" x-large) Buy now
+
+    v-container(fluid)
+      v-row.justify-center(no-gutters)
+        v-col.pa-0(cols="12" md="9")
+          lesson(:lesson="course.lessons[0]")
+        //-   v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
+        //-     v-tab.text-h5(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
+        //-   v-tabs-items(v-model="tab" v-if="!isSubscribed")
+        //-     v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id")
+        //-       lesson(:lesson="lesson")
+        //-   v-tabs-items(v-model="tab" v-else)
+        //-     v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id" :disabled="idx != 0")
+          //- lesson(:lesson="lesson")
+        v-col.pa-0(cols="12" md="3")
+          
         
-    
-    v-container(v-else fluid)
-      v-row.py-3
-        v-col
-          .text-h2.font-weight-bold {{ course.name }}
-      
-      v-row 
-        v-col
-          v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
-            v-tab.text-h4(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
-            v-tab.text-h4(:key="'+'")
-              v-icon(left) mdi-plus
-              | New Lesson
-          v-tabs-items(v-model="tab")
+          //- v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
+          //-   v-tab.text-h4(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
+          //-   v-tab.text-h4(:key="'+'")
+          //-     v-icon(left) mdi-plus
+          //-     | New Lesson
+          //- v-tabs-items(v-model="tab")
             v-tab-item(v-for="lesson in course.lessons" :key="lesson.id")
               lesson(:lesson="lesson")
             v-tab-item(:key="'+'")
@@ -221,6 +256,15 @@ export default {
 }
 
 video:focus {
-  outline: none
+  outline: none;
+}
+
+#course-info {
+  background-color: #1e1e1c;
+  color: white;
+}
+
+#play-button:hover {
+  opacity: 0.95;
 }
 </style>

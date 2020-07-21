@@ -1,6 +1,7 @@
 const {Course} = require('../models')
 const {User} = require('../models')
 const {Sequelize} = require('sequelize')
+const {Op} = require('sequelize')
 
 module.exports = {
   async create (req, res) {
@@ -83,10 +84,28 @@ module.exports = {
 
   async listAll (req, res) {
     try {
-      const courses = await Course.findAll({ 
-        order: Sequelize.literal('random()'), 
-        limit: 12 
-      })
+      let courses = null
+      if (req.query.search) {
+        courses = await Course.findAll({
+          where: {
+            [Op.or]: [
+              'name', 'instrument'
+            ].map(key => {
+              return {
+                [key] : {
+                  [Op.like]: `%${req.query.search}%`
+                }
+              }
+            })
+          },
+          limit: 12
+        })
+      } else {
+        courses = await Course.findAll({ 
+          order: Sequelize.literal('random()'), 
+          limit: 12
+        })
+      }
 
       if (!courses) {
         return res.status(403).send({

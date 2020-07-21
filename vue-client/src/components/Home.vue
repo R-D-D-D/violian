@@ -7,7 +7,7 @@
 
       v-row.mb-12
         v-col(cols="8")
-          v-autocomplete(v-model='model' :items='items' :loading='isLoading' :search-input.sync='search' clearable hide-details hide-selected item-text='name' item-value='symbol' label='Search for a course...' solo)
+          v-autocomplete(v-model='model' :items='items' :loading='isLoading' :search-input.sync='search' cache-items multiple clearable hide-details hide-selected item-text='name' item-value='symbol' label='Search for a course...' solo)
             template(v-slot:no-data)
               v-list-item
                 v-list-item-title
@@ -18,9 +18,8 @@
             //-     v-icon(left) mdi-coin
             //-     span(v-text='item')
             template(v-slot:item='{ item }')
-              v-list-item
-                span(v-text='item.title')
-                span(v-text='item.date')
+              v-list-item(@click="go_to_course($event, item.id)")
+                v-list-item-content {{ item.name }}
 
       v-divider
 
@@ -44,6 +43,8 @@
 
 <script>
 import { mapState } from 'vuex'
+import CourseService from '@/services/CourseService'
+import _ from 'lodash'
 
 export default {
   name: 'Home',
@@ -51,11 +52,14 @@ export default {
     return {
       isLoading: false,
       items: [{
-        title: 'piano',
-        date: '2017/01/01'
+        name: 'hey',
+        id: 1
       }, {
-        title: 'guitar',
-        date: '2017/01/01'
+        name: 'yo',
+        id: 2
+      }, {
+        name: 'yo',
+        id: 3
       }],
       model: null,
       search: null,
@@ -63,27 +67,22 @@ export default {
   },
 
   watch: {
-    model (val) {
-      console.log(val)
+    model (value) {
+      console.log(value)
     },
 
-    search () {
-      // Items have already been loaded
-      if (this.items.length > 0) return
-
-      this.isLoading = true
-
-      // Lazily load input items
-      fetch('https://api.coingecko.com/api/v3/coins/list')
-        .then(res => res.clone().json())
-        .then(res => {
-          this.items = res
-        })
-        .catch(err => {
+    search: _.debounce(async function (value) {
+      if (value != '' &&  value != undefined) {
+        this.isLoading = true
+        try {
+          this.items = (await CourseService.listAll(value)).data.courses
+          this.isLoading = false
+        } catch (err) {
+          this.isLoading = false
           console.log(err)
-        })
-        .finally(() => (this.isLoading = false))
-    },
+        }
+      }
+    }, 700)
   },
 
   computed: mapState(['user', 'allCourses']),

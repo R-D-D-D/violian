@@ -9,8 +9,12 @@ export default {
     return Api().get(`course/list?uid=${userId}`)
   },
 
-  listAll () {
-    return Api().get('course/listall')
+  listAll (value) {
+    if (value) {
+      return Api().get(`course/listall?search=${value}`)
+    } else {
+      return Api().get(`course/listall`)
+    }
   },
 
   show (cid) {

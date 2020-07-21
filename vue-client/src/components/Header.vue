@@ -1,29 +1,26 @@
 <template lang="pug">
   div
     v-app-bar(
-      dark
-      color="indigo"
+      light
       app
-      dense
       absolute
+      color="white"
     )
       v-app-bar-nav-icon(@click="drawer = true")
 
-      router-link.pl-3(to="/")
-        v-toolbar-title Rhythmy
+      router-link.pl-3#logo(to="/")
+        v-toolbar-title.font-weight-bold VIOLIAN
 
       v-spacer
 
       v-toolbar-items(v-if="!$store.state.isUserLoggedIn")
-        v-btn(depressed to="/register" color="indigo") Register
-        v-btn(depressed to="/login" color="indigo") Log In
+        v-btn(depressed to="/register" color="white") Register
+        v-btn(depressed to="/login" color="white") Log In
       v-toolbar-items(v-else)
-        v-btn(depressed to="/course/index" color="indigo") My Courses
-        v-btn(depressed to="/courses/threads/index" color="indigo" style="position: relative;") Notifications
+        v-btn(depressed to="/course/index" color="white") My Courses
+        v-btn(depressed to="/courses/threads/index" style="position: relative;" color="white") Notifications
           #notification {{ notifications }}
-
-
-        v-btn(depressed @click="logout" color="indigo") Log Out
+        v-btn(depressed @click="logout" color="white") Log Out
     
     v-navigation-drawer(v-model='drawer' absolute temporary)
       v-list(nav dense v-if="$store.state.isUserLoggedIn")
@@ -91,9 +88,9 @@ export default {
 </script>
 
 <style scoped>
-a, a:link, a:visited, a:active, a:hover {
+#logo, #logo:link, #logo:visited, #logo:active, #logo:hover {
   text-decoration: none;
-  color: white;
+  color: #1e1e1c;
 }
 
 #notification {
@@ -106,5 +103,7 @@ a, a:link, a:visited, a:active, a:hover {
   border-radius: 50%;
   font-size: 14px;
   line-height: 1.35rem;
+  color: white;
+  text-align: center;
 }
 </style>
