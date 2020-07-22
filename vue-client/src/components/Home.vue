@@ -28,7 +28,7 @@
           h2 Popular Courses
         v-col(v-for="course in allCourses" sm="6" md="4" lg="3")
           v-card.mx-auto
-            v-img.white--text.align-end(height="200px" src='https://images.pexels.com/photos/1246437/pexels-photo-1246437.jpeg?cs=srgb&dl=close-up-photo-of-person-playing-piano-1246437.jpg&fm=jpg')
+            v-img.white--text.align-end(height="200px" src='https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/standupforsingapore.jpg')
               v-card-title(style="text-shadow: 1px 1px 2px #000000;") {{ course.name }}
             v-card-subtitle.pb-0.text-left Drum
             v-card-text.text-left.text--primary.pb-0
