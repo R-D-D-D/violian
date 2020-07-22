@@ -6,7 +6,7 @@
       //-     v-toolbar-title(dark v-bind="attrs" v-on="on") Login form
       //-   span Log in
       v-card-text
-        v-form(ref="form" v-on:submit.prevent="register")
+        v-form.text-center(ref="form" v-on:submit.prevent="register")
           v-text-field(
             label='Username' 
             name='username' 

@@ -16,7 +16,7 @@
       //-     v-toolbar-title(dark v-bind='attrs' v-on='on') Login form
       //-   span Log in
       v-card-text
-        v-form(ref="form" v-on:submit.prevent="login")
+        v-form.text-center(ref="form" v-on:submit.prevent="login")
           v-text-field(
             label='Email' 
             name='email' 
@@ -35,7 +35,7 @@
           v-btn.mt-5(:loading='loading' :disabled="loading" type="submit") Log In
           v-spacer
       v-card-text
-        .error(v-html="error") {{ error }}
+        .error.text-center(v-html="error") {{ error }}
 </template>
 
 <script>
@@ -51,12 +51,12 @@ export default {
   },
   data () {
     return {
-      email: 'wangrunding@gmail.com',
+      email: '',
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
       ],
-      password: '12345678',
+      password: '',
       passwordRules: [
         v => !!v || 'Password is required',
       ],
@@ -102,8 +102,8 @@ export default {
           name: 'home'
         })
       } catch (err) {
-        console.log(err)
-        //this.error = err.response.data.error
+        // console.log(err)
+        this.error = err.response.data.error
         this.loading = false
       }
     }
