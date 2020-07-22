@@ -16,6 +16,7 @@ import Payment from "../views/Payment"
 import store from "../store/store"
 import AdvancedPayment from "../views/AdvancedPayment"
 import OSMD from "../components/OSMD"
+import ShowLesson from "../components/Course/ShowLesson"
 
 Vue.use(VueRouter);
 
@@ -44,6 +45,12 @@ const routes = [
     path: '/course/show/:course_id',
     name: 'showcourse',
     component: ShowCourse
+  },
+  {
+    path: '/course/show/:course_id/lesson/:lesson_id',
+    name: 'showlesson',
+    component: ShowLesson,
+    props: true
   },
   {
     path: '/course/index',

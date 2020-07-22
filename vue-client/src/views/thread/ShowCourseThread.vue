@@ -7,7 +7,7 @@
           v-expansion-panels.elevation-2(hover multiple v-model="currentThread")
             v-expansion-panel(v-for='(thread, i) in threads' :key='thread.id')
               v-expansion-panel-header.font-weight-bold(style="font-size: 18px;") {{ course.lessons[i].name }}
-              v-expansion-panel-content
+              v-expansion-panel-content.px-6
                 v-list(v-if="thread.posts")
                   v-list-item(v-for='(post, idx) in thread.posts' :key='post.id')
                     v-list-item-content.pb-0

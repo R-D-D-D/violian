@@ -39,7 +39,7 @@
               v-expansion-panels.mb-5(multiple focusable v-model="lesson")
                 v-expansion-panel(v-for='(lesson, idx) in lessons' :key='idx' @click="")
                   v-expansion-panel-header.text-h4 Lesson {{ idx + 1}}: {{ lesson.name }}
-                  v-expansion-panel-content
+                  v-expansion-panel-content.px-6
                     v-form.mt-5(:ref="`lessonForm${idx}`")
                       v-row
                         v-col(cols="12" md="4")

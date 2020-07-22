@@ -565,6 +565,13 @@ Vex.UI.Handler.prototype.notesToBars = function (notes, timeSignature) {
 				tickables = []
 				barNum++
 				accumDuration = dur
+			} else if (accumDuration + dur == barDuration) {
+				if (i == notes.length - 1) {
+					tickables.push(notes[i])
+					notesInBars.push(tickables)
+					barNum++
+					return notesInBars
+				}
 			} else {
 				accumDuration += dur
 			}

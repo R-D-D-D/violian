@@ -12,7 +12,7 @@
             v-btn(outlined color='indigo' @click="deleteCourse($event, course)")
               v-icon mdi-trash-can-outline
       v-list(v-else)
-        v-list-item(v-for="course in userSubscribedCourses" :key="course.name" @click="showCourse($event, course.id)")
+        v-list-item(v-for="course in userSubscribedCourses" :key="course.id" @click="showCourse($event, course.id, course.lessons[0].id)")
           v-list-item-content
             v-list-item-title.text-h5.py-0(v-text="course.name")
           v-list-item-content
@@ -59,8 +59,14 @@ export default {
     'panel': Panel
   },
   methods: {
-    showCourse (event, id) {
-      this.$router.push(`/course/show/${id}`)
+    showCourse (event, id, lid) {
+      this.$router.push({
+        name: `showlesson`,
+        params: {
+          course_id: id,
+          lesson_id: lid
+        }
+      })
     },
 
     async deleteCourse (event, course) {

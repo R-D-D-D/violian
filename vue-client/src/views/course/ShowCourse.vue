@@ -1,11 +1,11 @@
 <template lang="pug">
   div#show-course(v-if="course" fluid)
     v-container#course-info(fluid)
-      v-row.px-sm-16.mx-md-8
+      v-row.px-sm-16.mx-md-8.mx-lg-16
         v-col(cols="12" md="8")
           v-row
             v-col.text-left
-              h1(style="font-size: 40px;").font-weight-bold {{ course.name }}
+              h1(style="font-size: 40px; line-height: 1.2;").font-weight-bold {{ course.name }}
           v-row
             v-col.pt-0
               h3 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce aliquam orci sed mi tempus ullamcorper. Quisque vitae lacus ut ipsum ultrices rhoncus quis a arcu. Sed placerat nisl sed tellus malesuada, id ornare augue vulputate. Pellentesque laoreet ipsum quis tempor aliquet.
@@ -19,7 +19,7 @@
               v-row
                 v-col.pr-0(sm="4" md="3")
                   v-icon(color="white" size="30") mdi-guitar-acoustic
-                v-col.pl-0.my-auto(sm="8" md="9")
+                v-col.my-auto(sm="8" md="9")
                   p.ma-0 Instrument: Drum
             v-col(sm="4" lg="3")
               v-row
@@ -32,7 +32,7 @@
                 v-col.pr-0(sm="4" md="3")
                   v-icon(color="white" size="24") mdi-calendar-clock
                 v-col.my-auto(sm="8" md="9")
-                  p.ma-0 English
+                  p.ma-0 Last updated: {{ new Date(course.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
 
         v-col(cols="12" md="4" v-if="is_student && !isSubscribed")
           v-card
@@ -45,7 +45,117 @@
                 h1.pl-5.font-weight-bold(style="font-size: 36px;") S${{ course.price.toFixed(2) }}
             v-row
               v-col.text-center
-                v-btn(color="#ec5252" dark @click="subscribe" style="width:90%" x-large) Buy now
+                v-btn(color="#ec5252" dark @click="subscribe" style="width:90%" x-large v-if="course.price == 0") Enroll Now
+                v-btn(color="#ec5252" dark @click="subscribe" style="width:90%" x-large v-else) Buy Now
+        v-col.my-auto(cols="12" md="4" v-else)
+          v-row
+            v-col.text-center
+              v-btn(color="#26A69A" dark style="width:90%" x-large @click="goToLesson($event, course.lessons[0])") Start Learning!
+
+    v-container(fluid)
+      v-row.px-sm-16.mx-md-8.mx-lg-16
+        v-col(cols="12")
+          v-sheet.px-16.py-5(color="#fbfbf8" rounded style="border: 1px solid #E0E0E0")
+            v-row
+              v-col.py-0.px-0
+                h2.py-3.pl-0(style="color: #3c3b37; font-size: 30px;") What you will learn
+            v-row
+              v-col.py-0.px-0(cols="12" md="6")
+                v-row
+                  v-col.py-2.pr-0(cols="1")
+                    v-icon.d-inline.mb-2(size="16" color="#ec5252") mdi-star
+                  v-col.py-2.pr-0(cols="10")
+                    p.d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle;") mdi-star
+              v-col.py-0.px-0(cols="12" md="6")
+                v-row
+                  v-col.py-2.pr-0(cols="1")
+                    v-icon.d-inline.mb-2(size="16" color="#ec5252") mdi-star
+                  v-col.py-2.pr-0(cols="10")
+                    .d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle; width: 100%;")  Lorem ipsum dolor sit amet, consectetur adipiscing elit
+    
+    v-container(fluid)
+      v-row.px-sm-16.mx-md-8.mx-lg-16
+        v-col(cols="12")
+          v-sheet.px-10.py-5
+            h2.py-3(style="color: #3c3b37; font-size: 30px; font-size: 30px;") About the course
+            p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam at urna vitae purus ornare tincidunt vitae nec odio. Quisque dui urna, facilisis a convallis nec, porttitor quis orci. Quisque in condimentum arcu. Sed porta aliquet urna vitae viverra. Curabitur facilisis ullamcorper dapibus. Quisque bibendum, arcu vitae efficitur placerat, est nulla ultricies ligula, ac feugiat ante tellus sed dui. Nunc id lobortis eros. Donec id urna vel ex convallis vehicula. Suspendisse pulvinar non sapien sed aliquet. Morbi dictum condimentum arcu quis auctor. Nulla a nisi purus. In tempor sollicitudin pulvinar. Maecenas cursus sit amet tortor sed mattis. Praesent non lorem nec ipsum cursus vulputate. In at convallis metus. Praesent sit amet condimentum est. Praesent ut dui est. Morbi imperdiet libero vitae massa convallis, sed semper quam facilisis. Vivamus vitae feugiat tortor, eu lacinia sem. Suspendisse aliquam diam non arcu gravida, malesuada mattis elit tempus. Quisque sed arcu enim. Maecenas scelerisque venenatis massa, et vulputate ex tristique sit amet. Etiam eu dolor nec nisi auctor lobortis nec quis neque. Phasellus laoreet eros in placerat aliquet. Duis finibus posuere tortor quis posuere.
+
+    v-container(fluid)
+      v-row.px-sm-16.mx-md-8.mx-lg-16
+        v-col(cols="12")
+          v-sheet.px-16.py-5
+            v-row
+              v-col.py-0.px-0
+                h2.pl-0(style="color: #3c3b37; font-size: 30px;") Prerequisites for this Course
+            v-row(align="start")
+              v-col.py-0.px-0(cols="6")
+                v-row
+                  v-col.pr-0(cols="1" align-self="center")
+                    v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
+                  v-col.pr-0(cols="10" align-self="center")
+                    p.d-inline.mb-0(style="line-height:1;") mdi-star
+              v-col.py-0.px-0(cols="6")
+              v-col.py-0.px-0(cols="6")
+                v-row
+                  v-col.py-2.pr-0(cols="1")
+                    v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
+                  v-col.py-2.pr-0(cols="10" align-self="center")
+                    p.d-inline.mb-0(style="line-height:1; vertical-align: middle;")  Lorem ipsum dolor sit amet, consectetur adipiscing elit
+
+    v-container(fluid)
+      v-row.px-sm-16.mx-md-8.mx-lg-16
+        v-col(cols="12")
+          v-sheet.px-16.py-5
+            v-row
+              v-col.py-0.px-0
+                h2.pl-0(style="color: #3c3b37; font-size: 30px;") Who's suitable for the course
+            v-row(align="start")
+              v-col.py-0.px-0(cols="6")
+                v-row
+                  v-col.pr-0.py-0(cols="1" align-self="center")
+                    v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
+                  v-col.pr-0(cols="10" align-self="center")
+                    p.d-inline.mb-0(style="line-height:1;") mdi-star
+              v-col.py-0.px-0(cols="6")
+              v-col.py-0.px-0(cols="6")
+                v-row
+                  v-col.py-0.pr-0(cols="1")
+                    v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
+                  v-col.py-2.pr-0(cols="10" align-self="center")
+                    p.d-inline.mb-0(style="line-height:1; vertical-align: middle;")  Lorem ipsum dolor sit amet, consectetur adipiscing elit
+
+    v-container(fluid)
+      v-row.px-sm-16.mx-md-8.mx-lg-16
+        v-col(cols="12")
+          v-sheet.px-16.py-5
+            v-row
+              v-col.py-0.px-0
+                h2.pl-0.pb-2(style="color: #3c3b37; font-size: 30px;") Course Content
+                div(style="color: #9E9E9E; font-size: 16px;") {{ course.lessons.length }} Lessons &#8226; {{ timeConverted }} of video content
+            v-row(align="start")
+              v-col.px-0(cols="12")
+                v-card 
+                  v-toolbar(color='grey lighten-2' light flat)
+                    v-toolbar-title {{ course.name }}
+                    v-spacer
+                    v-btn(icon)
+                      v-icon mdi-unfold-more-horizontal
+
+                  v-list
+                    v-list-item(v-for='(lesson, idx) in course.lessons' :key='lesson.id' shaped :disabled="idx != 0" @click="goToLesson($event, lesson)")
+                      v-list-item-icon(v-if="idx == 0")
+                        v-icon(color='#ec5252') mdi-play
+                      v-list-item-icon(v-else)
+                        v-icon(color='rgba(0, 0, 0, 0.38)') mdi-play
+                      v-list-item-content
+                        v-list-item-title(v-text='lesson.name')
+                      v-spacer
+                      //- v-list-item-icon(v-if="idx == 0")
+                      //-   div(to="/") Preview
+                      v-list-item-icon
+                        div {{ lesson.duration }} mins
+
+                 
 
     v-container(fluid)
       v-row.justify-center(no-gutters)
@@ -165,11 +275,32 @@ export default {
       }
     },
 
+    timeConverted () {
+      var num = this.course.duration;
+      var hours = (num / 60);
+      var rhours = Math.floor(hours);
+      var minutes = (hours - rhours) * 60;
+      var rminutes = Math.round(minutes);
+      if (rhours == 0) {
+        return rminutes + " minute(s)";
+      } else {
+        return rhours + " hour(s) and " + rminutes + " minute(s)";
+      }
+    },
+
     ...mapState(["user", "userSubscribedCourses", "userOwnedCourses"])
   },
   methods: {
-    alert () {
-      alert("testing");
+    goToLesson (event, lesson) {
+      this.$router.push({
+        name: `showlesson`,
+        params: {
+          course_id: this.course.id,
+          lesson_id: lesson.id,
+          course: this.course,
+          lesson: lesson
+        }
+      })
     },
 
     edit_rhythm_name () {
@@ -195,7 +326,32 @@ export default {
     },
 
     async subscribe () {
-      this.$router.push(`/payment/${this.course.id}`)
+      if (this.course.price == 0) {
+        await Promise.all(this.course.lessons.map(async lesson => {
+          var response = await ThreadService.create({
+            lid: lesson.id
+          })
+          response.data.thread.posts = []
+          lesson.thread = response.data.thread
+          return lesson
+        })) 
+
+        await this.$store.dispatch('subscribe', {
+          studentId: this.$store.state.user.id,
+          courseId: this.course.id
+        })
+
+        this.$router.push({
+          name: `showlesson`,
+          params: {
+            course_id: this.course.id,
+            lesson_id: this.course.lessons[0].id
+          }
+        })
+
+      } else {
+        this.$router.push(`/payment/${this.course.id}`)
+      }
     }
   },
 
@@ -232,7 +388,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #setting {
   width: 100%;
 }
@@ -253,10 +409,6 @@ export default {
 
 #vexflow-wrapper {
   width: 100%;
-}
-
-video:focus {
-  outline: none;
 }
 
 #course-info {

@@ -30,7 +30,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
-  color: #1e1e1c;
+  color: #3c3b37;
 }
 
 .disabled-dom {
@@ -87,5 +87,9 @@ export default {
   border-left: 1px solid #BDBDBD;
   border-right: 1px solid #BDBDBD;
   border-bottom: 1px solid #BDBDBD;
+}
+
+.v-expansion-panel-content__wrap {
+  padding: 0 !important;
 }
 </style>

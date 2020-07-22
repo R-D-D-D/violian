@@ -71,5 +71,6 @@ export default {
   line-height: 1.8rem;
   color: white;
   background: #C62828;
+  text-align: center;
 }
 </style>
