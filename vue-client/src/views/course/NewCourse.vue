@@ -64,6 +64,8 @@
                             prepend-icon="mdi-image" 
                             label="Explanation Video Poster"
                             v-model="lessons[idx].videoPoster")
+                        v-col(cols="12" md="4")
+                          v-text-field(label='VideoUrl' type='text' v-model='lessons[idx].videoUrl' solo clearable color="indigo" ) Video Url
                       v-row
                         v-col(cols="12" md="6")
                           v-file-input(
@@ -79,6 +81,8 @@
                             prepend-icon="mdi-image"
                             label="Demo Video Poster"
                             v-model="lessons[idx].demoPoster")
+                        v-col(cols="12" md="4")
+                          v-text-field(label='DemoUrl' type='text' v-model='lessons[idx].demoUrl' solo clearable color="indigo" ) Demo Url
                       v-row
                         v-col(cols="12" md="6")
                           v-switch(v-model="lessons[idx].useScore" :label="`Overlay score on your demo video`" @change="showVex($event, idx)")
@@ -242,6 +246,8 @@ export default {
         videoPoster: null,
         demo: null,
         demoPoster: null,
+        videoUrl: '',
+        demoUrl: '',
         useScore: true,
         handler: null,
         timeSignature: '4/4',
@@ -307,8 +313,10 @@ export default {
           }
         } else {
           for (var j = 0; j < this.lessons.length; j++) {
-            this.reviewVexHandlers[j].setTimeSignature(this.lessons[j].timeSignature)
-            this.reviewVexHandlers[j].importNotes(this.lessons[j].melody, this.lessons[j].timeSignature)
+            if (this.lessons[j].useScore) {
+              this.reviewVexHandlers[j].setTimeSignature(this.lessons[j].timeSignature)
+              this.reviewVexHandlers[j].importNotes(this.lessons[j].melody, this.lessons[j].timeSignature)
+            }
           }
         }
       }
@@ -381,6 +389,8 @@ export default {
           formData.set('numberOfBars', tempLesson.numberOfBars)
           formData.set('demoStartTime', parseInt(tempLesson.demoStartTime))
           formData.set('useScore', tempLesson.useScore)
+          formData.set('videoUrl', tempLesson.videoUrl)
+          formData.set('demoUrl', tempLesson.demoUrl)
           if (tempLesson.useScore) {
             if (tempLesson.scoreOption == 'vex') {
               formData.set('useXml', false)
