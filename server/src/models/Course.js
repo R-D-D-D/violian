@@ -35,7 +35,8 @@ module.exports = (sequelize, DataTypes) => {
     requirements: DataTypes.TEXT,
     targetAudience: DataTypes.TEXT,
     learningPoints: DataTypes.TEXT,
-    previewVideoUrl: DataTypes.TEXT
+    previewVideoUrl: DataTypes.TEXT,
+    tagline: DataTypes.STRING
   })
 
   Course.associate = function (models) {

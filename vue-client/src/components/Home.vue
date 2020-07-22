@@ -51,16 +51,7 @@ export default {
   data () {
     return {
       isLoading: false,
-      items: [{
-        name: 'hey',
-        id: 1
-      }, {
-        name: 'yo',
-        id: 2
-      }, {
-        name: 'yo',
-        id: 3
-      }],
+      items: [],
       model: null,
       search: null,
     }

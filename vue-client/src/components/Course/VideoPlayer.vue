@@ -222,7 +222,7 @@ export default {
         fluid: true,
         sources: [
           {
-            src: this.exercise.demoUrl,
+            src: this.exercise[`${this.videoSrc}Url`],
             type: "video/mp4"
           }
         ],

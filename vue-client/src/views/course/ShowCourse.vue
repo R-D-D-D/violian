@@ -8,11 +8,11 @@
               h1(style="font-size: 40px; line-height: 1.2;").font-weight-bold {{ course.name }}
           v-row
             v-col.pt-0
-              h3 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce aliquam orci sed mi tempus ullamcorper. Quisque vitae lacus ut ipsum ultrices rhoncus quis a arcu. Sed placerat nisl sed tellus malesuada, id ornare augue vulputate. Pellentesque laoreet ipsum quis tempor aliquet.
+              h3 {{ course.description }}
       
-          v-row
-            v-col.py-0
-              h4.font-weight-bold Created by: {{ course.TutorId }}
+          //- v-row
+          //-   v-col.py-0
+          //-     h4.font-weight-bold Created by: {{ course.TutorId }}
             
           v-row
             v-col(sm="4" lg="3")
@@ -20,7 +20,7 @@
                 v-col.pr-0(sm="4" md="3")
                   v-icon(color="white" size="30") mdi-guitar-acoustic
                 v-col.my-auto(sm="8" md="9")
-                  p.ma-0 Instrument: Drum
+                  p.ma-0 Instrument: Body Percussion
             v-col(sm="4" lg="3")
               v-row
                 v-col.pr-0(sm="4" md="3")
@@ -65,20 +65,20 @@
                   v-col.py-2.pr-0(cols="1")
                     v-icon.d-inline.mb-2(size="16" color="#ec5252") mdi-star
                   v-col.py-2.pr-0(cols="10")
-                    p.d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle;") mdi-star
+                    p.d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle;") body percussion movements
               v-col.py-0.px-0(cols="12" md="6")
                 v-row
                   v-col.py-2.pr-0(cols="1")
                     v-icon.d-inline.mb-2(size="16" color="#ec5252") mdi-star
                   v-col.py-2.pr-0(cols="10")
-                    .d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle; width: 100%;")  Lorem ipsum dolor sit amet, consectetur adipiscing elit
+                    .d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle; width: 100%;")  stand up for singapore 
     
     v-container(fluid)
       v-row.px-sm-16.mx-md-8.mx-lg-16
         v-col(cols="12")
-          v-sheet.px-10.py-5
+          v-sheet.px-16.py-5
             h2.py-3(style="color: #3c3b37; font-size: 30px; font-size: 30px;") About the course
-            p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam at urna vitae purus ornare tincidunt vitae nec odio. Quisque dui urna, facilisis a convallis nec, porttitor quis orci. Quisque in condimentum arcu. Sed porta aliquet urna vitae viverra. Curabitur facilisis ullamcorper dapibus. Quisque bibendum, arcu vitae efficitur placerat, est nulla ultricies ligula, ac feugiat ante tellus sed dui. Nunc id lobortis eros. Donec id urna vel ex convallis vehicula. Suspendisse pulvinar non sapien sed aliquet. Morbi dictum condimentum arcu quis auctor. Nulla a nisi purus. In tempor sollicitudin pulvinar. Maecenas cursus sit amet tortor sed mattis. Praesent non lorem nec ipsum cursus vulputate. In at convallis metus. Praesent sit amet condimentum est. Praesent ut dui est. Morbi imperdiet libero vitae massa convallis, sed semper quam facilisis. Vivamus vitae feugiat tortor, eu lacinia sem. Suspendisse aliquam diam non arcu gravida, malesuada mattis elit tempus. Quisque sed arcu enim. Maecenas scelerisque venenatis massa, et vulputate ex tristique sit amet. Etiam eu dolor nec nisi auctor lobortis nec quis neque. Phasellus laoreet eros in placerat aliquet. Duis finibus posuere tortor quis posuere.
+            p {{ course.description }}
 
     v-container(fluid)
       v-row.px-sm-16.mx-md-8.mx-lg-16
@@ -93,14 +93,8 @@
                   v-col.pr-0(cols="1" align-self="center")
                     v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
                   v-col.pr-0(cols="10" align-self="center")
-                    p.d-inline.mb-0(style="line-height:1;") mdi-star
+                    p.d-inline.mb-0(style="line-height:1;") none
               v-col.py-0.px-0(cols="6")
-              v-col.py-0.px-0(cols="6")
-                v-row
-                  v-col.py-2.pr-0(cols="1")
-                    v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
-                  v-col.py-2.pr-0(cols="10" align-self="center")
-                    p.d-inline.mb-0(style="line-height:1; vertical-align: middle;")  Lorem ipsum dolor sit amet, consectetur adipiscing elit
 
     v-container(fluid)
       v-row.px-sm-16.mx-md-8.mx-lg-16
@@ -115,14 +109,8 @@
                   v-col.pr-0.py-0(cols="1" align-self="center")
                     v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
                   v-col.pr-0(cols="10" align-self="center")
-                    p.d-inline.mb-0(style="line-height:1;") mdi-star
+                    p.d-inline.mb-0(style="line-height:1;") All
               v-col.py-0.px-0(cols="6")
-              v-col.py-0.px-0(cols="6")
-                v-row
-                  v-col.py-0.pr-0(cols="1")
-                    v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
-                  v-col.py-2.pr-0(cols="10" align-self="center")
-                    p.d-inline.mb-0(style="line-height:1; vertical-align: middle;")  Lorem ipsum dolor sit amet, consectetur adipiscing elit
 
     v-container(fluid)
       v-row.px-sm-16.mx-md-8.mx-lg-16

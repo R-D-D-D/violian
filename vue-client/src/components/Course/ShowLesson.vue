@@ -8,7 +8,7 @@
               h1.font-weight-bold.pl-8.py-2 {{ course.name }}
           v-row.ma-0(style="width: 100%;")
             v-col.pa-0
-              video-player(:exercise="this.lesson.exercises[0]" :videoSrc="src")
+              video-player(:exercise="this.lesson.exercises[0]" :videoSrc="src" v-if="isVideoContent")
           
           v-container#dicussion(v-if="user.isStudent")
             v-row.justify-center
@@ -162,7 +162,6 @@ export default {
   components: {
     'video-player': VideoPlayer
   },
-  // props: ['lesson', 'course'],
   data () {
     return {
       // exercise info
@@ -200,6 +199,7 @@ export default {
       demoStartTime: 0,
       demoEndTime: null,
       currentDisplayedBar: 0,
+      isVideoContent: true,
 
       // osmd renderer
       osmd: null,
@@ -534,6 +534,15 @@ export default {
     }
 
     this.selected = this.course.lessons.indexOf(this.lesson)
+    if (!this.lesson.exercises[0].videoUrl && !this.lesson.exercises[0].demoUrl) {
+      this.isVideoContent = false
+    } else {
+      if (this.lesson.exercises[0].videoUrl) {
+        this.src = 'video'
+      } else {
+        this.src = 'demo'
+      }
+    }
 
     window.addEventListener('scroll', _.debounce(() => {
       if (window.pageYOffset == 0) {

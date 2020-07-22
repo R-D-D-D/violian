@@ -29,7 +29,7 @@
                     v-select(label='Instrument' :items="instruments" v-model="instrument" solo)
           
           v-row.justify-center
-            v-col
+            v-col.text-center
               v-btn(color="indigo" @click='goStepTwo' dark)
                 | Continue
               v-btn(to="/course/index") Cancel
@@ -189,7 +189,7 @@
                       p.text-h6 Number of Bars: {{ lesson.numberOfBars }}
 
           v-row.justify-center
-            v-col
+            v-col.text-center
               v-btn(color="indigo" @click="submit" dark :loading="loading" :disabled="loading")
                 | Confirm
               v-btn(to="/course/index") Cancel
