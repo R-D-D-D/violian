@@ -1,15 +1,71 @@
 <template lang="pug">
   div(v-if="course && lesson")
     v-container.pa-0(fluid)
-
       v-row(no-gutters)
         v-col(cols="9").text-left.pa-0
           v-row.ma-0(style="width: 100%;")
             v-col.pa-0#title
-              h1.font-weight-bold.pl-4.py-2 {{ course.name }}
+              h1.font-weight-bold.pl-8.py-2 {{ course.name }}
           v-row.ma-0(style="width: 100%;")
             v-col.pa-0
-              video-player(:exercise="this.lesson.exercises[0]")
+              video-player(:exercise="this.lesson.exercises[0]" :videoSrc="src")
+          
+          v-container#dicussion(v-if="user.isStudent")
+            v-row.justify-center
+              v-col.text-left.pb-0(cols="11")
+                h1.font-weight-bold.pt-2.pl-4 Ask your tutor!
+              v-col.pb-0(cols="11" v-if="lesson.thread")
+                v-list(v-if="lesson.thread.posts")
+                  v-list-item(v-for='(post, idx) in lesson.thread.posts' :key='post.id')
+                    v-list-item-content.pb-0
+                      v-container.pt-0.pb-4.px-0(fluid)
+                        v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != lesson.thread.posts[idx - 1].updatedAt.substring(0, 10)")
+                          v-col.py-0
+                            v-chip(label color="indigo darken-3" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                        v-row.mt-5
+                          v-col.pb-0(style="margin-bottom: -3px;")
+                            video(width="100%" height="audo" controls)
+                              source(:src="post.videoUrl" type="video/mp4")
+                              | Your browser does not support HTML video.
+
+                        v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
+                          v-col.pr-8.py-0(cols="6") 
+                            .speech-bubble-other
+                              v-row.ma-0(style="width: 100%;")
+                                v-col.text-left
+                                  div {{ post.message }}
+                              .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+                          v-col.text-center.pa-0(cols="1")
+                            v-avatar(color='grey' size="40")
+                              v-icon mdi-account
+                        v-row.justify-start.bottom-border.mx-0.py-3(v-else)
+                          v-col.text-center.pa-0(cols="1")
+                            v-avatar(color='grey' size="40")
+                              v-icon mdi-account
+                          v-col.pl-8.py-0(cols="6") 
+                            .speech-bubble-self
+                              v-row.ma-0(style="width: 100%;")
+                                v-col.text-left
+                                  div {{ post.message }}
+                              .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+            
+            v-row.justify-center
+              v-col.pt-0(cols="11")
+                v-form.px-4(:ref="`form`")
+                  v-row
+                    v-col.pt-0(cols="12")
+                      v-textarea(outlined name='input-7-4' label='Type your thoughts here...' v-model="message")
+                    v-col(cols="6")
+                      v-file-input(
+                        accept="video/mp4, video/ogg" 
+                        placeholder="Upload" 
+                        prepend-icon="mdi-video"
+                        label="Upload Video"
+                        v-model="file")
+
+                  v-row
+                    v-col
+                      v-btn(large color="#ec5252" dark @click="create_post") Submit practice video
 
         v-col.pa-0(cols="3" style="border-bottom: 1px solid #BDBDBD; border-left: 1px solid #BDBDBD; position: fixed; right:0;" :class="{ 'full-height': fullHeight, 'partial-height': !fullHeight }")
           h1.font-weight-bold.pl-4.py-2(style="background-color:#EEEEEE;") Lessons
@@ -20,22 +76,20 @@
           //-       div.pl-4 {{idx}}. {{ lesson.name }}
           v-list.py-0
             v-list-item.px-0(v-for='(currLesson, i) in course.lessons' :key='i')
-              //- v-list-item-content
-              //-   v-list-item-title {{ i + 1 }}. {{ currLesson.name }}
-              v-expansion-panels.px-0(accordion flat hover tile dense v-if="currLesson == lesson")
+              v-expansion-panels.px-0(accordion flat hover tile dense v-if="currLesson == lesson" v-model="opened" multiple)
                 v-expansion-panel
-                  v-expansion-panel-header.py-0.pl-4.pr-2(style="font-size: 14px;") {{ i + 1 }}. {{currLesson.name}}
+                  v-expansion-panel-header.py-0.pl-4.pr-2(style="font-size: 16px; background-color:#B2DFDB;") {{ i + 1 }}. {{currLesson.name}}
                   v-expansion-panel-content.pa-0
                     v-list.py-0
                       v-list-item-group.py-0
-                        v-list-item.px-0(v-if="currLesson.videoUrl")
+                        v-list-item.px-0(v-if="currLesson.exercises[0].videoUrl" @click="src = 'video'")
                           v-list-item-content
-                            div.pl-4(style="font-size: 12px;") explanation
-                        v-list-item.px-0(v-if="currLesson.demoUrl")
+                            div.pl-4.text-decoration-underline(style="font-size: 14px; color:#00897B;") Explanation
+                        v-list-item.px-0(v-if="currLesson.exercises[0].demoUrl" @click="src = 'demo'")
                           v-list-item-content
-                            div.pl-4(style="font-size: 12px;") demo
-              v-list-item-content(v-else to="/")
-                v-btn.pl-4(style="font-size: 14px;") {{ i + 1 }}. {{ currLesson.name }}
+                            div.pl-4.text-decoration-underline(style="font-size: 14px; color:#00897B;") Demonstration
+              v-list-item-content.py-0.link(v-else)
+                a.link.pl-4.py-5(style="font-size: 16px;" @click="goToLesson($event, currLesson)") {{ i + 1 }}. {{ currLesson.name }}
 
       
       v-row.justify-center(v-show="useScore")
@@ -44,64 +98,6 @@
         v-col(cols="12" v-else)
           div(:id="'osmd-wrapper-' + lesson.id")
 
-      v-row.justify-center(v-if="user.isStudent")
-        v-col.text-left(cols="11")
-          h1.pl-4 Discussion
-        v-col(cols="11" v-if="lesson.thread")
-          v-list(v-if="lesson.thread.posts")
-            v-list-item(v-for='(post, idx) in lesson.thread.posts' :key='post.id')
-              v-list-item-content.pb-0
-                v-container.pt-0.pb-4.px-0(fluid)
-                  v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != lesson.thread.posts[idx - 1].updatedAt.substring(0, 10)")
-                    v-col.py-0
-                      v-chip(label color="indigo darken-3" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
-                  v-row.mt-5
-                    v-col.pb-0(style="margin-bottom: -3px;")
-                      video(width="100%" height="audo" controls)
-                        source(:src="post.videoUrl" type="video/mp4")
-                        | Your browser does not support HTML video.
-
-                  v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
-                    v-col.pr-8.py-0(cols="6") 
-                      .speech-bubble-other
-                        v-row.ma-0(style="width: 100%;")
-                          v-col.text-left
-                            div {{ post.message }}
-                        .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
-                    v-col.pa-0(cols="1")
-                      v-avatar(color='indigo' size="40")
-                        v-img(:src="avatar")
-                  v-row.justify-start.bottom-border.mx-0.py-3(v-else)
-                    v-col.pa-0(cols="1")
-                      v-avatar(color='indigo' size="40")
-                        v-img(:src="avatar")
-                    v-col.pl-8.py-0(cols="6") 
-                      .speech-bubble-self
-                        v-row.ma-0(style="width: 100%;")
-                          v-col.text-left
-                            div {{ post.message }}
-                        .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
-          v-row.justify-center
-            v-col(cols="10")
-              v-form(:ref="`form`")
-                v-row
-                  v-col(cols="12")
-                    v-textarea(outlined name='input-7-4' label='Any question for your tutor?' v-model="message")
-                  v-col(cols="6")
-                    v-file-input(
-                      accept="video/mp4, video/ogg" 
-                      placeholder="Upload" 
-                      prepend-icon="mdi-video"
-                      label="Upload Video"
-                      v-model="file")
-
-                v-row
-                  v-col
-                    v-btn(large color="#ec5252" dark @click="create_post") Submit practice video
-      
-      v-row.bpm-control.pt-2(:id="`slider-${lesson.id}`" :class="{ hide: hide }")
-        v-icon(color="white" large) $vuetify.icons.custom_bpm
-        v-slider.pb-2(min="20" max="180" vertical color="white" track-color="rgba(115, 133, 159, 0.5)" thumb-label="always" v-model="playbackBpm")
       
     //- v-row(justify='center')
       v-dialog(v-model='dialog' persistent max-width='600px')
@@ -158,6 +154,8 @@ import axios from "axios"
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay"
 import CourseService from "@/services/CourseService"
 import VideoPlayer from "@/components/Course/VideoPlayer"
+import ThreadService from "@/services/ThreadService"
+import _ from 'lodash'
 
 export default {
   name: 'ShowLesson',
@@ -213,7 +211,9 @@ export default {
       selected: null,
       course: null,
       lesson: null,
-      fullHeight: false
+      fullHeight: false,
+      opened: [0],
+      src: 'video'
     }
   },
   watch: {
@@ -226,6 +226,9 @@ export default {
     // playbackBpm: function (val) {
     //   this.player.playbackRate(val / this.bpm)
     // }
+    '$route.params.lesson_id': function (val) {
+      this.$router.go()
+    }
   },
   computed: {
     tutor () {
@@ -497,24 +500,48 @@ export default {
       this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1])  , this.timeSignature)
 
       document.getElementById(`video-${this.lesson.id}`).appendChild(wrapper)
+    },
+
+    goToLesson (event, lesson) {
+      this.$router.push({
+        name: `showlesson`,
+        params: {
+          course_id: this.course.id,
+          lesson_id: lesson.id,
+          course: this.course,
+          lesson: lesson
+        }
+      })
     }
   },
 
   mounted: async function () {
     if (!this.course || !this.lesson) {
-      this.course = (await CourseService.show(this.$route.params.course_id)).data.course
+      let response = await CourseService.show(this.$route.params.course_id)
+      try {
+        response.data.course.lessons = await Promise.all(response.data.course.lessons.map(async (lesson) => {
+          var threadResponse = null
+          this.$store.dispatch('setNotifications', this.$store.state.notifications - response.data.course.unreadTutorPost)
+          threadResponse = await ThreadService.show(lesson.id, this.user.id)
+          lesson.thread = threadResponse.data.thread
+          return lesson
+        }))
+        this.course = response.data.course
+      } catch (err) {
+        console.log(err)
+      }
       this.lesson = this.course.lessons.find(lesson => lesson.id == this.$route.params.lesson_id)
     }
 
     this.selected = this.course.lessons.indexOf(this.lesson)
 
-    window.addEventListener('scroll', () => {
+    window.addEventListener('scroll', _.debounce(() => {
       if (window.pageYOffset == 0) {
         this.fullHeight = false
-      } else {
+      } else if (window.pageYOffset > 64) {
         this.fullHeight = true
       }
-    })
+    }, 200))
 
     // OpenSheetMusicDisplay.prototype.preCalculate = function () {
     //   if (!this.graphic) {
@@ -687,5 +714,14 @@ slider-bg: #72839d
 
 .partial-height {
   height: calc(100vh - 64px);
+}
+
+.link:hover {
+  background-color: #FAFAFA;
+}
+
+.link, .link:link, .link:visited, .link:active, .link:hover {
+  text-decoration: none;
+  color: #1e1e1c;
 }
 </style>

@@ -2,12 +2,13 @@
   div
     video.vjs-big-play-centered(ref="videoPlayer" class="video-js" :id="`video`")
 
-    v-row.bpm-control.pt-2(:id="`slider`" :class="{ hide: hide }")
+    v-row.bpm-control.pt-2(:id="`slider`" v-show="!hide")
       v-icon(color="white" large) $vuetify.icons.custom_bpm
       v-slider.pb-2(min="20" max="180" vertical color="white" track-color="rgba(115, 133, 159, 0.5)" thumb-label="always" v-model="playbackBpm")
 </template>
 
 <script>
+/* eslint-disable */
 import vexUI from "@/plugins/vex";
 import videojs from "video.js";
 import "videojs-hotkeys"
@@ -16,7 +17,7 @@ import axios from "axios"
 
 export default {
   name: 'VideoPlayer',
-  props: ['exercise'],
+  props: ['exercise', 'videoSrc'],
   data () {
     return {
       // exercise info
@@ -197,7 +198,21 @@ export default {
 
   watch: {
     playbackBpm: function (val) {
-      this.player.playbackRate(val / this.bpm)
+      if (this.bpm) {
+        this.player.playbackRate(val / this.bpm)
+      }
+    },
+
+    videoSrc: function (val) {
+      if (val == 'video' && this.exercise.videoUrl) {
+        if (this.player.src() != this.exercise.videoUrl) {
+          this.player.src(this.exercise.videoUrl)
+        }
+      } else if (val == 'demo' && this.exercise.demoUrl) {
+        if (this.player.src() != this.exercise.demoUrl) {
+          this.player.src(this.exercise.demoUrl)
+        }
+      }
     }
   },
 
@@ -221,34 +236,36 @@ export default {
           enableModifiersForNumbers: false,
           enableHoverScroll: true
         })
-        player.on('userinactive', () => {
-          if (player.paused()) {
-            this.hide = false
-          } else {
-            this.hide = true
-          }
-        })
-        player.on('useractive', () => {
-          this.hide = false
-        })
-        player.on('play', () => {
-          this.hide = false
-        })
-        player.on('firstplay', () => {
-          this.hide = false
-        })
-        player.on('ratechange', () => {
-          this.playbackBpm = this.bpm * this.player.playbackRate()
-        })
 
-        if (this.exercise.useScore && this.exercise.useXml) {
-          player.on('timeupdate', (e) => {
-            this.timeUpdatedOsmd(e)
+        if (this.exercise.useScore) {
+          player.on('userinactive', () => {
+            if (player.paused()) {
+              this.hide = false
+            } else {
+              this.hide = true
+            }
           })
-        } else if (this.useScore && !this.useXml) {
-          player.on('timeupdate', (e) => {
-            this.timeUpdated(e)
+          player.on('useractive', () => {
+            this.hide = false
           })
+          player.on('play', () => {
+            this.hide = false
+          })
+          player.on('firstplay', () => {
+            this.hide = false
+          })
+          player.on('ratechange', () => {
+            this.playbackBpm = this.bpm * this.player.playbackRate()
+          })
+          if (this.exercise.useXml) {
+            player.on('timeupdate', (e) => {
+              this.timeUpdatedOsmd(e)
+            })
+          } else {
+            player.on('timeupdate', (e) => {
+              this.timeUpdated(e)
+            })
+          }
         }
     })
 
@@ -281,6 +298,7 @@ export default {
       document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
+      this.hide = false
     }
   }
 }

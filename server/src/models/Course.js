@@ -31,7 +31,11 @@ module.exports = (sequelize, DataTypes) => {
     unreadTutorPost: {
       type: DataTypes.INTEGER,
       defaultValue: 0
-    }
+    },
+    requirements: DataTypes.TEXT,
+    targetAudience: DataTypes.TEXT,
+    learningPoints: DataTypes.TEXT,
+    previewVideoUrl: DataTypes.TEXT
   })
 
   Course.associate = function (models) {

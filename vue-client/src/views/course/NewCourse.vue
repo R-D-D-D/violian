@@ -123,7 +123,7 @@
                       v-icon mdi-plus
 
           v-row.justify-center
-            v-col
+            v-col.text-center
               v-btn(color="indigo" @click='goStepThree' dark)
                 | Continue
               v-btn(to="/course/index") Cancel
