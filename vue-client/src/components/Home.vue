@@ -80,7 +80,12 @@ export default {
 
   methods: {
     go_to_course (event, id) {
-      this.$router.push(`/course/show/${id}`)
+      this.$router.push({
+        name: `showcourse`,
+        params: {
+          course_id: id
+        }
+      })
     },
   },
 

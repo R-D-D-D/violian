@@ -5,12 +5,12 @@
       app
       absolute
       color="white"
+      elevate-on-scroll
     )
       v-app-bar-nav-icon(@click="drawer = true")
 
       router-link.pl-3#logo(to="/")
-        v-toolbar-title.font-weight-bold VIOLIAN
-
+        img#logo-img(:src="require('../assets/violian_logo.png')" height="46")
       v-spacer
 
       v-toolbar-items(v-if="!$store.state.isUserLoggedIn")
@@ -88,9 +88,8 @@ export default {
 </script>
 
 <style scoped>
-#logo, #logo:link, #logo:visited, #logo:active, #logo:hover {
-  text-decoration: none;
-  color: #1e1e1c;
+#logo-img {
+  margin-top: 8px;
 }
 
 #notification {

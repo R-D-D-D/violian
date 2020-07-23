@@ -144,75 +144,11 @@
                         div {{ lesson.duration }} mins
 
                  
-
-    v-container(fluid)
-      v-row.justify-center(no-gutters)
-        v-col.pa-0(cols="12" md="9")
-          lesson(:lesson="course.lessons[0]")
-        //-   v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
-        //-     v-tab.text-h5(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
-        //-   v-tabs-items(v-model="tab" v-if="!isSubscribed")
-        //-     v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id")
-        //-       lesson(:lesson="lesson")
-        //-   v-tabs-items(v-model="tab" v-else)
-        //-     v-tab-item(v-for="(lesson, idx) in course.lessons" :key="lesson.id" :disabled="idx != 0")
-          //- lesson(:lesson="lesson")
-        v-col.pa-0(cols="12" md="3")
-          
-        
-          //- v-tabs.rounded(v-model="tab" background-color="indigo lighten-5" color="indigo" height="64" fixed-tabs)
-          //-   v-tab.text-h4(v-for="lesson in course.lessons" :key="lesson.id") {{ lesson.name }}
-          //-   v-tab.text-h4(:key="'+'")
-          //-     v-icon(left) mdi-plus
-          //-     | New Lesson
-          //- v-tabs-items(v-model="tab")
-            v-tab-item(v-for="lesson in course.lessons" :key="lesson.id")
-              lesson(:lesson="lesson")
-            v-tab-item(:key="'+'")
-              v-card
-                v-row.justify-center
-                  v-col(cols="6")
-                    v-card-title
-                      span.headline.text-h3 Lesson Details
-                    v-card-text.py-0
-                      v-form(ref="form")
-                        v-text-field(v-model="new_name" type="text" label='Lesson name*' required :rules="nameRules")
-                        v-text-field(v-model="new_duration" type="text" label='Estimated lesson duration in minutes*' required :rules="durationRules")
-                            
-                          //- v-col(cols='12')
-                          //-   v-autocomplete(:items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']" label='Interests' multiple='')
-                    v-card-actions
-                      v-spacer
-                      v-btn(color='indigo' text='' @click="add_lesson" :loading="add_btn_loading" x-large block) Save
-                      v-spacer
-                    v-card-text(v-if="error")
-                      p {{ error }}
-    //- v-row(justify='center')
-    //-   v-dialog(v-model='dialog' persistent='' max-width='600px')
-    //-     template(v-slot:activator='{ on, attrs }')
-    //-     v-card
-    //-       v-card-name
-    //-         span.headline Rhythm Details
-    //-       v-card-text.py-0
-    //-         v-form(ref="form")
-    //-           v-container
-    //-             v-row
-    //-               v-col(cols='12')
-    //-                 v-text-field(v-model="new_name" type="text" label='Rhythm name*' required :rules="nameRules")
-    //-             //- v-col(cols='12')
-    //-             //-   v-autocomplete(:items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']" label='Interests' multiple='')
-    //-       v-card-actions
-    //-         v-spacer
-    //-         v-btn(color='blue darken-1' text='' @click='dialog = false') Close
-    //-         v-btn(color='blue darken-1' text='' @click="add_rhythm" :loading="add_btn_loading") Save
-    //-       v-card-text(v-if="error")
-    //-         p {{ error }}  
 </template>
  
 <script>
 import Panel from "@/components/Panel";
 import { mapState } from "vuex";
-import ShowLesson from "@/components/Course/ShowLesson";
 import CourseService from "@/services/CourseService";
 import ThreadService from "@/services/ThreadService";
 
@@ -239,8 +175,7 @@ export default {
     }
   },
   components: {
-    "panel": Panel,
-    "lesson": ShowLesson
+    "panel": Panel
   },
   computed: {
     is_student () {
@@ -357,6 +292,7 @@ export default {
     } catch (err) {
       console.log(err)
     }
+    console.log(process.env)
   },
 
   mounted: function () {

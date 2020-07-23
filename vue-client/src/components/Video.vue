@@ -1,65 +1,91 @@
 <template lang="pug">
   div 
-    v-row.justify-center
-      v-col(cols="10").text-center
-        video(ref="videoPlayer" class="video-js")
-        #vexflow-wrapper
+    v-container
+      v-row
+        v-col
+          v-form
+            v-row
+              v-col
+                v-file-input(
+                  accept="video/mp4, video/ogg" 
+                  placeholder="Choose Explanation Video" 
+                  prepend-icon="mdi-video" 
+                  label="Explanation Video"
+                  v-model="video")
+            v-row
+              v-col
+                v-progress-linear(:value='progress' height='7' striped rounded)
+
+            v-btn(@click="submit") Submit
+      v-row
+        v-col
+          v-slider(v-model="progress" min="0" max="100")
 </template>
 
 <script>
-import videojs from 'video.js';
-import vexUI from "@/plugins/vex";
+import AWS from 'aws-sdk'
 
 export default {
 name: "VideoPlayer",
     data() {
       return {
-        options: {
-          controls: true,
-          fluid: true,
-          sources: [
-            {
-              src: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-              type: "video/mp4"
-            }
-          ],
-          poster: 'https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/demoPoster.JPG'
-        },
-        handler: null,
-        hide: true
+        video: null,
+        progress: 0,
+        value: '',
+        custom: true,
+      }
+    },
+
+    computed: {
+    },
+
+    watch: {
+      video: function (val) {
+        console.log(val)
+      }
+    },
+
+    methods: {
+      async submit () {
+        AWS.config.update({
+          accessKeyId : process.env.VUE_APP_AWS_ACCESS_KEY,
+          secretAccessKey : process.env.VUE_APP_AWS_SECRET_ACCESS_KEY
+        });
+        AWS.config.region = 'ap-southeast-1'
+
+        let upload = new AWS.S3.ManagedUpload({
+          partSize: 10 * 1024 * 1024,
+          params: {
+            Bucket: process.env.VUE_APP_BUCKET_NAME,
+            Key: `testingmultipart/${this.video.name}`,
+            Body: this.video
+          }
+        })
+        upload.on('httpUploadProgress', (evt) => {
+          this.progress = parseInt((evt.loaded * 100) / evt.total)
+        })
+        await upload.promise()
+        // upload.send()
+        console.log(upload)
+        // const s3 = new AWS.S3({
+        //   accessKeyId: process.env.VUE_APP_AWS_ACCESS_KEY,
+        //   secretAccessKey: process.env.VUE_APP_AWS_SECRET_ACCESS_KEY,
+        //   region: 'ap-southeast-1'
+        // });
+
+        // let params = {
+        //     Bucket: process.env.VUE_APP_BUCKET_NAME,
+        //     Key: `testingmultipart/${this.video.name}`,
+        //     Body: this.video
+        // }
+    
+        // // Uploading files to the bucket
+        // await s3.upload(params).promise()
       }
     },
     mounted() {
-      this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
-          console.log('Player ready');
-      });
+      console.log(process.env)
 
-      this.handler = new vexUI.Handler("vexflow-wrapper", {
-        canEdit: false,
-        numberOfStaves: 2,
-        canvasProperties: {
-          id: "vexflow-wrapper" + "-canvas",
-          width: document.getElementById("vjs_video_3").offsetWidth,
-          height: 80 * vexUI.scale,
-          tabindex: 1
-        }
-      }).init();
-
-      this.player.on('fullscreenchange', () => {
-        if (this.player.isFullscreen_) {
-          this.hide = false;
-        } else {
-          this.hide = true;
-        }
-      })
-
-      document.getElementById("vjs_video_3").appendChild(document.getElementById("vexflow-wrapper"))
-    },
-
-    beforeDestroy() {
-      if (this.player) {
-          this.player.dispose()
-      }
     }
 }
 </script>
