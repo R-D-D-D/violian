@@ -217,12 +217,23 @@ export default {
   },
 
   mounted: async function() {
+    let source = ''
+    if (!this.exercise.videoUrl && !this.exercise.demoUrl) {
+      source = 'undefined'
+    } else {
+      if (this.exercise.videoUrl) {
+        source = this.exercise.videoUrl
+      } else {
+        source = this.exercise.demoUrl
+      }
+    }
+
     const player = videojs(this.$refs.videoPlayer, {
         controls: true,
         fluid: true,
         sources: [
           {
-            src: this.exercise[`${this.videoSrc}Url`],
+            src: source,
             type: "video/mp4"
           }
         ],

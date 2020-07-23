@@ -515,7 +515,7 @@ export default {
     }
   },
 
-  mounted: async function () {
+  created: async function () {
     if (!this.course || !this.lesson) {
       let response = await CourseService.show(this.$route.params.course_id)
       try {
@@ -536,6 +536,7 @@ export default {
     this.selected = this.course.lessons.indexOf(this.lesson)
     if (!this.lesson.exercises[0].videoUrl && !this.lesson.exercises[0].demoUrl) {
       this.isVideoContent = false
+      this.src = 'undefined'
     } else {
       if (this.lesson.exercises[0].videoUrl) {
         this.src = 'video'

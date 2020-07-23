@@ -389,8 +389,12 @@ export default {
           formData.set('numberOfBars', tempLesson.numberOfBars)
           formData.set('demoStartTime', parseInt(tempLesson.demoStartTime))
           formData.set('useScore', tempLesson.useScore)
-          formData.set('videoUrl', tempLesson.videoUrl)
-          formData.set('demoUrl', tempLesson.demoUrl)
+          if (tempLesson.videoUrl) {
+            formData.set('videoUrl', tempLesson.videoUrl)
+          }
+          if (tempLesson.demoUrl) {
+            formData.set('demoUrl', tempLesson.demoUrl)
+          }
           if (tempLesson.useScore) {
             if (tempLesson.scoreOption == 'vex') {
               formData.set('useXml', false)
