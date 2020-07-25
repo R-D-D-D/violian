@@ -194,9 +194,9 @@
 
           v-row.justify-center
             v-col.text-center
-              v-btn(color="indigo" @click="submit" dark :loading="loading" :disabled="loading")
+              v-btn(color="indigo" @click="submit" dark :loading="loading")
                 | Confirm
-              v-btn(to="/course/index") Cancel
+              v-btn(to="/course/index" :disabled="loading") Cancel
           v-row
             v-col
               p.error {{ error }}
