@@ -210,7 +210,6 @@
 </template>
  
 <script>
-import Panel from "@/components/Panel";
 import { mapState } from "vuex";
 import ShowLesson from "@/components/Course/ShowLesson";
 import CourseService from "@/services/CourseService";
@@ -239,7 +238,6 @@ export default {
     }
   },
   components: {
-    "panel": Panel,
     "lesson": ShowLesson
   },
   computed: {
@@ -276,7 +274,7 @@ export default {
       }
     },
 
-    ...mapState(["user", "userSubscribedCourses", "userOwnedCourses"])
+    ...mapState(["user"])
   },
   methods: {
     goToLesson (event, lesson) {
@@ -325,7 +323,7 @@ export default {
         })) 
 
         await this.$store.dispatch('subscribe', {
-          studentId: this.$store.state.user.id,
+          studentId: this.user.id,
           courseId: this.course.id
         })
 

@@ -1,36 +1,38 @@
 const {Lesson} = require('../models')
 const {User} = require('../models')
 const {Course} = require('../models')
+const {sequelize} = require('../models')
 
 module.exports = {
   async create (req, res) {
     try {
-      const {cid} = req.body
-      const course = await Course.findOne({
-        where: {
-          id: cid
-        }
-      })
-      
-      if (!course) {
-        return res.status(403).send({
-          error: "Course information is incorrect"
+      await sequelize.transaction(async (t) => {
+        const {cid} = req.body
+        console.log(req.body)
+
+        const course = await Course.findOne({
+          where: {
+            id: cid
+          }
         })
-      }
-
-      const lesson = await course.createLesson({
-        name: req.body.name,
-        duration: req.body.duration || 0,
-        description: req.body.description
-      })
-
-      await course.increment('duration', { by: parseInt(req.body.duration) || 0})
-      await lesson.setCourse(course)
-
-      res.send({
-        lesson: lesson.toJSON()
+        
+        if (!course) {
+          return res.status(403).send({
+            error: "Course information is incorrect"
+          })
+        }
+  
+        const lesson = await course.createLesson(req.body)
+  
+        await course.increment('duration', { by: parseInt(req.body.duration) || 0})
+        await lesson.setCourse(course)
+  
+        res.send({
+          lesson: lesson.toJSON()
+        })
       })
     } catch (err) {
+      console.log('from lesson', err)
       res.status(500).send({
         error: 'an error has occured trying to create the lesson'
       })
@@ -39,38 +41,40 @@ module.exports = {
 
   async edit (req, res) {
     try {
-      const {lessonObj} = req.body
-      const lesson = await Lesson.findOne({
-        where: {
-          id: lessonObj.id
-        }
-      })
-
-      if (!lesson) {
-        res.status(403).send({
-          error: "Lesson not found"
+      await sequelize.transaction(async (t) => {
+        const {lessonObj} = req.body
+        const lesson = await Lesson.findOne({
+          where: {
+            id: lessonObj.id
+          }
         })
-      }
 
-      const course = await lesson.getCourse()
-      var differenceInDuration = parseInt(lessonObj.duration) - lesson.duration
-      if (differenceInDuration != 0) {
-        if (differenceInDuration > 0) {
-          await course.increment('duration', { by: differenceInDuration })
-        } else {
-          await course.decrement('duration', { by: differenceInDuration })
+        if (!lesson) {
+          res.status(403).send({
+            error: "Lesson not found"
+          })
         }
-      }
 
-      lesson.name = lessonObj.name
-      lesson.duration = lessonObj.duration
-      await lesson.save()
+        const course = await lesson.getCourse()
+        var differenceInDuration = parseInt(lessonObj.duration) - lesson.duration
+        if (differenceInDuration != 0) {
+          if (differenceInDuration > 0) {
+            await course.increment('duration', { by: differenceInDuration })
+          } else {
+            await course.decrement('duration', { by: differenceInDuration })
+          }
+        }
 
-      res.send({
-        lesson: lesson.toJSON()
+        lesson.name = lessonObj.name
+        lesson.duration = lessonObj.duration
+        await lesson.save()
+
+        res.send({
+          lesson: lesson.toJSON()
+        })
       })
-
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to edit lesson"
       })
@@ -117,18 +121,20 @@ module.exports = {
 
   async destroy (req, res) {
     try {
-      const {lid} = req.query
-      const lesson = await Lesson.findOne({
-        where: {
-          id: lid
-        }
-      })
+      await sequelize.transaction(async (t) => {
+        const {lid} = req.query
+        const lesson = await Lesson.findOne({
+          where: {
+            id: lid
+          }
+        })
 
-      const course = await lesson.getCourse()
-      await course.decrement('duration', { by: lesson.duration })
-      await lesson.destroy()
-      res.send({
-        data: 'ok'
+        const course = await lesson.getCourse()
+        await course.decrement('duration', { by: lesson.duration })
+        await lesson.destroy()
+        res.send({
+          data: 'ok'
+        })
       })
     } catch (err) {
       res.status(500).send({

@@ -44,13 +44,9 @@
 
 <script>
 import AuthenticationService from "@/services/AuthenticationService";
-import Panel from "@/components/Panel";
 
 export default {
   name: "Register",
-  components: {
-    'panel': Panel
-  },
   data() {
     return {
       username: "",

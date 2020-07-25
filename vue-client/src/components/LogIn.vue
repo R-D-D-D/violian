@@ -40,15 +40,11 @@
 
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
-import Panel from '@/components/Panel'
 import SubscriptionService from '@/services/SubscriptionService'
 import CourseService from '@/services/CourseService'
 
 export default {
   name: 'LogIn',
-  components: {
-    'panel': Panel
-  },
   data () {
     return {
       email: '',

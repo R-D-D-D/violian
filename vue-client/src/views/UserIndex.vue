@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import Panel from '@/components/Panel'
 import UserService from '@/services/UserService'
 
 export default {
@@ -22,9 +21,6 @@ export default {
     return {
       allUsers: []
     }
-  },
-  components: {
-    'panel': Panel
   },
 
   mounted: async function () {

@@ -12,7 +12,6 @@
 </template>
 
 <script>
-import Panel from '@/components/Panel'
 import { mapState } from 'vuex'
 
 export default {
@@ -21,9 +20,6 @@ export default {
     return {
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg'
     }
-  },
-  components: {
-    'panel': Panel
   },
   computed: {
     ...mapState(['user', 'allCourses'])

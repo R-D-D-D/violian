@@ -33,10 +33,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0
     },
     requirements: DataTypes.TEXT,
-    targetAudience: DataTypes.TEXT,
+    targetAudiences: DataTypes.TEXT,
     learningPoints: DataTypes.TEXT,
     previewVideoUrl: DataTypes.TEXT,
-    tagline: DataTypes.STRING
+    tagline: DataTypes.STRING,
+    coverPhotoUrl: DataTypes.STRING,
   })
 
   Course.associate = function (models) {

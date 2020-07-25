@@ -2,31 +2,66 @@ const {Course} = require('../models')
 const {User} = require('../models')
 const {Sequelize} = require('sequelize')
 const {Op} = require('sequelize')
+const {sequelize} = require('../models')
+const AWS = require('aws-sdk')
+const config = require('../config/config')
+
+const s3 = new AWS.S3({
+  accessKeyId: config.aws.id,
+  secretAccessKey: config.aws.secret
+});
 
 module.exports = {
   async create (req, res) {
     try {
-      const {TutorId} = req.body
-      const user = await User.findOne({
-        where: {
-          id: TutorId
-        }
-      })
-      
-      if (!user) {
-        return res.status(403).send({
-          error: "User information is incorrect"
+      await sequelize.transaction(async (t) => {
+        const {TutorId} = req.body
+        const user = await User.findOne({
+          where: {
+            id: TutorId
+          }
         })
-      }
+        
+        if (!user) {
+          return res.status(403).send({
+            error: "User information is incorrect"
+          })
+        }
 
-      req.body.duration = 0
-      const course = await user.createCourse(req.body)
-      await course.setTutor(user)
+        if (req.files['previewVideo'] && req.files['previewVideo'].length > 0) {
+          let params = {
+              Bucket: config.aws.bucket,
+              Key: `${user.email}/${req.body.name}/previewVideo/${req.files['previewVideo'][0].originalname}`,
+              Body: req.files['previewVideo'][0].buffer
+          }
+      
+          // Uploading files to the bucket
+          const response = await s3.upload(params).promise()
+          req.body.previewVideoUrl = response.Location
+        }
 
-      res.send({
-        course: course.toJSON()
+        if (req.files['coverPhoto'] && req.files['coverPhoto'].length > 0) {
+          let params = {
+              Bucket: config.aws.bucket,
+              Key: `${user.email}/${req.body.name}/coverPhoto//${req.files['coverPhoto'][0].originalname}`,
+              Body: req.files['coverPhoto'][0].buffer
+          }
+      
+          // Uploading files to the bucket
+          const response = await s3.upload(params).promise()
+          req.body.coverPhotoUrl = response.Location
+        } 
+  
+        req.body.duration = 0
+        const course = await user.createCourse(req.body)
+        await course.setTutor(user)
+  
+        res.send({
+          course: course.toJSON()
+        })
       })
     } catch (err) {
+      console.log('from course', err)
       res.status(500).send({
         error: 'an  error has occured trying to create the course'
       })
@@ -56,7 +91,6 @@ module.exports = {
           error: "No course found"
         })
       }
-      
 
       var coursesJson = []
 
@@ -72,10 +106,12 @@ module.exports = {
         return courseJson
       }))
 
+      console.log(coursesJson)
       res.send({
         courses: coursesJson
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to retrieve courses"
       })
@@ -152,6 +188,7 @@ module.exports = {
         return lessonJson
       }))
 
+      console.log(courseJson)
       res.send({
         course: courseJson
       })
@@ -165,16 +202,18 @@ module.exports = {
 
   async destroy (req, res) {
     try {
-      const {cid} = req.query
-      await Course.destroy({
-        where: {
-          id: cid
-        },
-        individualHooks: true
-      })
-
-      res.send({
-        data: 'ok'
+      await sequelize.transaction(async (t) => {
+        const {cid} = req.query
+        await Course.destroy({
+          where: {
+            id: cid
+          },
+          individualHooks: true
+        })
+  
+        res.send({
+          data: 'ok'
+        })
       })
     } catch (err) {
       res.status(500).send({
@@ -185,26 +224,48 @@ module.exports = {
 
   async edit (req, res) {
     try {
-      const {courseObj} = req.body
-      await Course.update({
-        name: courseObj.name,
-        price: courseObj.price
-      }, {
-        where: {
-          id: courseObj.id
+      await sequelize.transaction(async (t) => {
+        const user = req.user
+        if (req.files['previewVideo'] && req.files['previewVideo'].length > 0) {
+          let params = {
+              Bucket: config.aws.bucket,
+              Key: `${user.email}/${req.body.name}/previewVideo/${req.files['previewVideo'][0].originalname}`,
+              Body: req.files['previewVideo'][0].buffer
+          }
+      
+          // Uploading files to the bucket
+          const response = await s3.upload(params).promise()
+          req.body.previewVideoUrl = response.Location
         }
-      })
 
-      const course = await Course.findOne({
-        where: {
-          id: courseObj.id
-        }
-      })
+        if (req.files['coverPhoto'] && req.files['coverPhoto'].length > 0) {
+          let params = {
+              Bucket: config.aws.bucket,
+              Key: `${user.email}/${req.body.name}/coverPhoto/${req.files['coverPhoto'][0].originalname}`,
+              Body: req.files['coverPhoto'][0].buffer
+          }
+      
+          // Uploading files to the bucket
+          const response = await s3.upload(params).promise()
+          req.body.coverPhotoUrl = response.Location
+        } 
 
-      res.send({
-        course: course.toJSON()
+        await Course.update(req.body, {
+          where: {
+            id: req.body.id
+          }
+        })
+  
+        const course = await Course.findOne({
+          where: {
+            id: courseObj.id
+          }
+        })
+  
+        res.send({
+          course: course.toJSON()
+        })
       })
-
     } catch (err) {
       res.status(500).send({
         error: "An error has occured in trying to edit course"

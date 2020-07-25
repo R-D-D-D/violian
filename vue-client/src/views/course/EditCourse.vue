@@ -9,76 +9,25 @@
         v-stepper-step(step='3' color="indigo") Review and Confirm
       v-stepper-items
         v-stepper-content(step='1')
-          v-row.justify-center
-            v-col(cols="12" md="11")
-              v-card.text-left(outlined).mb-12
-                v-card-title.display-1 Course Info
-                v-divider
-                v-card-text
-                  v-form(ref="courseForm")
-                    v-row
-                      v-col(cols="12" md="4")
-                        v-text-field(label='Title*' name='title' type='text' v-model='name' outlined clearable color="indigo")
-                      v-col(cols="12" md="4")
-                        v-text-field(label='Price*' name='price' prepend-icon='mdi-currency-usd' v-model='price' :rules="priceRules" outlined clearable color="indigo")
-                      v-col(cols="12" md="4")
-                        v-text-field(label='Tagline' name='tagline' v-model='tagline' outlined clearable color="indigo")
-                    v-row
-                      v-col(cols="12")
-                        v-textarea(label="Description" auto-grow outlined v-model="description" color="indigo")
-                    v-row
-                      v-col(cols="12" md="4")
-                        v-select(label='Level' :items="levels" v-model="level" outlined color="indigo")
-                      v-col(cols="12" md="4")
-                        v-select(label='Instrument' :items="instruments" v-model="instrument" outlined color="indigo")
-                      v-col(cols="12" md="4")
-                        v-select(label='Language' :items="languages" v-model="language" outlined color="indigo")
-                    
-                    v-row
-                      v-col(cols="12" md="6")
-                        v-file-input(
-                          accept="video/mp4, video/ogg" 
-                          placeholder="Upload a preview video, if none is supplied, the first lesson will be displayed as preview video" 
-                          prepend-icon="mdi-video"
-                          label="Preview Video"
-                          v-model="previewVideo"
-                          outlined
-                          color="indigo")
-
-                      v-col(cols="12" md="6")
-                        v-file-input(
-                          accept="image/*" 
-                          placeholder="Choose coverpage for your course" 
-                          prepend-icon="mdi-image"
-                          label="Cover Photo"
-                          v-model="coverPhoto"
-                          outlined
-                          color="indigo")
-                    
-                    v-row
-                      v-col(cols="12")
-                        div(style="font-size: 16px;") What will your students learn from the course?
-                      v-col.py-1(cols="12" v-for="(learningPoint, idx) in learningPoints")
-                        v-text-field(color="indigo" label='Example: How to use pen tool in Photoshop' name='tagline' v-model='learningPoints[idx]' outlined clearable dense hide-details :rules="alphanumricRules")
-                      v-col(cols="12")
-                        v-btn(@click="addLearningPoint" color="indigo" text) + Add an answer
-                    
-                    v-row
-                      v-col(cols="12")
-                        div(style="font-size: 16px;") What will your students learn from the course?
-                      v-col.py-1(cols="12" v-for="(targetAudience, idx) in targetAudiences")
-                        v-text-field(color="indigo" label='Example: Kids 6-8 years old' name='tagline' v-model='targetAudiences[idx]' outlined clearable dense hide-details :rules="alphanumricRules")
-                      v-col(cols="12")
-                        v-btn(@click="addTargetAudience" color="indigo" text) + Add an answer
-                    
-                    v-row
-                      v-col(cols="12")
-                        div(style="font-size: 18px;") What will your students learn from the course?
-                      v-col.py-1(cols="12" v-for="(requirement, idx) in requirements")
-                        v-text-field(color="indigo" label='Example: Photoshop software' name='tagline' v-model='requirements[idx]' outlined clearable dense hide-details :rules="alphanumricRules")
-                      v-col(cols="12")
-                        v-btn(@click="addRequirement" color="indigo" text) + Add an answer
-            
+          panel.mb-5(title="Basic Info" md="10")
+            v-card-text
+              v-form(ref="courseForm")
+                v-row
+                  v-col(cols="12" md="4")
+                    v-text-field(label='Title*' name='title' type='text' v-model='name' :rules="nameRules" solo clearable color="indigo")
+                  v-col(cols="12" md="4")
+                    v-text-field(label='Price*' name='price' prepend-icon='mdi-currency-usd' v-model='price' :rules="priceRules" solo clearable color="indigo")
+                  v-col(cols="12" md="4")
+                    v-select(label='Language' :items="languages" v-model="language" solo)
+                v-row
+                  v-col(cols="12")
+                    v-textarea(label="Description" auto-grow solo v-model="description")
+                v-row
+                  v-col(cols="12" md="4")
+                    v-select(label='Level' :items="levels" v-model="level" solo)
+                  v-col(cols="12" md="4")
+                    v-select(label='Instrument' :items="instruments" v-model="instrument" solo)
+          
           v-row.justify-center
             v-col.text-center
               v-btn(color="indigo" @click='goStepTwo' dark)
@@ -94,12 +43,12 @@
                     v-form.mt-5(:ref="`lessonForm${idx}`")
                       v-row
                         v-col(cols="12" md="4")
-                          v-text-field(label='Name' name='name' type='text' v-model='lessons[idx].name' :rules="requiredRules" outlined clearable color="indigo" ) Title*
+                          v-text-field(label='Name' name='name' type='text' v-model='lessons[idx].name' :rules="requiredRules" solo clearable color="indigo" ) Title*
                         v-col(cols="12" md="4")
-                          v-text-field(label='Duration in minutes' name='duration' v-model='lessons[idx].duration' :rules="durationRules" outlined clearable color="indigo")
+                          v-text-field(label='Duration in minutes' name='duration' v-model='lessons[idx].duration' :rules="durationRules" solo clearable color="indigo")
                       v-row
                         v-col(cols="12")
-                          v-textarea(label="Description" auto-grow v-model='lessons[idx].description' color="indigo" outlined)
+                          v-textarea(label="Description" auto-grow v-model='lessons[idx].description')
                       v-row
                         v-col(cols="12" md="6")
                           v-file-input(
@@ -107,18 +56,16 @@
                             placeholder="Choose Explanation Video" 
                             prepend-icon="mdi-video" 
                             label="Explanation Video"
-                            v-model="lessons[idx].video"
-                            outlined
-                            color="indigo")
+                            v-model="lessons[idx].video")
                         v-col(cols="12" md="6")
                           v-file-input(
                             accept="image/*" 
                             placeholder="Choose coverpage for video" 
                             prepend-icon="mdi-image" 
                             label="Explanation Video Poster"
-                            v-model="lessons[idx].videoPoster"
-                            outlined
-                            color="indigo")
+                            v-model="lessons[idx].videoPoster")
+                        v-col(cols="12" md="4")
+                          v-text-field(label='VideoUrl' type='text' v-model='lessons[idx].videoUrl' solo clearable color="indigo" ) Video Url
                       v-row
                         v-col(cols="12" md="6")
                           v-file-input(
@@ -126,26 +73,24 @@
                             placeholder="Choose Explanation Video" 
                             prepend-icon="mdi-video"
                             label="Demo Video"
-                            v-model="lessons[idx].demo"
-                            outlined
-                            color="indigo")
+                            v-model="lessons[idx].demo")
                         v-col(cols="12" md="6")
                           v-file-input(
                             accept="image/*" 
                             placeholder="Choose coverpage for demo video" 
                             prepend-icon="mdi-image"
                             label="Demo Video Poster"
-                            v-model="lessons[idx].demoPoster"
-                            outlined
-                            color="indigo")
+                            v-model="lessons[idx].demoPoster")
+                        v-col(cols="12" md="4")
+                          v-text-field(label='DemoUrl' type='text' v-model='lessons[idx].demoUrl' solo clearable color="indigo" ) Demo Url
                       v-row
                         v-col(cols="12" md="6")
-                          v-switch(v-model="lessons[idx].useScore" :label="`Overlay score on your demo video`" @change="showVex($event, idx)" color="indigo")
+                          v-switch(v-model="lessons[idx].useScore" :label="`Overlay score on your demo video`" @change="showVex($event, idx)")
                       v-row  
                         v-col(cols="12" md="6" v-if="lessons[idx].useScore")
                           v-radio-group(v-model="lessons[idx].scoreOption" :mandatory="true")
-                            v-radio(label="Upload musicXML file" value="xml" color="indigo")
-                            v-radio(label="Design your own score" value="vex" color="indigo")
+                            v-radio(label="Upload musicXML file" value="xml")
+                            v-radio(label="Design your own score" value="vex")
                         v-col(cols="12" md="6" v-if="lessons[idx].useScore")
                           v-text-field(label='Demo Start Time' v-model='lessons[idx].demoStartTime' clearable color="indigo" prepend-icon="mdi-alarm" persistent-hint hint="At roughly which second did you start playing in demo video" :rules="demoStartTimeRules")
                     
@@ -155,12 +100,12 @@
                       v-row
                         v-col(cols="12" md="6")
                           v-subheader.pl-0 No. Bars
-                          v-slider(v-model='lessons[idx].numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, idx)" color="indigo" track-color="indigo lighten-3")
+                          v-slider(v-model='lessons[idx].numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, idx)")
                         v-col(cols="12" md="6")
                           v-subheader.pl-0 BPM
-                          v-slider(v-model='lessons[idx].bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3")
+                          v-slider(v-model='lessons[idx].bpm' min='60' max='120' thumb-label :thumb-size="24")
                         v-col(cols="12" md="6")
-                          v-select(:items="time_signatures" outlined v-model="lessons[idx].timeSignature" label='Time Signature' @change="changeTimeSignature($event, idx)" color="indigo")
+                          v-select(:items="time_signatures" v-model="lessons[idx].timeSignature" label='Time Signature' @change="changeTimeSignature($event, idx)")
                     div#optionxml(v-show="(lessons[idx].scoreOption == 'xml' && lessons[idx].useScore)")
                       v-row
                         v-col(cols="12" md="6")
@@ -194,13 +139,12 @@
                   v-spacer
                   v-btn(outlined color='indigo' right @click='e1 = 1')
                     v-icon(color="indigo") mdi-pencil
-                v-divider
                 v-card-text
                   v-row
                     v-col(cols="12" md="4")
                       p.text-h6 Title: {{ name }}
                     v-col(cols="12" md="4")
-                      p.text-h6 Price: {{ price }}
+                      p.text-h6 Price: {{ price}}
                     v-col(cols="12" md="4")
                       p.text-h6 Language: {{ language }}
                   v-row
@@ -272,10 +216,11 @@ export default {
     return {
       e1: 1,
       name: '',
-      tagline: '',
       nameRules: [
         v => !!v || 'Title is required',
       ],
+      error: null,
+      loading: false,
       price: '',
       priceRules: [
         v => !!v || "Price is required",
@@ -288,11 +233,6 @@ export default {
       levels: ['Beginner', 'Intermediate', 'Advanced'],
       instrument: '',
       instruments: ['Piano', 'Guitar', 'Drum Set', 'Er Hu', 'Yang Qin', 'French Horn'],
-      targetAudiences: [''],
-      learningPoints: [''],
-      requirements: [''],
-      coverPhoto: null,
-      previewVideo: null,
       lesson: [0],
       lessons: [{
         name: '',
@@ -302,6 +242,8 @@ export default {
         videoPoster: null,
         demo: null,
         demoPoster: null,
+        videoUrl: '',
+        demoUrl: '',
         useScore: true,
         handler: null,
         timeSignature: '4/4',
@@ -323,13 +265,8 @@ export default {
       requiredRules: [
         v => !!v || "This field is required"
       ],
-      alphanumricRules: [
-        v => new RegExp("^[a-zA-Z0-9 !@#$%^*_(){}-]{0,100}$").test(v) || "You can only input alphanumeric characters",
-      ],
       reviewVexHandlers: [],
-      time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
-      error: null,
-      loading: false,
+      time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"]
     }
   },
 
@@ -383,18 +320,6 @@ export default {
   },
 
   methods: {
-    addLearningPoint () {
-      this.learningPoints.push('')
-    },
-
-    addTargetAudience () {
-      this.targetAudiences.push('')
-    },
-
-    addRequirement () {
-      this.requirements.push('')
-    },
-
     goStepTwo () {
       if (this.$refs.courseForm.validate()) {
         this.e1 = 2
@@ -424,29 +349,19 @@ export default {
     async submit () {
       this.loading = true
       this.error = ''
-      try {
+      try {  
         // create course
-        var courseFormData = new FormData()
-        courseFormData.set('name', this.name)
-        courseFormData.set('description', this.description)
-        courseFormData.set('language', this.langauge)
-        courseFormData.set('level', this.level)
-        courseFormData.set('instrument', this.instrument)
-        courseFormData.set('price', Number(this.price))
-        courseFormData.set('requirements', this.requirements.join('&'))
-        courseFormData.set('targetAudiences', this.targetAudiences.join('&'))
-        courseFormData.set('learningPoints', this.learningPoints.join('&'))
-        courseFormData.set('tagline', this.tagline)
-        courseFormData.set('TutorId', this.user.id)
+        const courseResponse = await CourseService.create({
+          name: this.name,
+          description: this.description, 
+          langauge: this.langauge, 
+          level: this.level, 
+          instrument: this.instrument,
+          price: Number(this.price),
+          TutorId: this.user.id,
+        })
 
-        if (this.previewVideo) {
-          courseFormData.append('previewVideo', this.previewVideo)
-        }
-        if (this.coverPhoto) {
-          courseFormData.append('coverPhoto', this.coverPhoto)
-        }
-
-        const courseResponse = await CourseService.create(courseFormData)
+        await this.$store.dispatch('addCourse', courseResponse.data.course)
 
         // create lessons
         for (var i = 0; i < this.lessons.length; i++) {
@@ -470,6 +385,12 @@ export default {
           formData.set('numberOfBars', tempLesson.numberOfBars)
           formData.set('demoStartTime', parseInt(tempLesson.demoStartTime))
           formData.set('useScore', tempLesson.useScore)
+          if (tempLesson.videoUrl) {
+            formData.set('videoUrl', tempLesson.videoUrl)
+          }
+          if (tempLesson.demoUrl) {
+            formData.set('demoUrl', tempLesson.demoUrl)
+          }
           if (tempLesson.useScore) {
             if (tempLesson.scoreOption == 'vex') {
               formData.set('useXml', false)
@@ -503,7 +424,6 @@ export default {
 
         this.$router.push(`/course/show/${courseResponse.data.course.id}`)
       } catch (err) {
-        console.log(err)
         this.error = err.response.data.error
       }
     },

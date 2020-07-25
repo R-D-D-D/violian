@@ -7,6 +7,7 @@ import LogIn from "../components/LogIn"
 import ShowCourse from "../views/course/ShowCourse"
 import CourseIndex from "../views/course/CourseIndex"
 import NewCourse from "../views/course/NewCourse"
+import EditCourse from "../views/course/EditCourse"
 import UserIndex from "../views/UserIndex"
 import Video from "../components/Video"
 import CoursesThreadsIndex from "../views/thread/CoursesThreadsIndex"
@@ -45,6 +46,11 @@ const routes = [
     path: '/course/show/:course_id',
     name: 'showcourse',
     component: ShowCourse
+  },
+  {
+    path: '/course/edit/:course_id',
+    name: 'editcourse',
+    component: EditCourse
   },
   {
     path: '/course/show/:course_id/lesson/:lesson_id',

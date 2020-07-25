@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import Panel from '@/components/Panel'
 import { mapState } from 'vuex'
 import SubscriptionService from '@/services/SubscriptionService'
 import ThreadService from '@/services/ThreadService'
@@ -28,10 +27,6 @@ export default {
       students: [],
       unreads: []
     }
-  },
-
-  components: {
-    'panel': Panel
   },
 
   computed: {

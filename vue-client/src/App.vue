@@ -92,4 +92,16 @@ export default {
 .v-expansion-panel-content__wrap {
   padding: 0 !important;
 }
+
+input:-webkit-autofill {
+  -webkit-box-shadow:0 0 0 50px white inset; /* Change the color to your own background color */
+  box-shadow:0 0 0 50px white inset;
+  -webkit-text-fill-color: #333;
+}
+
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 50px white inset;/*your box-shadow*/
+  box-shadow:0 0 0 50px white inset;
+  -webkit-text-fill-color: #333;
+} 
 </style>

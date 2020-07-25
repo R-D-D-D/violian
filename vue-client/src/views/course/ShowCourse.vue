@@ -147,7 +147,6 @@
 </template>
  
 <script>
-import Panel from "@/components/Panel";
 import { mapState } from "vuex";
 import CourseService from "@/services/CourseService";
 import ThreadService from "@/services/ThreadService";
@@ -173,9 +172,6 @@ export default {
       ],
       add_btn_loading: false,
     }
-  },
-  components: {
-    "panel": Panel
   },
   computed: {
     is_student () {

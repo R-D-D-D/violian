@@ -36,11 +36,15 @@ module.exports = (app) => {
     UserController.getAllStudents),
 
   // course management  
-  app.post('/course/new', 
+  app.post('/course/new', upload.fields(
+    [{ name: 'previewVideo', maxCount: 1 }, 
+    { name: 'coverPhoto', maxCount: 1 }]),  
     isAuthenticated,
     CourseController.create),
 
-  app.put('/course/edit', 
+  app.put('/course/edit', upload.fields(
+    [{ name: 'previewVideo', maxCount: 1 }, 
+    { name: 'coverPhoto', maxCount: 1 }]), 
     isAuthenticated, 
     CourseController.edit),
 

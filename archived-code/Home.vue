@@ -39,7 +39,7 @@
   //-               v-icon mdi-volume-plus
   //-             v-btn#voldec
   //-               v-icon mdi-volume-minus
-  //-             v-progress-linear#progress.progress.mx-5(v-model="progress" height="8" color="indigo darken-2" rounded)
+  //-             v-progress-linear#progress.progress.mx-5(v-model="progress" height="8" color="#271957" rounded)
   //-             v-btn#fs
   //-               v-icon(v-if="!isFullScreen") mdi-fullscreen
   //-               v-icon(v-else) mdi-fullscreen-exit

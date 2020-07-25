@@ -66,7 +66,6 @@
 </template>
 
 <script>
-import Panel from '@/components/Panel'
 import { mapState } from 'vuex'
 import ThreadService from '@/services/ThreadService'
 import CourseService from '@/services/CourseService'
@@ -88,10 +87,6 @@ export default {
       ],
       currentThread: [this.lesson_pos]
     }
-  },
-
-  components: {
-    'panel': Panel
   },
 
   computed: {

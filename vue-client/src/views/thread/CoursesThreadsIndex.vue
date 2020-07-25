@@ -21,7 +21,6 @@
 </template>
 
 <script>
-import Panel from '@/components/Panel'
 import { mapState } from 'vuex'
 import SubscriptionService from '@/services/SubscriptionService'
 import CourseService from '@/services/CourseService'
@@ -35,10 +34,6 @@ export default {
       userOwnedCourses: [],
       userSubscribedCourses: []
     }
-  },
-
-  components: {
-    'panel': Panel
   },
 
   computed: mapState(['user']),
