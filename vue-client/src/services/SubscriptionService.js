@@ -12,8 +12,4 @@ export default {
   getSubscriptionInfoOfCourse (courseId) {
     return Api().get(`subscribe/get/course?cid=${courseId}`)
   },
-
-  getAllTutors () {
-    return Api().get('tutor/list')
-  }
 }

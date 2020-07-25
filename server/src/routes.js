@@ -6,6 +6,7 @@ const ExerciseController = require('./controllers/ExerciseController')
 const ThreadController = require('./controllers/ThreadController')
 const PostController = require('./controllers/PostController')
 const PaymentController = require('./controllers/PaymentController')
+const UserController = require('./controllers/UserController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
 const isAuthenticated = require('./policies/isAuthenticated')
@@ -20,6 +21,19 @@ module.exports = (app) => {
     AuthenticationController.register),
 
   app.post('/login', AuthenticationController.login),
+
+  // user management
+  app.get('/user/list', 
+  isAuthenticated, 
+  UserController.getAllUsers),
+
+  app.get('/tutor/list', 
+    isAuthenticated, 
+    UserController.getAllTutors),
+
+  app.get('/student/list', 
+    isAuthenticated, 
+    UserController.getAllStudents),
 
   // course management  
   app.post('/course/new', 
@@ -101,10 +115,6 @@ module.exports = (app) => {
   app.get('/subscribe/get/course', 
     isAuthenticated, 
     SubscriptionController.getSubscriptionInfoOfCourse),
-
-  app.get('/tutor/list', 
-    isAuthenticated, 
-    SubscriptionController.getAllTutors),
 
   // thread management
   app.get('/thread/list',

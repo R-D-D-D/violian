@@ -7,7 +7,8 @@
 - GET `/login { email, password }` - `{ user: <userObj>, token: jwtSignedToken}`
 
 ## users
-- GET `/student/list` - `{ students: [<userObj>] }` -- to be implemented
+- GET `/user/list` - `{ users: [<userObj>] }`
+- GET `/student/list` - `{ students: [<userObj>] }`
 - GET `/tutor/list` - `{ tutors: [<userObj>] }`
 
 ## courses

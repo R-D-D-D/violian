@@ -476,6 +476,7 @@ Vex.UI.Handler.prototype.exportNotes = function() {
 };
 
 Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
+	console.log(notes)
 	if (notes && timeSignature) {
 		var tickables = []
 		var barNum = 0
@@ -557,29 +558,20 @@ Vex.UI.Handler.prototype.notesToBars = function (notes, timeSignature) {
 			dur = 1 / parseInt(dur)
 			if (isDot) {
 				dur = dur * 1.5
-				staveNote.addDotToAll()
 			}
+
+			accumDuration += dur
+			tickables.push(notes[i])
 	
-			if (accumDuration + dur > barDuration) {
+			if (accumDuration == barDuration) {
 				notesInBars.push(tickables)
 				tickables = []
 				barNum++
-				accumDuration = dur
-			} else if (accumDuration + dur == barDuration) {
-				if (i == notes.length - 1) {
-					tickables.push(notes[i])
-					notesInBars.push(tickables)
-					barNum++
-					return notesInBars
-				}
-			} else {
-				accumDuration += dur
+				accumDuration = 0
 			}
-	
-			tickables.push(notes[i])
 		}
 		
-		if (tickables.length > 0 && barNum + 1 <= this.options.numberOfStaves) {
+		if (tickables.length > 0 && barNum + 1 < this.options.numberOfStaves) {
 			notesInBars.push(tickables)
 		}
 

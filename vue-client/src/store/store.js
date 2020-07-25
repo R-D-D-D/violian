@@ -215,19 +215,6 @@ export default new Vuex.Store({
       }
     },
 
-    async getAllTutors ({commit}) {
-      try {
-        const response = await SubscriptionService.getAllTutors();
-        var tutors = response.data.tutors.map(tutor => {
-          tutor.lessons = null;
-          return tutor;
-        });
-        commit("setAllTutors", tutors);
-      } catch (err) {
-        console.log(err);
-      }
-    },
-
     async getCoursesForTutor ({commit}, tutor) {
       const response = await CourseService.list(tutor.id);
       var courses = response.data.courses
