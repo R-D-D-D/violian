@@ -64,6 +64,10 @@ module.exports = (app) => {
     CourseController.destroy),
 
   // lesson management  
+  app.get('/lesson/show',
+    isAuthenticated,
+    LessonController.show),
+
   app.post('/lesson/new', 
     isAuthenticated, 
     LessonController.create),
@@ -119,6 +123,14 @@ module.exports = (app) => {
   app.get('/subscribe/get/course', 
     isAuthenticated, 
     SubscriptionController.getSubscriptionInfoOfCourse),
+  
+  app.get('/subscribe/get/is-subscribed',
+    isAuthenticated,
+    SubscriptionController.isSubscribed),
+
+  app.get('/subscribe/get/is-owned',
+    isAuthenticated,
+    SubscriptionController.isOwned),
 
   // thread management
   app.get('/thread/list',

@@ -88,12 +88,6 @@ export default {
           this.$store.dispatch('setNotifications', userOwnedCourses.reduce(reducer, 0))
         }
         
-        if (response.data.user.isStudent) {
-          await this.$store.dispatch('getAllCourses')
-          await this.$store.dispatch('getCoursesForStudent', response.data.user)
-        } else {
-          await this.$store.dispatch('getCoursesForTutor', response.data.user)
-        }
         this.$router.push({
           name: 'home'
         })

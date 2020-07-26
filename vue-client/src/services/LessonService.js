@@ -1,6 +1,10 @@
 import Api from '@/services/Api'
 
 export default {
+  show (lessonId) {
+    return Api().get(`lesson/show?lid=${lessonId}`)
+  },
+
   create (lessonInfo) {
     return Api().post('lesson/new', lessonInfo)
   },

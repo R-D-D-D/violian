@@ -3,10 +3,10 @@
     panel(title="All Courses" md="9")
       v-list(v-if="!is_student")
         v-list-item(v-for="course in courses" :key="course.id")
-          v-list-item-content
+          v-list-item-content.clickable-content.mx-2.px-2(@click="showCourse($event, course.id, course.lessons[0].id)" style="")
             v-list-item-title.text-h5.py-0(v-text="course.name")
           v-list-item-icon
-            v-btn(outlined color='indigo' @click="showCourse($event, course.id)")
+            v-btn(outlined color='indigo' @click="editCourse($event, course)")
               v-icon mdi-pencil
           v-list-item-icon
             v-btn(outlined color='indigo' @click="deleteCourse($event, course)")
@@ -26,6 +26,7 @@
 import { mapState } from 'vuex'
 import SubscriptionService from '@/services/SubscriptionService'
 import CourseService from '@/services/CourseService'
+import LessonService from '@/services/LessonService'
 
 export default {
   data () {
@@ -53,8 +54,16 @@ export default {
 
     async deleteCourse (event, course) {
       if (confirm('Are you sure?')) {
-        await this.$store.dispatch('deleteCourse', course)
+        await Promise.all(course.lessons.map(lesson => {
+          return LessonService.delete(lesson.id);
+        }))
+        await CourseService.delete(course.id);
       }
+      this.$router.go()
+    },
+
+    editCourse (event, course) {
+      this.$router.push(`/course/edit/${course.id}`)
     }
   },
   mounted: async function () {
@@ -67,5 +76,9 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.clickable-content:hover {
+  background-color: #F5F5F5;
+  cursor: pointer;
+}
 </style>

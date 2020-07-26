@@ -43,7 +43,7 @@ module.exports = {
         if (req.files['coverPhoto'] && req.files['coverPhoto'].length > 0) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/${req.body.name}/coverPhoto//${req.files['coverPhoto'][0].originalname}`,
+              Key: `${user.email}/${req.body.name}/coverPhoto/${req.files['coverPhoto'][0].originalname}`,
               Body: req.files['coverPhoto'][0].buffer
           }
       

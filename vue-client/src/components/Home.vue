@@ -26,9 +26,9 @@
       v-row.mt-10
         v-col.text-left(cols="12")
           h2 Popular Courses
-        v-col(v-for="course in allCourses" sm="6" md="4" lg="3")
+        v-col(v-for="course in courses" sm="6" md="4" lg="3")
           v-card.mx-auto
-            v-img.white--text.align-end(height="200px" src='https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/standupforsingapore.jpg')
+            v-img.white--text.align-end(height="200px" :src="course.coverPhotoUrl")
               v-card-title(style="text-shadow: 1px 1px 2px #000000;") {{ course.name }}
             v-card-subtitle.pb-0.text-left Drum
             v-card-text.text-left.text--primary.pb-0
@@ -54,6 +54,7 @@ export default {
       items: [],
       model: null,
       search: null,
+      courses: []
     }
   },
 
@@ -90,7 +91,7 @@ export default {
   },
 
   mounted: async function () {
-    await this.$store.dispatch('getAllCourses')
+    this.courses = (await CourseService.listAll()).data.courses
   }
 }
 </script>

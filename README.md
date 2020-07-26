@@ -14,7 +14,7 @@
 ## courses
 - course management
   - GET `/course/list?uid=` - `{ courses: [<courseObj>] }`
-  - GET `/course/listall` - `{ courses: [<courseObj>] }`
+  - GET `/course/listall?search=` - `{ courses: [<courseObj>] }`
   - GET `/course/show?cid=` - `{ course: <courseObj> } gets detailed course obj including lessons`
   - POST `/course/new { name, price, description, langauge, level, instrument,  TutorId }` - `{ course: <courseObj> }`
   - PUT `/course/edit { courseObj }` - `{ course: <courseObj> }`
@@ -23,9 +23,9 @@
 ## lessons
 - lesson management
   - POST `/lesson/new { name, duration, description, cid }` - `{ lesson: <lessonObj> }`
-  - PUT `/lesson/edit { lessonObj }` - `{ lesson: <lessonObj> }`
+  - PUT `/lesson/edit { name, duration, description, cid, id }` - `{ lesson: <lessonObj> }`
   - GET `/lesson/list?cid=` - `{ lessons: [<lessonObj>] }`
-  - GET `/listall?search=` - `{ courses: [<courseObj>] }`
+  - GET `/show?lid=` - `{ lesson: <lessonObj> }`
   - DELETE `/lesson/del?lid=` - `{ data: ok }`
 
 ## exercises
@@ -39,6 +39,8 @@
 - POST `/subscribe/new { studentId, courseId }` - `{ data: ok }`
 - GET `/subscribe/get/student?uid=` - `{ courses: [<courseObj>] }`
 - GET `/subscribe/get/course?cid=` - `{ students: [<userObj>] }`
+- GET `/subscribe/get/is-subscribed?cid=` - `{ isSubscribed: boolean }`
+- GET `/subscribe/get/is-owned?cid=` - `{ isOwned: boolean }`
 
 ## threads
 - thread management

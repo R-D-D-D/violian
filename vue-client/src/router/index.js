@@ -18,6 +18,8 @@ import store from "../store/store"
 import AdvancedPayment from "../views/AdvancedPayment"
 import OSMD from "../components/OSMD"
 import ShowLesson from "../components/Course/ShowLesson"
+import CourseForm from "../views/course/CourseForm"
+import LessonForm from "../views/course/LessonForm"
 
 Vue.use(VueRouter);
 
@@ -45,12 +47,26 @@ const routes = [
   {
     path: '/course/show/:course_id',
     name: 'showcourse',
-    component: ShowCourse
+    component: ShowCourse,
+    props: true
   },
   {
     path: '/course/edit/:course_id',
     name: 'editcourse',
     component: EditCourse
+  },
+  {
+    path: '/course/form/:course_id',
+    name: 'courseform',
+    component: CourseForm
+  },
+  {
+    path: '/lesson/edit-form/:lesson_id',
+    component: LessonForm
+  },
+  {
+    path: '/lesson/new-form/:course_id',
+    component: LessonForm
   },
   {
     path: '/course/show/:course_id/lesson/:lesson_id',

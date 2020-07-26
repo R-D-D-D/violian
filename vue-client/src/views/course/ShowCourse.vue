@@ -9,24 +9,20 @@
           v-row
             v-col.pt-0
               h3 {{ course.description }}
-      
-          //- v-row
-          //-   v-col.py-0
-          //-     h4.font-weight-bold Created by: {{ course.TutorId }}
-            
+
           v-row
             v-col(sm="4" lg="3")
               v-row
                 v-col.pr-0(sm="4" md="3")
                   v-icon(color="white" size="30") mdi-guitar-acoustic
                 v-col.my-auto(sm="8" md="9")
-                  p.ma-0 Instrument: Body Percussion
+                  p.ma-0 Instrument: {{ course.instrument }}
             v-col(sm="4" lg="3")
               v-row
                 v-col.pr-0(sm="4" md="3")
                   v-icon(color="white" size="24") mdi-earth
                 v-col.my-auto(sm="8" md="9")
-                  p.ma-0 English
+                  p.ma-0 {{ course.language }}
             v-col(sm="4" lg="3")
               v-row
                 v-col.pr-0(sm="4" md="3")
@@ -36,7 +32,7 @@
 
         v-col(cols="12" md="4" v-if="is_student && !isSubscribed")
           v-card
-            v-img.white--text.align-end(gradient="to top right, rgba(0,0,0,.5), rgba(0,0,0,.5)" height="200px" src='https://images.pexels.com/photos/1246437/pexels-photo-1246437.jpeg?cs=srgb&dl=close-up-photo-of-person-playing-piano-1246437.jpg&fm=jpg' @click="alert('hey')" style="cursor: pointer;")
+            v-img.white--text.align-end(gradient="to top right, rgba(0,0,0,.5), rgba(0,0,0,.5)" height="200px" :src="course.coverPhotoUrl" @click="playVideo" style="cursor: pointer;")
               div(style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;")
                img#play-button(:src="require('../../assets/play_button.png')" style="position: absolute; width: 60px; left: calc(50% - 30px); top: calc(50% - 30px); height: 60px;" color="white" size="62" )
                h3.text--white(style="bottom: 12px; text-align: center; position: absolute; left:0; right:0;") Preview this course
@@ -47,7 +43,7 @@
               v-col.text-center
                 v-btn(color="#ec5252" dark @click="subscribe" style="width:90%" x-large v-if="course.price == 0") Enroll Now
                 v-btn(color="#ec5252" dark @click="subscribe" style="width:90%" x-large v-else) Buy Now
-        v-col.my-auto(cols="12" md="4" v-else)
+        v-col.my-auto(cols="12" md="4" v-if="isSubscribed || isOwned")
           v-row
             v-col.text-center
               v-btn(color="#26A69A" dark style="width:90%" x-large @click="goToLesson($event, course.lessons[0])") Start Learning!
@@ -60,18 +56,12 @@
               v-col.py-0.px-0
                 h2.py-3.pl-0(style="color: #3c3b37; font-size: 30px;") What you will learn
             v-row
-              v-col.py-0.px-0(cols="12" md="6")
+              v-col.py-0.px-0(cols="12" md="6" v-for="learningPoint in course.learningPoints.split('&')")
                 v-row
                   v-col.py-2.pr-0(cols="1")
                     v-icon.d-inline.mb-2(size="16" color="#ec5252") mdi-star
                   v-col.py-2.pr-0(cols="10")
-                    p.d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle;") body percussion movements
-              v-col.py-0.px-0(cols="12" md="6")
-                v-row
-                  v-col.py-2.pr-0(cols="1")
-                    v-icon.d-inline.mb-2(size="16" color="#ec5252") mdi-star
-                  v-col.py-2.pr-0(cols="10")
-                    .d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle; width: 100%;")  stand up for singapore 
+                    p.d-inline.mb-0.text-uppercase(style="line-height:1; vertical-align: middle;") {{ learningPoint }}
     
     v-container(fluid)
       v-row.px-sm-16.mx-md-8.mx-lg-16
@@ -87,13 +77,13 @@
             v-row
               v-col.py-0.px-0
                 h2.pl-0(style="color: #3c3b37; font-size: 30px;") Prerequisites for this Course
-            v-row(align="start")
+            v-row(align="start" v-for="requirement in course.requirements.split('&')")
               v-col.py-0.px-0(cols="6")
                 v-row
                   v-col.pr-0(cols="1" align-self="center")
                     v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
                   v-col.pr-0(cols="10" align-self="center")
-                    p.d-inline.mb-0(style="line-height:1;") none
+                    p.d-inline.mb-0(style="line-height:1;") {{ requirement }}
               v-col.py-0.px-0(cols="6")
 
     v-container(fluid)
@@ -103,13 +93,13 @@
             v-row
               v-col.py-0.px-0
                 h2.pl-0(style="color: #3c3b37; font-size: 30px;") Who's suitable for the course
-            v-row(align="start")
+            v-row(align="start" v-for="targetAudience in course.targetAudiences.split('&')")
               v-col.py-0.px-0(cols="6")
                 v-row
                   v-col.pr-0.py-0(cols="1" align-self="center")
                     v-icon.d-inline.mb-2(size="30" color="#ec5252") mdi-square-small
                   v-col.pr-0(cols="10" align-self="center")
-                    p.d-inline.mb-0(style="line-height:1;") All
+                    p.d-inline.mb-0(style="line-height:1;") {{ targetAudience }}
               v-col.py-0.px-0(cols="6")
 
     v-container(fluid)
@@ -143,13 +133,22 @@
                       v-list-item-icon
                         div {{ lesson.duration }} mins
 
+    v-row(justify='center')
+      v-dialog(v-model='dialog' max-width='calc(100vw * 0.8)' v-if="dialog")
+        video(width="100%" height="auto" controls ref="videoPlayer" id='video')
+          source(:src="course.previewVideoUrl" type="video/mp4")
+
+              
+
                  
 </template>
  
 <script>
-import { mapState } from "vuex";
-import CourseService from "@/services/CourseService";
-import ThreadService from "@/services/ThreadService";
+import { mapState } from "vuex"
+import CourseService from "@/services/CourseService"
+import ThreadService from "@/services/ThreadService"
+import SubscriptionService from '@/services/SubscriptionService'
+// import videojs from "video.js"
 
 export default {
   name: "ShowCourse",
@@ -158,40 +157,15 @@ export default {
       course: null,
       dialog: false,
       error: null,
-      recording: false,
       tab: null,
-      new_name: '',
-      new_duration: '',
-      new_melody: [],
-      nameRules: [
-        v => !!v || "Title is required"
-      ],
-      durationRules: [
-        v => !!v || "Duration is required",
-        v => new RegExp(/^\d+$/).test(v) || "Please input numbers only"
-      ],
-      add_btn_loading: false,
+      isSubscribed: false,
+      isOwned: false,
+      player: null
     }
   },
   computed: {
     is_student () {
       return this.user.isStudent;
-    },
-
-    isSubscribed () {
-      if (this.is_student) {
-        return this.$store.getters.isSubscribed(this.course.id)
-      } else {
-        return null
-      }
-    },
-
-    isOwned () {
-      if (!this.is_student) {
-        return this.$store.getters.isOwned(this.course.id)
-      } else {
-        return null
-      }
     },
 
     timeConverted () {
@@ -207,8 +181,17 @@ export default {
       }
     },
 
-    ...mapState(["user", "userSubscribedCourses", "userOwnedCourses"])
+    ...mapState(["user"])
   },
+
+  watch: {
+    dialog (val) {
+      if (val == false) {
+        return false
+      }
+    }
+  },
+
   methods: {
     goToLesson (event, lesson) {
       this.$router.push({
@@ -222,25 +205,7 @@ export default {
       })
     },
 
-    edit_rhythm_name () {
-      this.name_editable = true;
-    },
-
-    async add_lesson () {
-      if (this.$refs.form.validate()) {
-        this.add_btn_loading = true;
-        var newLesson = {
-          name: this.new_name,
-          duration: parseInt(this.new_duration),
-          cid: this.course.id
-        };
-
-        await this.$store.dispatch("addLesson", newLesson);
-        this.add_btn_loading = false;
-      }
-    },
-
-    open_dialogue () {
+    playVideo () {
       this.dialog = true;
     },
 
@@ -274,12 +239,11 @@ export default {
     }
   },
 
-  created: async function() {
-    var response = await CourseService.show(this.$route.params.course_id)
+  async mounted () {
     try {
+      var response = await CourseService.show(this.$route.params.course_id)
       response.data.course.lessons = await Promise.all(response.data.course.lessons.map(async (lesson) => {
         var threadResponse = null
-        this.$store.dispatch('setNotifications', this.$store.state.notifications - response.data.course.unreadTutorPost)
         threadResponse = await ThreadService.show(lesson.id, this.user.id)
         lesson.thread = threadResponse.data.thread
         return lesson
@@ -288,22 +252,24 @@ export default {
     } catch (err) {
       console.log(err)
     }
-    console.log(process.env)
-  },
+    if (this.user.isStudent) {
+      this.isSubscribed = (await SubscriptionService.isSubscribed(this.course.id)).data.isSubscribed
+    } else {
+      this.isOwned = (await SubscriptionService.isOwned(this.course.id)).data.isOwned
+    }
 
-  mounted: function () {
-    // var stripe = window.Stripe('pk_test_51H4T51AAfWaljxm1ClFL60860vpMI5QDkhWYBEu4BKU39CVAUlTNo0fdnR6CDCv3puPd8ZRxdf5z7OiCztEEZ0rk00P5a6SI0s');
-    // var elements = stripe.elements();
-    // var card = elements.create("card", { 
-    //   style: {
-    //     base: {
-    //       color: "#32325d",
+    // this.player = videojs(this.$refs.videoPlayer, {
+    //   controls: true,
+    //   fluid: true,
+    //   sources: [
+    //     {
+    //       src: this.course.previewVideoUrl,
+    //       type: "video/mp4"
     //     }
-    //   } 
-    // });
-    // console.log(document.getElementById('payment-form'))
-    // console.log(document.getElementById('card-element'))
-    // card.mount(document.getElementById('card-element'));
+    //   ],
+    //   playbackRates: [0.8, 0.9, 1, 1.1, 1.2],
+    //   poster: this.course.coverPhotoUrl
+    // })
   }
 }
 </script>

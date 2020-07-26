@@ -52,22 +52,7 @@ module.exports = {
         })
       }
 
-      // var associatedUsers = []
-      // if (user.isStudent) {
-      //   associatedUsers = await user.getTutors()
-      // } else {
-      //   associatedUsers = await user.getStudents()
-      // }
-
-      // const usersJson = []
-
       var subscribedCourses = await user.getSubscribedCourses()
-      // const arr = [1, 2, 3];
-
-      // const asyncRes = await Promise.all(arr.map(async (i) => {
-      //   await sleep(10);
-      //   return i + 1;
-      // }));
       var coursesJson = []
 
       coursesJson = await Promise.all(subscribedCourses.map(async course => {
@@ -106,15 +91,6 @@ module.exports = {
         })
       }
 
-      // var associatedUsers = []
-      // if (user.isStudent) {
-      //   associatedUsers = await user.getTutors()
-      // } else {
-      //   associatedUsers = await user.getStudents()
-      // }
-
-      // const usersJson = []
-
       const subscribedStudents = await course.getStudents()
 
       const studentsJson = []
@@ -126,6 +102,50 @@ module.exports = {
         students: studentsJson
       })
     } catch (err) {
+      res.status(500).send({
+        error: 'an error has occured trying to retrieve subscription information'
+      })
+    }
+  },
+
+  async isSubscribed (req, res) {
+    try {
+      let user = req.user
+      let courses = await user.getSubscribedCourses()
+      let course = courses.find(course => course.id == req.query.cid)
+      if (course != undefined) {
+        return res.json({
+          isSubscribed: true
+        })
+      } else {
+        return res.json({
+          isSubscribed: false
+        })
+      }
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: 'an error has occured trying to retrieve subscription information'
+      })
+    }
+  },
+
+  async isOwned (req, res) {
+    try {
+      let user = req.user
+      let courses = await user.getCourses()
+      let course = courses.find(course => course.id == req.query.cid)
+      if (course != undefined) {
+        return res.json({
+          isOwned: true
+        })
+      } else {
+        return res.json({
+          isOwned: false
+        })
+      }
+    } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: 'an error has occured trying to retrieve subscription information'
       })

@@ -173,10 +173,10 @@ module.exports = {
   async edit (req, res) {
     try {
       await sequelize.transaction(async (t) => {
-        const {eid} = req.body
+        const {id} = req.body
         const exercise = await Exercise.findOne({
           where: {
-            id: eid
+            id: id
           },
           include: Lesson
         })
@@ -242,7 +242,7 @@ module.exports = {
   
         await Exercise.update(req.body, {
           where: {
-            id: eid
+            id: id
           }
         })
   
@@ -252,6 +252,7 @@ module.exports = {
         })
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: 'an  error has occured trying to create the exercise'
       })

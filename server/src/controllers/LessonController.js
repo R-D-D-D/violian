@@ -1,9 +1,40 @@
 const {Lesson} = require('../models')
 const {User} = require('../models')
+const {Exercise} = require('../models')
 const {Course} = require('../models')
 const {sequelize} = require('../models')
 
 module.exports = {
+  async show (req, res) {
+    try {
+      await sequelize.transaction(async (t) => {
+        const {lid} = req.query
+
+        const lesson = await Lesson.findOne({
+          where: {
+            id: lid
+          },
+          include: Exercise
+        })
+        
+        if (!lesson) {
+          return res.status(403).send({
+            error: "Lesson information is incorrect"
+          })
+        }
+  
+        res.send({
+          lesson: lesson.toJSON()
+        })
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: 'an error has occured trying to retrieve lesson information'
+      })
+    }
+  },
+
   async create (req, res) {
     try {
       await sequelize.transaction(async (t) => {
@@ -42,10 +73,10 @@ module.exports = {
   async edit (req, res) {
     try {
       await sequelize.transaction(async (t) => {
-        const {lessonObj} = req.body
+        const {id} = req.body
         const lesson = await Lesson.findOne({
           where: {
-            id: lessonObj.id
+            id: id
           }
         })
 
@@ -56,7 +87,7 @@ module.exports = {
         }
 
         const course = await lesson.getCourse()
-        var differenceInDuration = parseInt(lessonObj.duration) - lesson.duration
+        var differenceInDuration = parseInt(req.body.duration) - lesson.duration
         if (differenceInDuration != 0) {
           if (differenceInDuration > 0) {
             await course.increment('duration', { by: differenceInDuration })
@@ -65,10 +96,13 @@ module.exports = {
           }
         }
 
-        lesson.name = lessonObj.name
-        lesson.duration = lessonObj.duration
-        await lesson.save()
-
+        await Lesson.update(req.body, {
+          where: {
+            id: id
+          }
+        })
+        
+        await lesson.reload()
         res.send({
           lesson: lesson.toJSON()
         })

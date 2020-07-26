@@ -12,4 +12,12 @@ export default {
   getSubscriptionInfoOfCourse (courseId) {
     return Api().get(`subscribe/get/course?cid=${courseId}`)
   },
+
+  isSubscribed (courseId) {
+    return Api().get(`subscribe/get/is-subscribed?cid=${courseId}`)
+  },
+
+  isOwned (courseId) {
+    return Api().get(`subscribe/get/is-owned?cid=${courseId}`)
+  }
 }

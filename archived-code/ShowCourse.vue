@@ -289,28 +289,6 @@ export default {
       })
     },
 
-    edit_rhythm_name () {
-      this.name_editable = true;
-    },
-
-    async add_lesson () {
-      if (this.$refs.form.validate()) {
-        this.add_btn_loading = true;
-        var newLesson = {
-          name: this.new_name,
-          duration: parseInt(this.new_duration),
-          cid: this.course.id
-        };
-
-        await this.$store.dispatch("addLesson", newLesson);
-        this.add_btn_loading = false;
-      }
-    },
-
-    open_dialogue () {
-      this.dialog = true;
-    },
-
     async subscribe () {
       if (this.course.price == 0) {
         await Promise.all(this.course.lessons.map(async lesson => {

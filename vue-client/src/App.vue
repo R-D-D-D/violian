@@ -24,6 +24,13 @@ export default {
 
 <style>
 @import '../node_modules/video.js/dist/video-js.css';
+div {
+  font-size: 18px;
+}
+
+strong {
+  font-size: 20px;
+}
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -31,6 +38,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
   color: #3c3b37;
+}
+
+.theme--light.v-card > .v-card__text {
+  color: #3c3b37 !important;
 }
 
 .disabled-dom {
