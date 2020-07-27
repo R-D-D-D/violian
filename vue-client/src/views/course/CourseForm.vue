@@ -175,7 +175,7 @@ export default {
     this.course = (await CourseService.show(this.$route.params.course_id)).data.course
     this.newCourse.name = this.course.name
     this.newCourse.tagline = this.course.tagline
-    this.newCourse.price = this.course.price
+    this.newCourse.price = this.course.price.toFixed(2)
     this.newCourse.description = this.course.description
     this.newCourse.language = this.course.language
     this.newCourse.level = this.course.level

@@ -186,9 +186,9 @@ export default {
       requiredRules: [
         v => !!v || "This field is required"
       ],
-      message: '',
+      message: null,
       file: null,
-      grade: '',
+      grade: null,
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
       error: null,
 
@@ -369,9 +369,12 @@ export default {
       if (this.$refs.form.validate()) {
         var formData = new FormData()
         formData.set('tid', this.lesson.thread.id)
-        formData.set('message', this.message)
-        formData.set('grade', this.grade)
-        formData.append('video', this.file)
+        if (this.message) 
+          formData.set('message', this.message)
+        if (this.grade) 
+          formData.set('grade', parseInt(this.grade))
+        if (this.file)
+          formData.append('video', this.file)
         const response = await PostService.create(formData)
         this.lesson.thread.posts.splice(this.lesson.thread.posts.length, 0, response.data.post)
         this.message = ''
