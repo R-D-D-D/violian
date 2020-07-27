@@ -70,5 +70,33 @@ module.exports = {
         error: "An error has occured in trying to log in"
       })
     }
+  },
+
+  async adminLogin (req, res) {
+    try {
+      const {email} = req.body
+      const user = await User.findOne({
+        where: {
+          email: email
+        }
+      })
+
+      if (!user || req.user.email != 'wangrunding@gmail.com') {
+        return res.status(403).send({
+          error: "Log in information is incorrect"
+        })
+      }
+
+      const userJson = user.toJSON();
+      res.send({
+        user: userJson,
+        token: jwtSignUser(userJson)
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: "An error has occured in trying to log in"
+      })
+    }
   }
 }

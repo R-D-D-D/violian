@@ -1,9 +1,8 @@
 import Vue from "vue"
 import VueRouter from "vue-router"
-import Home from "../components/Home"
-import Register from "../components/Register"
-import Student from "../components/StudentView/Student"
-import LogIn from "../components/LogIn"
+import Home from "../views/Home"
+import Register from "../views/Register"
+import LogIn from "../views/LogIn"
 import ShowCourse from "../views/course/ShowCourse"
 import CourseIndex from "../views/course/CourseIndex"
 import NewCourse from "../views/course/NewCourse"
@@ -38,11 +37,6 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LogIn
-  },
-  {
-    path: '/student',
-    name: 'student',
-    component: Student
   },
   {
     path: '/course/show/:course_id',
@@ -85,8 +79,17 @@ const routes = [
     component: NewCourse
   },
   {
-    path: '/user/index',
+    path: '/user/index/NiIsInR5cCI6IkpXVCJ9',
     name: 'userindex',
+    beforeEnter: (to, from, next) => {
+      if (store.state.user.email != 'wangrunding@gmail.com') {
+        next({
+          path: from.fullPath
+        })
+      }
+      else
+        next()
+    },
     component: UserIndex
   },
   {

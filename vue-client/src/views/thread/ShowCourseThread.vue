@@ -15,32 +15,41 @@
                         v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != thread.posts[idx - 1].updatedAt.substring(0, 10)")
                           v-col.py-0
                             v-chip(label color="indigo darken-3" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
-                        v-row.mt-5
+                        v-row.mt-5(v-if="post.videoUrl")
                           v-col.pb-0(style="margin-bottom: -3px;")
                             video(width="100%" height="auto" controls)
                               source(:src="post.videoUrl" type="video/mp4")
                               | Your browser does not support HTML video.
+                        v-row(v-else)
+                          v-col.pb-0(style="border-bottom: 1px solid #BDBDBD;")
 
                         v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
+                          v-col.py-0.text-left(cols="5" v-if="post.UserId == user.id")
+                            v-btn(icon @click="deletePost($event, thread, i, post)" color="indigo")
+                              v-icon mdi-trash-can-outline
                           v-col.pr-8.py-0(cols="6") 
                             .speech-bubble-other
                               v-row.ma-0(style="width: 100%;")
                                 v-col.text-left
                                   div {{ post.message }}
                               .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
-                          v-col.pa-0(cols="1")
-                            v-avatar(color='indigo' size="40")
-                              v-img(:src="avatar")
+                          v-col.text-center.pa-0(cols="1")
+                            v-avatar(color='grey' size="40")
+                              v-icon mdi-account
                         v-row.justify-start.bottom-border.mx-0.py-3(v-else)
-                          v-col.pa-0(cols="1")
-                            v-avatar(color='indigo' size="40")
-                              v-img(:src="avatar")
+                          v-col.text-center.pa-0(cols="1")
+                            v-avatar(color='grey' size="40")
+                              v-icon mdi-account
                           v-col.pl-8.py-0(cols="6") 
                             .speech-bubble-self
                               v-row.ma-0(style="width: 100%;")
                                 v-col.text-left
                                   div {{ post.message }}
                               .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+                          v-col.py-0.text-right(cols="5" v-if="post.UserId == user.id")
+                            v-btn(icon @click="deletePost($event, thread, i, post)" color="indigo")
+                              v-icon mdi-trash-can-outline
+
                 v-row.justify-center
                   v-col(cols="10")
                     v-form(:ref="`form-${thread.id}`")
@@ -85,7 +94,7 @@ export default {
       requiredRules: [
         v => !!v || "This field is required"
       ],
-      currentThread: [this.lesson_pos]
+      currentThread: []
     }
   },
 
@@ -124,7 +133,14 @@ export default {
       } else {
         return
       }
-    }
+    },
+
+    async deletePost (event, thread, idx, post) {
+      if (confirm('Are you sure you want to delete?')) {
+        await PostService.delete(post.id)
+        this.threads[idx].posts.splice(this.threads[idx].posts.indexOf(post), 1)
+      }
+    },
   },
 
   mounted: async function () {

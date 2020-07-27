@@ -188,10 +188,19 @@ module.exports = {
       })
 
       const thread = await post.getThread()
-      if (thread.UserId != req.user.id) {
+      if (post.UserId != req.user.id) {
         return res.status(403).send({
           error: 'you do not have access to this resource'
         })
+      }
+
+
+      if (post.videoUrl) {
+        let deleteParams = {
+          Bucket: config.aws.bucket,
+          Key: `${req.user.email}/post/${post.ThreadId}/${post.videoUrl.split(`post/${post.ThreadId}/`)[1]}`
+        }
+        await s3.deleteObject(deleteParams).promise()
       }
 
       await post.destroy()
@@ -199,6 +208,7 @@ module.exports = {
         data: 'ok'
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to delete post"
       })

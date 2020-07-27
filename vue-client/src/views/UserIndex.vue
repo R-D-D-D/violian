@@ -1,6 +1,6 @@
 <template lang="pug">
-  #student
-    panel(title="Users")
+  #student(v-if="user.email == 'wangrunding@gmail.com'")
+    panel(title="Users" md="10")
       v-list
         v-list-item(v-for='user in allUsers' :key='user.id')
           v-list-item-content
@@ -10,16 +10,58 @@
           v-list-item-content
             v-list-item-title.mr-5(v-if='user.isStudent') Student
             v-list-item-title.mr-5(v-else) Tutor
+          v-list-item-icon
+            v-btn(icon)
+              v-icon(@click="login($event, user)") mdi-eye
 </template>
 
 <script>
 import UserService from '@/services/UserService'
+import AuthenticationService from '@/services/AuthenticationService'
+import SubscriptionService from '@/services/SubscriptionService'
+import CourseService from '@/services/CourseService'
+import {mapState} from 'vuex'
 
 export default {
   name: 'UserIndex',
   data () {
     return {
       allUsers: []
+    }
+  },
+
+  computed: mapState(['user']),
+
+  methods: {
+    async login (event, user) {
+      try {
+        const response = await AuthenticationService.adminLogin({
+          email: user.email
+        })
+
+        this.$store.dispatch('setToken', response.data.token)
+        this.$store.dispatch('setUser', response.data.user)
+
+        if (response.data.user.isStudent) {
+          const studentResponse = await SubscriptionService.getSubscriptionInfoOfStudent(response.data.user.id)
+          const userSubscribedCourses = studentResponse.data.courses
+          const reducer = (course, init) => course + init.unreadTutorPost
+          this.$store.dispatch('setNotifications', userSubscribedCourses.reduce(reducer, 0))
+        } else {
+          const tutorResponse = await CourseService.list(response.data.user.id);
+          const userOwnedCourses = tutorResponse.data.courses
+          const reducer = (course, init) => course + init.unreadStudentPost
+          this.$store.dispatch('setNotifications', userOwnedCourses.reduce(reducer, 0))
+        }
+        
+        this.$router.push({
+          name: 'home'
+        })
+      } catch (err) {
+        // console.log(err)
+        this.error = err.response.data.error
+        this.loading = false
+      }
     }
   },
 

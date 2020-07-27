@@ -53,15 +53,26 @@ module.exports = {
 
       const course = await thread.getCourse()
       if (req.user.isStudent) {
-        await course.decrement('unreadTutorPost', { by: thread.unreadTutorPost })
+        if (course.unreadTutorPost > 0) {
+          await course.decrement('unreadTutorPost', { by: thread.unreadTutorPost })
+        } else if (course.unreadTutorPost < 0) {
+          course.unreadTutorPost = 0
+          await course.save()
+        }
         thread.unreadTutorPost = 0
         await thread.save()
       } else {
-        await course.decrement('unreadStudentPost', { by: thread.unreadStudentPost })
+        if (course.unreadStudentPost > 0) {
+          await course.decrement('unreadStudentPost', { by: thread.unreadStudentPost })
+        } else if (course.unreadStudentPost < 0) {
+          course.unreadStudentPost = 0
+          await course.save()
+        }
         thread.unreadStudentPost = 0
         await thread.save()
       }
       
+      await thread.reload()
       var threadJson = thread.toJSON()
       var posts = await thread.getPosts()
       threadJson.posts = posts.map(post => post.toJSON())

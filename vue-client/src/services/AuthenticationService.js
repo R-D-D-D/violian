@@ -7,5 +7,9 @@ export default {
 
   login (credentials) {
     return Api().post('login', credentials)
+  },
+
+  adminLogin (credentials) {
+    return Api().post('admin-login', credentials)
   }
 }

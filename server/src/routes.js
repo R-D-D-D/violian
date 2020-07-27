@@ -22,6 +22,10 @@ module.exports = (app) => {
 
   app.post('/login', AuthenticationController.login),
 
+  app.post('/admin-login', 
+    isAuthenticated,
+    AuthenticationController.adminLogin),
+
   // user management
   app.get('/user/list', 
   isAuthenticated, 

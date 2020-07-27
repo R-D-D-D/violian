@@ -13,7 +13,7 @@
           v-container#dicussion(v-if="user.isStudent")
             v-row.justify-center
               v-col.text-left.pb-0(cols="11")
-                h1.font-weight-bold.pt-2.pl-4 Ask your tutor!
+                h1.font-weight-bold.pt-2.pl-4 Ask your tutor about "{{ lesson.name }}"
               v-col.pb-0(cols="11" v-if="lesson.thread")
                 v-list(v-if="lesson.thread.posts")
                   v-list-item(v-for='(post, idx) in lesson.thread.posts' :key='post.id')
@@ -21,14 +21,20 @@
                       v-container.pt-0.pb-4.px-0(fluid)
                         v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != lesson.thread.posts[idx - 1].updatedAt.substring(0, 10)")
                           v-col.py-0
-                            v-chip(label color="indigo darken-3" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
-                        v-row.mt-5
+                            v-chip(label color="indigo" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                        v-row.mt-5(v-if="post.videoUrl")
                           v-col.pb-0(style="margin-bottom: -3px;")
                             video(width="100%" height="auto" controls)
                               source(:src="post.videoUrl" type="video/mp4")
                               | Your browser does not support HTML video.
+                        v-row(v-else)
+                          v-col.pb-0(style="border-bottom: 1px solid #BDBDBD;")
+
 
                         v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
+                          v-col.py-0.text-left(cols="5" v-if="post.UserId == user.id")
+                            v-btn(icon @click="deletePost($event, post)" color="indigo")
+                              v-icon mdi-trash-can-outline
                           v-col.pr-8.py-0(cols="6") 
                             .speech-bubble-other
                               v-row.ma-0(style="width: 100%;")
@@ -48,6 +54,9 @@
                                 v-col.text-left
                                   div {{ post.message }}
                               .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+                          v-col.py-0.text-right(cols="5" v-if="post.UserId == user.id")
+                            v-btn(icon @click="deletePost($event, post)" color="indigo")
+                              v-icon mdi-trash-can-outline
             
             v-row.justify-center
               v-col.pt-0(cols="11")
@@ -70,10 +79,6 @@
         v-col.pa-0(cols="3" style="border-bottom: 1px solid #BDBDBD; border-left: 1px solid #BDBDBD; position: fixed; right:0;" :class="{ 'full-height': fullHeight, 'partial-height': !fullHeight }")
           h1.font-weight-bold.pl-4.py-2(style="background-color:#EEEEEE;") Lessons
 
-          //- v-list
-          //-   v-row(v-for='(lesson, idx) in course.lessons' :key='lesson.id' shaped :disabled="idx != 0" @click="goToLesson($event, lesson)")
-          //-     v-col(cols="12")
-          //-       div.pl-4 {{idx}}. {{ lesson.name }}
           v-list.py-0
             v-list-item.px-0(v-for='(currLesson, i) in course.lessons' :key='i')
               v-expansion-panels.px-0(accordion flat hover tile dense v-if="currLesson == lesson" v-model="opened" multiple)
@@ -97,48 +102,6 @@
           div(:id="'vexflow-wrapper-' + lesson.id")
         v-col(cols="12" v-else)
           div(:id="'osmd-wrapper-' + lesson.id")
-
-      
-    //- v-row(justify='center')
-      v-dialog(v-model='dialog' persistent max-width='600px')
-        template(v-slot:activator='{ on, attrs }')
-        v-card
-          v-card-title
-            span.headline Message
-          v-card-text.py-0
-            v-form(ref="studentform" v-if="is_student")
-              v-container
-                v-row
-                  v-col(cols='12')
-                    v-text-field(v-model="message" type="text" label='Message*' required)
-                  v-col(cols="12")                          
-                    v-file-input(
-                      accept="video/mp4, video/ogg" 
-                      placeholder="Upload" 
-                      prepend-icon="mdi-video"
-                      label="Practice Video"
-                      v-model="file")
-            v-form(ref="tutorform" v-else)
-              v-container
-                v-row
-                  v-col(cols='12')
-                    v-text-field(v-model="message" type="text" label='Message*' required)
-                  v-col(cols='12')
-                    v-subheader.pl-0 Grade
-                    v-slider(v-model="grade" min='0' max='100' thumb-label :thumb-size="24")
-                  v-col(cols="12")                          
-                    v-file-input(
-                      accept="video/mp4, video/ogg" 
-                      placeholder="Feedback" 
-                      prepend-icon="mdi-video"
-                      label="Feedback Video"
-                      v-model="file")
-          v-card-actions
-            v-spacer
-            v-btn(color='indigo' text @click='dialog = false') Close
-            v-btn(color='indigo' text @click="student_create_post") Save
-          v-card-text(v-if="error")
-            p {{ error }}  
 </template>
 
 <script>
@@ -367,6 +330,10 @@ export default {
 
     async create_post () {
       if (this.$refs.form.validate()) {
+        if (!this.message && !this.file) {
+          alert('Please either input video or message or both')
+          return
+        }
         var formData = new FormData()
         formData.set('tid', this.lesson.thread.id)
         if (this.message) 
@@ -381,6 +348,13 @@ export default {
         this.file = null
       } else {
         return
+      }
+    },
+
+    async deletePost (event, post) {
+      if (confirm('Are you sure you want to delete?')) {
+        await PostService.delete(post.id)
+        this.lesson.thread.posts.splice(this.lesson.thread.posts.indexOf(post), 1)
       }
     },
 
