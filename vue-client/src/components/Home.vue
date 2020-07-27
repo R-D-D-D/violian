@@ -28,7 +28,7 @@
           h2 Popular Courses
         v-col(v-for="course in courses" sm="6" md="4" lg="3")
           v-card.mx-auto
-            v-img.white--text.align-end(height="200px" :src="course.coverPhotoUrl")
+            v-img.white--text.align-end(height="200px" :src="course.coverPhotoUrl" gradient="to top right, rgba(0,0,0,.5), rgba(0,0,0,.5)")
               v-card-title(style="text-shadow: 1px 1px 2px #000000;") {{ course.name }}
             v-card-subtitle.pb-0.text-left Drum
             v-card-text.text-left.text--primary.pb-0

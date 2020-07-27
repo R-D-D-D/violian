@@ -53,9 +53,14 @@ module.exports = {
           })
         }
   
-        const lesson = await course.createLesson(req.body)
+        const lesson = await course.createLesson(req.body, {
+          transaction: t
+        })
   
-        await course.increment('duration', { by: parseInt(req.body.duration) || 0})
+        await course.increment('duration', { 
+          by: parseInt(req.body.duration) || 0,
+          transaction: t
+        })
         await lesson.setCourse(course)
   
         res.send({
@@ -90,16 +95,23 @@ module.exports = {
         var differenceInDuration = parseInt(req.body.duration) - lesson.duration
         if (differenceInDuration != 0) {
           if (differenceInDuration > 0) {
-            await course.increment('duration', { by: differenceInDuration })
+            await course.increment('duration', { 
+              by: differenceInDuration,
+              transaction: t
+            })
           } else {
-            await course.decrement('duration', { by: differenceInDuration })
+            await course.decrement('duration', { 
+              by: differenceInDuration,
+              transaction: t
+            })
           }
         }
 
         await Lesson.update(req.body, {
           where: {
             id: id
-          }
+          },
+          transaction: t
         })
         
         await lesson.reload()
@@ -160,12 +172,18 @@ module.exports = {
         const lesson = await Lesson.findOne({
           where: {
             id: lid
-          }
+          },
+          transaction: t
         })
 
         const course = await lesson.getCourse()
-        await course.decrement('duration', { by: lesson.duration })
-        await lesson.destroy()
+        await course.decrement('duration', { 
+          by: lesson.duration,
+          transaction: t
+        })
+        await lesson.destroy({
+          transaction: t
+        })
         res.send({
           data: 'ok'
         })

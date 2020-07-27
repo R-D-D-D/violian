@@ -53,7 +53,9 @@ module.exports = {
         } 
   
         req.body.duration = 0
-        const course = await user.createCourse(req.body)
+        const course = await user.createCourse(req.body, {
+          transaction: t
+        })
         await course.setTutor(user)
   
         res.send({
@@ -188,7 +190,6 @@ module.exports = {
         return lessonJson
       }))
 
-      console.log(courseJson)
       res.send({
         course: courseJson
       })
@@ -208,7 +209,8 @@ module.exports = {
           where: {
             id: cid
           },
-          individualHooks: true
+          individualHooks: true,
+          transaction: t
         })
   
         res.send({
@@ -224,49 +226,69 @@ module.exports = {
 
   async edit (req, res) {
     try {
-      await sequelize.transaction(async (t) => {
-        const user = req.user
-        if (req.files['previewVideo'] && req.files['previewVideo'].length > 0) {
-          let params = {
-              Bucket: config.aws.bucket,
-              Key: `${user.email}/${req.body.name}/previewVideo/${req.files['previewVideo'][0].originalname}`,
-              Body: req.files['previewVideo'][0].buffer
-          }
-      
-          // Uploading files to the bucket
-          const response = await s3.upload(params).promise()
-          req.body.previewVideoUrl = response.Location
+      const user = req.user
+      let course = await Course.findOne({
+        where: {
+          id: req.body.id
         }
+      })
 
-        if (req.files['coverPhoto'] && req.files['coverPhoto'].length > 0) {
-          let params = {
-              Bucket: config.aws.bucket,
-              Key: `${user.email}/${req.body.name}/coverPhoto/${req.files['coverPhoto'][0].originalname}`,
-              Body: req.files['coverPhoto'][0].buffer
-          }
+      let possibleAttr = ['previewVideo', 'coverPhoto']
+      let changedAttr = []
+      if (req.files['previewVideo'] && req.files['previewVideo'].length > 0) 
+        changedAttr.push(0)
+      if (req.files['coverPhoto'] && req.files['coverPhoto'].length > 0) 
+        changedAttr.push(1)
       
-          // Uploading files to the bucket
-          const response = await s3.upload(params).promise()
-          req.body.coverPhotoUrl = response.Location
-        } 
+      for (let i = 0; i < changedAttr.length; i++) {
+        let originalKey = null
+        if (changedAttr[i] == 0 && course.previewVideoUrl)
+          originalKey = course.previewVideoUrl.split(`${possibleAttr[changedAttr[i]]}/`)[1]
+        if (changedAttr[i] == 1 && course.coverPhotoUrl)
+          originalKey = course.coverPhotoUrl.split(`${possibleAttr[changedAttr[i]]}/`)[1]
 
+        if (originalKey != null) {
+          // delete the previous video
+          let deleteParams = {
+            Bucket: config.aws.bucket,
+            Key: `${user.email}/${req.body.name}/${possibleAttr[changedAttr[i]]}/${originalKey}`
+          }
+          await s3.deleteObject(deleteParams).promise()
+        }
+        let params = {
+          Bucket: config.aws.bucket,
+          Key: `${user.email}/${req.body.name}/${possibleAttr[changedAttr[i]]}/${req.files[`${possibleAttr[changedAttr[i]]}`][0].originalname}`,
+          Body: req.files[`${possibleAttr[changedAttr[i]]}`][0].buffer
+        }
+    
+        // Uploading files to the bucket
+        const response = await s3.upload(params).promise()
+
+        if (changedAttr[i] == 0)
+          req.body.previewVideoUrl = response.Location
+        if (changedAttr[i] == 1)
+          req.body.coverPhotoUrl = response.Location
+      }
+      
+      course = await sequelize.transaction(async (t) => {
         await Course.update(req.body, {
+          where: {
+            id: req.body.id
+          },
+          transaction: t
+        })
+  
+        return await Course.findOne({
           where: {
             id: req.body.id
           }
         })
-  
-        const course = await Course.findOne({
-          where: {
-            id: courseObj.id
-          }
-        })
-  
-        res.send({
-          course: course.toJSON()
-        })
+      })
+      res.send({
+        course: course.toJSON()
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to edit course"
       })

@@ -476,7 +476,6 @@ Vex.UI.Handler.prototype.exportNotes = function() {
 };
 
 Vex.UI.Handler.prototype.importNotes = function(notes, timeSignature) {
-	console.log(notes)
 	if (notes && timeSignature) {
 		var tickables = []
 		var barNum = 0

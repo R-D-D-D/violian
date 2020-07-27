@@ -19,38 +19,38 @@ v-container
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="video/mp4, video/ogg" 
-                  :placeholder="lesson.videoUrl ? lesson.videoUrl : 'Choose explanation video'" 
+                  :placeholder="lesson.Exercises[0].videoUrl ? lesson.Exercises[0].videoUrl.split('/')[6] : 'Choose explanation video'" 
                   prepend-icon="mdi-video" 
                   label="Explanation Video"
-                  v-model="lesson.video"
+                  v-model="newLesson.video"
                   outlined
                   color="indigo")
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="image/*" 
-                  :placeholder="lesson.videoPosterUrl ? lesson.videoPosterUrl : 'Choose coverpage for video'" 
+                  :placeholder="lesson.Exercises[0].videoPosterUrl ? lesson.Exercises[0].videoPosterUrl.split('/')[6] : 'Choose coverpage for video'" 
                   prepend-icon="mdi-image" 
                   label="Explanation Video Poster"
-                  v-model="lesson.videoPoster"
+                  v-model="newLesson.videoPoster"
                   outlined
                   color="indigo")
             v-row
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="video/mp4, video/ogg" 
-                  :placeholder="lesson.demoUrl ? lesson.demoUrl : 'Choose Demo Video'" 
+                  :placeholder="lesson.Exercises[0].demoUrl ? lesson.Exercises[0].demoUrl.split('/')[6] : 'Choose Demo Video'" 
                   prepend-icon="mdi-video"
                   label="Demo Video"
-                  v-model="lesson.demo"
+                  v-model="newLesson.demo"
                   outlined
                   color="indigo")
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="image/*" 
-                  :placeholder="lesson.demoPosterUrl ? lesson.demoPosterUrl : 'Choose coverpage for demo video'" 
+                  :placeholder="lesson.Exercises[0].demoPosterUrl ? lesson.Exercises[0].demoPosterUrl.split('/')[6] : 'Choose coverpage for demo video'" 
                   prepend-icon="mdi-image"
                   label="Demo Video Poster"
-                  v-model="lesson.demoPoster"
+                  v-model="newLesson.demoPoster"
                   outlined
                   color="indigo")
             v-row
@@ -84,7 +84,7 @@ v-container
                   placeholder="Music XML file" 
                   prepend-icon="mdi-file-document-outline"
                   label="Upload musicxml file"
-                  v-model="lesson.musicXml")
+                  v-model="newLesson.musicXml")
             v-row
               v-col(cols="12" md="6")
                 v-subheader.pl-0 BPM
@@ -224,6 +224,7 @@ export default {
         formData.append('musicXml', tempLesson.musicXml)
       }
 
+      console.log(formData)
       if (this.$route.params.lesson_id) {
         formData.set('id', this.lesson.Exercises[0].id)
         await ExerciseService.edit(formData)
@@ -258,20 +259,21 @@ export default {
           this.newLesson.timeSignature = this.lesson.Exercises[0].timeSignature
           this.newLesson.bpm = this.lesson.Exercises[0].bpm
           this.newLesson.numberOfBars = this.lesson.Exercises[0].numberOfBars
-          this.newLesson.melody = this.lesson.Exercises[0].melody
+          this.newLesson.melody = this.lesson.Exercises[0].melody.split('-')
           await this.$nextTick()
           var div = document.createElement("div")
           div.id = `vexflow-wrapper`
-          console.log(document.getElementById(`pannel-content`))
           var pannel = document.getElementById(`pannel-content`)
           pannel.appendChild(div)
           this.handler = new vexUI.Handler(div.id, {
+            numberOfStaves: this.newLesson.numberOfBars,
             canvasProperties: {
               id: div.id + '-canvas',
               width: window.innerWidth * 5 / 6,
               tabindex: 1
             }
           }).init()
+          this.handler.importNotes(this.newLesson.melody, this.newLesson.timeSignature)
         }
       }
     }

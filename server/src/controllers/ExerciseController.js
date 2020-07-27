@@ -97,7 +97,9 @@ module.exports = {
         }
   
         console.log(req.body)
-        const exercise = await lesson.createExercise(req.body)
+        const exercise = await lesson.createExercise(req.body, {
+          transaction: t
+        })
         await exercise.setLesson(lesson)
   
         res.send({
@@ -156,7 +158,8 @@ module.exports = {
         await Exercise.destroy({
           where: {
             id: eid
-          }
+          },
+          transaction: t
         })
   
         res.send({
@@ -189,7 +192,7 @@ module.exports = {
   
         const course = await exercise.Lesson.getCourse()
         const user = await course.getTutor()
-        let possibleAttr = ['demo', 'demoPoster', 'video', 'videoPoster']
+        let possibleAttr = ['demo', 'demoPoster', 'video', 'videoPoster', 'musicXml']
         let changedAttr = []
         if (req.files['demo'] && req.files['demo'].length > 0) 
           changedAttr.push(0)
@@ -199,6 +202,8 @@ module.exports = {
           changedAttr.push(2)
         if (req.files['videoPoster'] && req.files['videoPoster'].length > 0) 
           changedAttr.push(3)
+        if (req.files['musicXml'] && req.files['musicXml'].length > 0)
+          changedAttr.push(4)
         
         for (let i = 0; i < changedAttr.length; i++) {
           let originalKey = null
@@ -210,6 +215,8 @@ module.exports = {
             originalKey = exercise.videoUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
           if (changedAttr[i] == 3 && exercise.videoPosterUrl)
             originalKey = exercise.videoPosterUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
+          if (changedAttr[i] == 4 && exercise.musicXmlUrl)
+            originalKey = exercise.musicXmlUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
   
           if (originalKey != null) {
             // delete the previous video
@@ -238,12 +245,15 @@ module.exports = {
             req.body.videoUrl = response.Location
           if (changedAttr[i] == 3)
             req.body.videoPosterUrl = response.Location
+          if (changedAttr[i] == 4)
+            req.body.musicXmlUrl = response.Location
         }
   
         await Exercise.update(req.body, {
           where: {
             id: id
-          }
+          },
+          transaction: t
         })
   
         await exercise.reload()

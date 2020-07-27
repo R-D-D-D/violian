@@ -22,7 +22,9 @@ export default {
   },
 
   edit (courseInfo) {
-    return Api().put('course/edit', courseInfo)
+    const instance = Api()
+    instance.defaults.headers.put['Content-Type'] = 'multipart/form-data'
+    return instance.put('course/edit', courseInfo)
   },
 
   delete (courseId) {

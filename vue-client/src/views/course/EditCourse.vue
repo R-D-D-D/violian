@@ -46,22 +46,19 @@
               v-col(cols="12")
                 strong What your student will learn:
               v-col.py-0(v-for="learningPoint in course.learningPoints.split('&')" cols="12")
-                strong 
-                | {{ learningPoint }}
+                p {{ learningPoint }}
 
             v-row
               v-col(cols="12")
                 strong Who are this course for?
               v-col.py-0(cols="12" v-for="targetAudience in course.targetAudiences.split('&')")
-                strong 
-                | {{ targetAudience }}
+                p {{ targetAudience }}
 
             v-row
               v-col(cols="12")
                 strong What are the requirements?
               v-col.py-0(cols="12" v-for="requirement in course.requirements.split('&')")
-                strong 
-                | {{ requirement }}
+                p {{ requirement }}
 
     
     v-row.justify-center.mt-5
@@ -114,8 +111,7 @@
 
     v-row.justify-center
       v-col.text-center
-        v-btn(color="indigo" dark)
-          | Confirm
+        v-btn(color="indigo" dark to="/course/index") Confirm
         v-btn(to="/course/index") Cancel
 
 </template>
@@ -160,7 +156,6 @@ export default {
         let ex = this.course.lessons[i].exercises[0]
         if (ex.useScore && !ex.useXml) {
           await this.$nextTick()
-          console.log('here')
           let handler = new vexUI.Handler(`vexflow-review-wrapper-${i}`, {
             canEdit: false,
             numberOfStaves: ex.numberOfBars,
@@ -185,5 +180,9 @@ export default {
 <style scoped>
 .hide {
   display: none;
+}
+
+.item {
+  border: thin solid rgba(0, 0, 0, 0.12)
 }
 </style>

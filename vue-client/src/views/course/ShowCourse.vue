@@ -30,12 +30,12 @@
                 v-col.my-auto(sm="8" md="9")
                   p.ma-0 Last updated: {{ new Date(course.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
 
-        v-col(cols="12" md="4" v-if="is_student && !isSubscribed")
+        v-col(cols="12" md="4" v-if="user == null || (user.isStudent && !isSubscribed)")
           v-card
             v-img.white--text.align-end(gradient="to top right, rgba(0,0,0,.5), rgba(0,0,0,.5)" height="200px" :src="course.coverPhotoUrl" @click="playVideo" style="cursor: pointer;")
               div(style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;")
                img#play-button(:src="require('../../assets/play_button.png')" style="position: absolute; width: 60px; left: calc(50% - 30px); top: calc(50% - 30px); height: 60px;" color="white" size="62" )
-               h3.text--white(style="bottom: 12px; text-align: center; position: absolute; left:0; right:0;") Preview this course
+               h3.text--white(style="bottom: 12px; text-align: center; position: absolute; left:0; right:0; text-shadow: 1px 1px 2px #000000;") Preview this course
             v-row
               v-col.text-left
                 h1.pl-5.font-weight-bold(style="font-size: 36px;") S${{ course.price.toFixed(2) }}
@@ -164,10 +164,6 @@ export default {
     }
   },
   computed: {
-    is_student () {
-      return this.user.isStudent;
-    },
-
     timeConverted () {
       var num = this.course.duration;
       var hours = (num / 60);
@@ -211,28 +207,31 @@ export default {
 
     async subscribe () {
       if (this.course.price == 0) {
-        await Promise.all(this.course.lessons.map(async lesson => {
-          var response = await ThreadService.create({
-            lid: lesson.id
+        if (this.user) {
+          await Promise.all(this.course.lessons.map(async lesson => {
+            var response = await ThreadService.create({
+              lid: lesson.id
+            })
+            response.data.thread.posts = []
+            lesson.thread = response.data.thread
+            return lesson
+          })) 
+
+          await this.$store.dispatch('subscribe', {
+            studentId: this.$store.state.user.id,
+            courseId: this.course.id
           })
-          response.data.thread.posts = []
-          lesson.thread = response.data.thread
-          return lesson
-        })) 
 
-        await this.$store.dispatch('subscribe', {
-          studentId: this.$store.state.user.id,
-          courseId: this.course.id
-        })
-
-        this.$router.push({
-          name: `showlesson`,
-          params: {
-            course_id: this.course.id,
-            lesson_id: this.course.lessons[0].id
-          }
-        })
-
+          this.$router.push({
+            name: `showlesson`,
+            params: {
+              course_id: this.course.id,
+              lesson_id: this.course.lessons[0].id
+            }
+          })
+        } else {
+          alert('Please register or login first')
+        }
       } else {
         this.$router.push(`/payment/${this.course.id}`)
       }
@@ -242,21 +241,17 @@ export default {
   async mounted () {
     try {
       var response = await CourseService.show(this.$route.params.course_id)
-      response.data.course.lessons = await Promise.all(response.data.course.lessons.map(async (lesson) => {
-        var threadResponse = null
-        threadResponse = await ThreadService.show(lesson.id, this.user.id)
-        lesson.thread = threadResponse.data.thread
-        return lesson
-      }))
       this.course = response.data.course
     } catch (err) {
       console.log(err)
     }
-    if (this.user.isStudent) {
-      this.isSubscribed = (await SubscriptionService.isSubscribed(this.course.id)).data.isSubscribed
-    } else {
-      this.isOwned = (await SubscriptionService.isOwned(this.course.id)).data.isOwned
-    }
+    if (this.user) {
+      if (this.user.isStudent) {
+        this.isSubscribed = (await SubscriptionService.isSubscribed(this.course.id)).data.isSubscribed
+      } else {
+        this.isOwned = (await SubscriptionService.isOwned(this.course.id)).data.isOwned
+      }
+    } 
 
     // this.player = videojs(this.$refs.videoPlayer, {
     //   controls: true,
