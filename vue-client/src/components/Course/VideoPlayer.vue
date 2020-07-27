@@ -1,5 +1,5 @@
 <template lang="pug">
-  div
+  div(style="font-size:14px !important;")
     video.vjs-big-play-centered(ref="videoPlayer" class="video-js" :id="`video`")
 
     v-row.bpm-control.pt-2(:id="`slider`" v-show="!hide")
@@ -309,7 +309,6 @@ export default {
       document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
       document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
-      this.hide = false
     }
   }
 }
@@ -324,7 +323,7 @@ export default {
 .bpm-control {
   background-color: rgba(43, 51, 63, 0.7); 
   position: absolute; 
-  bottom: 30px; 
+  bottom: 42px; 
   left: 12px; 
   width: 30px;
   visibility: visible;
@@ -334,5 +333,9 @@ export default {
 
 video:focus {
   outline: none;
+}
+
+div {
+  font-size: 14px !important;
 }
 </style>

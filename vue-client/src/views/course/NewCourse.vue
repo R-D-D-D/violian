@@ -54,6 +54,7 @@
                             label="Cover Photo"
                             v-model="coverPhoto"
                             outlined
+                            :rules="requiredRules"
                             color="indigo")
                       
                       v-row

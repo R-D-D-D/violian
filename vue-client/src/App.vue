@@ -24,7 +24,7 @@ export default {
 
 <style>
 @import '../node_modules/video.js/dist/video-js.css';
-div {
+p {
   font-size: 18px;
 }
 
@@ -114,5 +114,9 @@ input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 50px white inset;/*your box-shadow*/
   box-shadow:0 0 0 50px white inset;
   -webkit-text-fill-color: #333;
-} 
+}
+
+video:focus {
+  outline: none;
+}
 </style>

@@ -16,8 +16,8 @@
                           v-col.py-0
                             v-chip(label color="indigo darken-3" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
                         v-row.mt-5(v-if="post.videoUrl")
-                          v-col.pb-0(style="margin-bottom: -3px;")
-                            video(width="100%" height="auto" controls)
+                          v-col.py-0.text-center(style="margin-bottom: -3px; background-color:black;")
+                            video(controls style="max-width:100%; max-height:400px;")
                               source(:src="post.videoUrl" type="video/mp4")
                               | Your browser does not support HTML video.
                         v-row(v-else)

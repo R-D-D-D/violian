@@ -67,8 +67,10 @@
       v-row.px-sm-16.mx-md-8.mx-lg-16
         v-col(cols="12")
           v-sheet.px-16.py-5
-            h2.py-3(style="color: #3c3b37; font-size: 30px; font-size: 30px;") About the course
-            p {{ course.description }}
+            v-row
+              v-col.py-0.px-0
+                h2.py-3(style="color: #3c3b37; font-size: 30px; font-size: 30px;") About the course
+                p {{ course.description }}
 
     v-container(fluid v-if="course.requirements")
       v-row.px-sm-16.mx-md-8.mx-lg-16
