@@ -2,5 +2,6 @@ vue-client/node_modules/
 server/node_modules/
 server/src/.env/
 server/rhythmacademy.sqlite
+archived-code/
 .vscode/
 .env.local
