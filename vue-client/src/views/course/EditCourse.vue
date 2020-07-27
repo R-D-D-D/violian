@@ -42,19 +42,19 @@
                 strong Cover photo: 
                 | {{ course.coverPhotoUrl.split('/')[6] }}
             
-            v-row
+            v-row(v-if="course.learningPoints")
               v-col(cols="12")
                 strong What your student will learn:
               v-col.py-0(v-for="learningPoint in course.learningPoints.split('&')" cols="12")
                 p {{ learningPoint }}
 
-            v-row
+            v-row(v-if="course.targetAudiences")
               v-col(cols="12")
                 strong Who are this course for?
               v-col.py-0(cols="12" v-for="targetAudience in course.targetAudiences.split('&')")
                 p {{ targetAudience }}
 
-            v-row
+            v-row(v-if="course.requirements")
               v-col(cols="12")
                 strong What are the requirements?
               v-col.py-0(cols="12" v-for="requirement in course.requirements.split('&')")

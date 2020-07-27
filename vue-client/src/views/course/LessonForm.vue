@@ -170,6 +170,8 @@ export default {
     },
 
     async update () {
+      if (!this.$refs.lessonForm.validate())
+        return
       this.loading = true
       let lessonResponse = null
       if (this.$route.params.lesson_id) {

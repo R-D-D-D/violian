@@ -48,7 +48,7 @@
             v-col.text-center
               v-btn(color="#26A69A" dark style="width:90%" x-large @click="goToLesson($event, course.lessons[0])") Start Learning!
 
-    v-container(fluid)
+    v-container(fluid v-if="course.learningPoints")
       v-row.px-sm-16.mx-md-8.mx-lg-16
         v-col(cols="12")
           v-sheet.px-16.py-5(color="#fbfbf8" rounded style="border: 1px solid #E0E0E0")
@@ -70,7 +70,7 @@
             h2.py-3(style="color: #3c3b37; font-size: 30px; font-size: 30px;") About the course
             p {{ course.description }}
 
-    v-container(fluid)
+    v-container(fluid v-if="course.requirements")
       v-row.px-sm-16.mx-md-8.mx-lg-16
         v-col(cols="12")
           v-sheet.px-16.py-5
@@ -86,7 +86,7 @@
                     p.d-inline.mb-0(style="line-height:1;") {{ requirement }}
               v-col.py-0.px-0(cols="6")
 
-    v-container(fluid)
+    v-container(fluid v-if="course.targetAudiences")
       v-row.px-sm-16.mx-md-8.mx-lg-16
         v-col(cols="12")
           v-sheet.px-16.py-5
@@ -251,20 +251,7 @@ export default {
       } else {
         this.isOwned = (await SubscriptionService.isOwned(this.course.id)).data.isOwned
       }
-    } 
-
-    // this.player = videojs(this.$refs.videoPlayer, {
-    //   controls: true,
-    //   fluid: true,
-    //   sources: [
-    //     {
-    //       src: this.course.previewVideoUrl,
-    //       type: "video/mp4"
-    //     }
-    //   ],
-    //   playbackRates: [0.8, 0.9, 1, 1.1, 1.2],
-    //   poster: this.course.coverPhotoUrl
-    // })
+    }
   }
 }
 </script>

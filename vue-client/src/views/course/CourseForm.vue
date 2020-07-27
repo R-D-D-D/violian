@@ -122,6 +122,8 @@ export default {
 
   methods: {
     async update () {
+      if (!this.$refs.courseForm.validate())
+        return
       this.loading = true
       this.error = ''
       try {  
@@ -178,9 +180,9 @@ export default {
     this.newCourse.language = this.course.language
     this.newCourse.level = this.course.level
     this.newCourse.instrument = this.course.instrument
-    this.newCourse.targetAudiences = this.course.targetAudiences.split('&')
-    this.newCourse.learningPoints = this.course.learningPoints.split('&')
-    this.newCourse.requirements = this.course.requirements.split('&')
+    this.newCourse.targetAudiences = this.course.targetAudiences ? this.course.targetAudiences.split('&') : []
+    this.newCourse.learningPoints = this.course.learningPoints ? this.course.learningPoints.split('&') : []
+    this.newCourse.requirements = this.course.requirements ? this.course.requirements.split('&') : []
   }
 }
 </script>
