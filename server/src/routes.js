@@ -7,6 +7,8 @@ const ThreadController = require('./controllers/ThreadController')
 const PostController = require('./controllers/PostController')
 const PaymentController = require('./controllers/PaymentController')
 const UserController = require('./controllers/UserController')
+const FolderController = require('./controllers/FolderController')
+const FileController = require('./controllers/FileController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
 const isAuthenticated = require('./policies/isAuthenticated')
@@ -208,6 +210,37 @@ module.exports = (app) => {
 
   app.post('/paypal-capture-order',
     isAuthenticated,
-    PaymentController.captureOrder)
+    PaymentController.captureOrder),
+
+  // folder
+  app.get('/folder/list',
+    isAuthenticated,
+    FolderController.list),
+
+  app.get('/folder/show',
+    isAuthenticated,
+    FolderController.show),
+
+  app.post('/folder/new',
+    isAuthenticated,
+    FolderController.create),
+
+  app.delete('/folder/del',
+    isAuthenticated,
+    FolderController.destroy),
+
+  // file
+  app.get('/file/list',
+    isAuthenticated,
+    FileController.list),
+
+  app.post('/folder/new',
+    upload.single('file'),
+    isAuthenticated,
+    FileController.create),
+
+  app.delete('/folder/del',
+    isAuthenticated,
+    FileController.destroy)
 }
   

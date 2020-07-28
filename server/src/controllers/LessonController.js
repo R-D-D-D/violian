@@ -1,5 +1,5 @@
 const {Lesson} = require('../models')
-const {User} = require('../models')
+const {Folder} = require('../models')
 const {Exercise} = require('../models')
 const {Course} = require('../models')
 const {sequelize} = require('../models')
@@ -172,23 +172,32 @@ module.exports = {
         const lesson = await Lesson.findOne({
           where: {
             id: lid
-          },
-          transaction: t
+          }
         })
-
+        console.log('1')
         const course = await lesson.getCourse()
         await course.decrement('duration', { 
           by: lesson.duration,
           transaction: t
         })
-        await lesson.destroy({
+
+        console.log('2')
+        await Folder.destroy({
+          where: {
+            LessonId: lesson.id
+          },
+          individualHooks: true,
           transaction: t
         })
+        console.log('3')
+
+        await lesson.destroy()
         res.send({
           data: 'ok'
         })
       })
     } catch (err) {
+      console.log(err)
       res.status(500).send({
         error: "An error has occured in trying to delete lesson"
       })

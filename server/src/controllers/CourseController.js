@@ -15,18 +15,7 @@ module.exports = {
   async create (req, res) {
     try {
       await sequelize.transaction(async (t) => {
-        const {TutorId} = req.body
-        const user = await User.findOne({
-          where: {
-            id: TutorId
-          }
-        })
-        
-        if (!user) {
-          return res.status(403).send({
-            error: "User information is incorrect"
-          })
-        }
+        const user = req.user
 
         if (req.files['previewVideo'] && req.files['previewVideo'].length > 0) {
           let params = {
@@ -108,7 +97,6 @@ module.exports = {
         return courseJson
       }))
 
-      console.log(coursesJson)
       res.send({
         courses: coursesJson
       })

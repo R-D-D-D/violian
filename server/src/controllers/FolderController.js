@@ -1,182 +1,160 @@
 const {Lesson} = require('../models')
+const {Folder} = require('../models')
+const {sequelize} = require('../models')
 const {Course} = require('../models')
-const {Thread} = require('../models')
+
+async function getDirectoryTree (folder) {
+  let children = (await folder.getChildren())
+  let folderJson = folder.toJSON()
+  if (children.length == 0) {
+    return folderJson
+  } else {
+    folderJson.children = await Promise.all(children.map(async child => await getDirectoryTree(child)))
+    return folderJson
+  }
+}
+
+async function deleteDirectoryTree (folder) {
+  let children = (await folder.getChildren())
+  await folder.destroy()
+  if (children.length > 0)
+    children.map(async child => await deleteDirectoryTree(child))
+}
 
 module.exports = {
   async create (req, res) {
     try {
-      const user = req.user
-      const {lid} = req.body
-      const lesson = await Lesson.findOne({
-        where: {
-          id: lid
-        }
-      })
-      
-      if (!lesson) {
-        return res.status(403).send({
-          error: "Lesson information is incorrect"
+      await sequelize.transaction(async (t) => {
+        const {parentId, lessonId} = req.body
+        let user = req.user
+
+        const lesson = await Lesson.findOne({
+          where: {
+            id: lessonId
+          },
+          include: Course
         })
-      }
+        
+        if (!lesson) {
+          return res.status(403).send({
+            error: "Lesson information is incorrect"
+          })
+        }
 
-      const thread = await lesson.createThread()
-      await thread.setUser(user)
-      await thread.setCourse(lesson.CourseId)
+        if (lesson.Course.TutorId != user.id) {
+          return res.status(403).send({
+            error: "You do not have access to this resource"
+          })
+        }
 
-      res.send({
-        thread: thread.toJSON()
+        let folder = null
+        if (parentId) {
+          let parent = await Folder.findOne({
+            where: {
+              id: parentId
+            }
+          })
+          req.body.relativePath = `${parent.relativePath}/${req.body.name}`
+          folder = await lesson.createFolder(req.body, { transaction: t })
+          await folder.addParent(parent, { transaction: t })
+          await parent.addChild(folder, { transaction: t })
+        } else {
+          req.body.relativePath = `${user.email}/${lesson.Course.name}/${lesson.name}/${req.body.name}`
+          req.body.isRoot = true
+          folder = await lesson.createFolder(req.body, { transaction: t })
+        }
+
+        res.send({
+          folder: folder.toJSON()
+        })
       })
     } catch (err) {
       console.log(err)
       res.status(500).send({
-        error: 'an error has occured trying to create the thread'
+        error: 'an error has occured trying to create the folder'
       })
     }
   },
 
   async show (req, res) {
     try {
-      var {lid} = req.query
-      var {uid} = req.query
-      const thread = await Thread.findOne({
-        where: {
-          UserId: uid,
-          LessonId: lid
+      let {lid, fid} = req.query
+      let folder = null
+      if (lid || fid) {
+        if (lid) {
+          let lesson = await Lesson.findOne({
+            where: {
+              id: lid
+            }
+          })
+          folder = await lesson.getFolder()
+        } else {
+          folder = await Folder.findOne({
+            where: {
+              id: fid
+            }
+          })
         }
-      })
-
-      if (!thread) {
-        return res.send({
-          thread: {}
+      } else {
+        return res.status(403).send({
+          error: "Information given is incorrect"
         })
       }
 
-      const course = await thread.getCourse()
-      if (req.user.isStudent) {
-        if (course.unreadTutorPost > 0) {
-          await course.decrement('unreadTutorPost', { by: thread.unreadTutorPost })
-        } else if (course.unreadTutorPost < 0) {
-          course.unreadTutorPost = 0
-          await course.save()
-        }
-        thread.unreadTutorPost = 0
-        await thread.save()
-      } else {
-        if (course.unreadStudentPost > 0) {
-          await course.decrement('unreadStudentPost', { by: thread.unreadStudentPost })
-        } else if (course.unreadStudentPost < 0) {
-          course.unreadStudentPost = 0
-          await course.save()
-        }
-        thread.unreadStudentPost = 0
-        await thread.save()
+      if (!folder) {
+        return res.status(403).send({
+          error: "Information given is incorrect"
+        })
       }
-      
-      await thread.reload()
-      var threadJson = thread.toJSON()
-      var posts = await thread.getPosts()
-      threadJson.posts = posts.map(post => post.toJSON())
+
+      let folderJson = null
+      folderJson = await getDirectoryTree(folder)
 
       // console.log(ThreadsJson)
       res.send({
-        thread: threadJson
+        folder: folderJson
       })
     } catch (err) {
       console.log(err)
       res.status(500).send({
-        error: "An error has occured in trying to retrieve thread"
+        error: "An error has occured in trying to retrieve folder"
       })
     }
   },
 
   async list (req, res) {
     try {
-      var threads = null
-      if (req.query.lid) {
-        const lesson = await Lesson.findOne({
-          where: {
-            id: req.query.lid
-          }
-        })
-        if (!lesson) {
-          return res.status(403).send({
-            error: "Lesson information provided is incorrect"
-          })
-        }
-        threads = await lesson.getThreads()
-      } else {
-        threads = await req.user.getThreads()
-      }
-      
-      if (!threads) {
-        return res.send({
-          threads: []
-        })
-      }
-      
-      const threadsJson = []
-      threads.forEach(thread => {
-        threadsJson.push(thread.toJSON())
-      })
-      // console.log(ThreadsJson)
+      let folders = await Folder.findAll()
+      let foldersJson = []
+      foldersJson = await Promise.all(folders.map(async folder => {
+        let folderJson = folder.toJSON()
+        // folder.parents = await folder.getParents()
+        // folder.children = await folder.getChildren()
+        folderJson.parents = (await folder.getParents()).map(parent => parent.toJSON())
+        folderJson.children = (await folder.getChildren()).map(child => child.toJSON())
+        foldersJson.push(folderJson)
+        return folderJson
+      }))
       res.send({
-        threads: threadsJson
-      })
-    } catch (err) {
-      res.status(500).send({
-        error: "An error has occured in trying to retrieve threads"
-      })
-    }
-  },
-
-  async getUnread (req, res) {
-    try {
-      const {uid} = req.query
-      const {cid} = req.query
-      const course = await Course.findOne({
-        where: {
-          id: cid
-        },
-        include: Lesson
-      })
-
-      if (!course) {
-        res.status(403).send({
-          error: 'Course information incorrect'
-        })
-      }
-
-      var result = 0
-
-      for (var i = 0; i < course.Lessons.length; i++) {
-        var thread = await Thread.findOne({
-          where: {
-            LessonId: course.Lessons[i].id,
-            UserId: uid
-          }
-        })
-        result += thread.unreadStudentPost
-      }
-
-      res.send({
-        unread: result
+        folders: foldersJson
       })
     } catch (err) {
       console.log(err)
       res.status(500).send({
-        error: "An error has occured in trying to get unread of thread"
+        error: "An error has occured in trying to retrieve folders"
       })
     }
   },
 
   async destroy (req, res) {
     try {
-      const {tid} = req.query
-      await Thread.destroy({
+      const {fid} = req.query
+      let folder = await Folder.findOne({
         where: {
-          id: tid
+          id: fid
         }
       })
+      await deleteDirectoryTree(folder)
 
       res.send({
         data: 'ok'
@@ -184,7 +162,7 @@ module.exports = {
     } catch (err) {
       console.log(err)
       res.status(500).send({
-        error: "An error has occured in trying to delete thread"
+        error: "An error has occured in trying to delete folder"
       })
     }
   }

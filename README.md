@@ -67,3 +67,17 @@
   - GET `/paypal-access-token` - `{ token: access_token }`
   - GET `/paypal-client-token` - `{ token: client_token }`
   - POST `/paypal-new-payout { accessToken, amount, courseId }` - `{ result: responseObj }`
+
+## folders
+- folder management
+  - GET `/folder/list` - `{ folders: [<folderObj>] }`
+  - GET `/folder/show?fid=&lid=` - `{ folder: <folderObj> }`
+  - POST `/folder/new { name, parentId, lessonId }` - `{ folder: <folderObj> }`
+  - PUT `/folder/edit { folderId, name }` - `{ folder: <folderObj> }`
+  - DELETE `/folder/del?fid=` - `{ data: ok }`
+
+## files
+- folder management
+  - GET `/file/list?lid=` - - `{ files: [<fileObj>] }`
+  - POST `/file/new { file, folderId, name, url, size, type }` - `{ file: <fileObj> }`
+  - DELETE `/file/del?fid=` - `{ data: ok }`

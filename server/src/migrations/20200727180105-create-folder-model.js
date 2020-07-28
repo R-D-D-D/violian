@@ -5,7 +5,12 @@ module.exports = {
     return queryInterface.sequelize.transaction(t => {
       return queryInterface.createTable('Folders', {
         name: Sequelize.DataTypes.STRING,
-        size: Sequelize.DataTypes.INTEGER
+        size: Sequelize.DataTypes.INTEGER,
+        relativePath: Sequelize.DataTypes.STRING,
+        isRoot: {
+          type: Sequelize.DataTypes.BOOLEAN,
+          defaultValue: false
+        }
       });
     })
   },
