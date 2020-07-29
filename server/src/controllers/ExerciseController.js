@@ -16,6 +16,7 @@ module.exports = {
     try {
       await sequelize.transaction(async (t) => {
         const {lid} = req.body
+        const user = req.user
         const lesson = await Lesson.findOne({
           where: {
             id: lid
@@ -28,16 +29,14 @@ module.exports = {
             error: "Lesson information is incorrect"
           })
         }
-  
-        const user = await lesson.Course.getTutor()
-  
+    
         // console.log(req.files)
         // format to present score
         if (req.body.useXml) {
           if (req.files['musicXml'] && req.files['musicXml'].length > 0) {
             let params = {
                 Bucket: config.aws.bucket,
-                Key: `${user.email}/musicXml/${lesson.id}/${req.files['musicXml'][0].originalname}`,
+                Key: `${user.email}/${lesson.Course.name}/${lesson.name}/musicXml/${req.files['musicXml'][0].originalname}`,
                 Body: req.files['musicXml'][0].buffer
             }
         
@@ -51,7 +50,7 @@ module.exports = {
         if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/demoPoster/${lesson.id}/${req.files['demoPoster'][0].originalname}`,
+              Key: `${user.email}/${lesson.Course.name}/${lesson.name}/demoPoster/${req.files['demoPoster'][0].originalname}`,
               Body: req.files['demoPoster'][0].buffer
           }
       
@@ -63,7 +62,7 @@ module.exports = {
         if (req.files['demo'] && req.files['demo'].length > 0) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/demo/${lesson.id}/${req.files['demo'][0].originalname}`,
+              Key: `${user.email}/${lesson.Course.name}/${lesson.name}/demo/${req.files['demo'][0].originalname}`,
               Body: req.files['demo'][0].buffer
           }
       
@@ -75,7 +74,7 @@ module.exports = {
         if (req.files['video'] && req.files['video'].length > 0) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/video/${lesson.id}/${req.files['video'][0].originalname}`,
+              Key: `${user.email}/${lesson.Course.name}/${lesson.name}/video/${req.files['video'][0].originalname}`,
               Body: req.files['video'][0].buffer
           }
       
@@ -87,7 +86,7 @@ module.exports = {
         if (req.files['videoPoster'] && req.files['videoPoster'].length > 0) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/videoPoster/${lesson.id}/${req.files['videoPoster'][0].originalname}`,
+              Key: `${user.email}/${lesson.Course.name}/${lesson.name}/videoPoster/${req.files['videoPoster'][0].originalname}`,
               Body: req.files['videoPoster'][0].buffer
           }
       

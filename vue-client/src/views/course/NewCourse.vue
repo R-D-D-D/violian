@@ -13,9 +13,9 @@
             v-row.justify-center
               v-col(cols="12")
                 v-card.text-left(outlined).mb-12
-                  v-card-title.display-1 Course Info
+                  v-card-title.px-10.display-1 Course Info
                   v-divider
-                  v-card-text
+                  v-card-text.px-10
                     v-form(ref="courseForm")
                       v-row
                         v-col(cols="12" md="4")
@@ -92,8 +92,8 @@
               v-col(cols="12")
                 v-expansion-panels.mb-5(multiple focusable v-model="lesson")
                   v-expansion-panel(v-for='(lesson, idx) in lessons' :key='idx' @click="")
-                    v-expansion-panel-header.text-h4 Lesson {{ idx + 1}}: {{ lesson.name }}
-                    v-expansion-panel-content.px-6
+                    v-expansion-panel-header.text-h4.px-10 Lesson {{ idx + 1}}: {{ lesson.name }}
+                    v-expansion-panel-content.px-10
                       v-form.mt-5(:ref="`lessonForm${idx}`")
                         v-row
                           v-col(cols="12" md="4")
@@ -194,12 +194,12 @@
             v-row.justify-center
               v-col(cols="12")
                 v-card.text-left(outlined).mb-12
-                  v-card-title.display-1 Course Info
+                  v-card-title.display-1.px-10 Course Info
                     v-spacer
                     v-btn(outlined color='indigo' right @click='e1 = 1')
                       v-icon(color="indigo") mdi-pencil
                   v-divider
-                  v-card-text
+                  v-card-text.px-10
                     v-row
                       v-col(cols="12" md="4")
                         strong Title: 
@@ -254,12 +254,12 @@
             v-row.justify-center.mt-5
               v-col(cols="12")
                 v-card.text-left(outlined).mb-12
-                  v-card-title.display-1 Lessons
+                  v-card-title.display-1.px-10 Lessons
                     v-spacer
                     v-btn(outlined color='indigo' right @click='e1 = 2')
                       v-icon(color="indigo") mdi-pencil
                   v-divider
-                  v-card-text(v-for="(lesson, idx) in lessons")
+                  v-card-text.px-10(v-for="(lesson, idx) in lessons")
                     v-row
                       v-col(cols="12" md="4")
                         strong Name: 
@@ -615,5 +615,9 @@ export default {
 <style scoped>
 .hide {
   display: none;
+}
+
+div {
+  font-size: 18px;
 }
 </style>

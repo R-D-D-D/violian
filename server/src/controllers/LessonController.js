@@ -4,28 +4,37 @@ const {Exercise} = require('../models')
 const {Course} = require('../models')
 const {sequelize} = require('../models')
 
+async function deleteDirectoryTree (folder) {
+  let children = (await folder.getChildren())
+  await sequelize.transaction(async (t) => {
+    await folder.destroy({
+      transaction: t
+    })
+  })
+  if (children.length > 0)
+    children.map(async child => await deleteDirectoryTree(child))
+}
+
 module.exports = {
   async show (req, res) {
     try {
-      await sequelize.transaction(async (t) => {
-        const {lid} = req.query
+      const {lid} = req.query
 
-        const lesson = await Lesson.findOne({
-          where: {
-            id: lid
-          },
-          include: Exercise
+      const lesson = await Lesson.findOne({
+        where: {
+          id: lid
+        },
+        include: Exercise
+      })
+      
+      if (!lesson) {
+        return res.status(403).send({
+          error: "Lesson information is incorrect"
         })
-        
-        if (!lesson) {
-          return res.status(403).send({
-            error: "Lesson information is incorrect"
-          })
-        }
-  
-        res.send({
-          lesson: lesson.toJSON()
-        })
+      }
+
+      res.send({
+        lesson: lesson.toJSON()
       })
     } catch (err) {
       console.log(err)
@@ -174,24 +183,21 @@ module.exports = {
             id: lid
           }
         })
-        console.log('1')
+
         const course = await lesson.getCourse()
         await course.decrement('duration', { 
           by: lesson.duration,
           transaction: t
         })
 
-        console.log('2')
-        await Folder.destroy({
+        await deleteDirectoryTree((await lesson.getFolder()))
+
+        await Lesson.destroy({
           where: {
-            LessonId: lesson.id
+            id: lid
           },
-          individualHooks: true,
           transaction: t
         })
-        console.log('3')
-
-        await lesson.destroy()
         res.send({
           data: 'ok'
         })

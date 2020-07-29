@@ -3,7 +3,7 @@
     v-container
       v-row.mt-10
         v-col.text-left(cols="8")
-          h1 Welcome to Music Academy
+          h1 Welcome to Violian!
 
       v-row.mb-12
         v-col(cols="8")

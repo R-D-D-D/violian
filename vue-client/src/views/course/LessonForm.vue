@@ -3,9 +3,9 @@ v-container
   v-row(v-if="($route.params.lesson_id && lesson) || $route.params.course_id")
     v-col
       v-card.text-left(outlined).mb-12
-        v-card-title.display-1 Lesson
+        v-card-title.display-1.px-10.font-weight-bold Lesson
         v-divider
-        v-card-text
+        v-card-text.px-10
           v-form.mt-5(:ref="`lessonForm`")
             v-row
               v-col(cols="12" md="4")
@@ -89,6 +89,16 @@ v-container
               v-col(cols="12" md="6")
                 v-subheader.pl-0 BPM
                 v-slider(v-model='lesson.bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3")
+
+          v-row
+            v-col(cols="12")
+              h1 Resources
+            v-col(cols="12")
+              v-breadcrumbs.px-0(:items='items')
+                template(v-slot:divider='')
+                  v-icon mdi-chevron-right
+
+  
   v-row.justify-center
     v-col.text-center
       v-btn(color="indigo" @click='update' :loading="loading" dark)
@@ -137,6 +147,16 @@ export default {
         v => new RegExp(/^\d+$/).test(v) || "Please input numbers only"
       ],
       time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
+      items: [
+        {
+          text: 'parent'
+        }, 
+        {
+          text: 'child'
+        }, 
+        {
+          text: 'grand child'
+          }],
       loading: false,
       error: null,
     }
@@ -283,5 +303,5 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 </style>

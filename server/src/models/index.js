@@ -7,14 +7,15 @@ const db = {}
 
 var sequelize = null
 
-if (process.env.ENV == 'development') {
-  sequelize = new Sequelize({
-    dialect: config.db.dialect, 
-    storage: config.db.url
-  })
-} else {
-  sequelize = new Sequelize(config.db.url)
-}
+// if (process.env.ENV == 'development') {
+//   sequelize = new Sequelize({
+//     dialect: config.db.dialect, 
+//     storage: config.db.url
+//   })
+// } else {
+//   sequelize = new Sequelize(config.db.url)
+// }
+sequelize = new Sequelize(config.db.url)
 
 fs
   .readdirSync(__dirname)

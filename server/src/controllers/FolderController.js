@@ -2,10 +2,12 @@ const {Lesson} = require('../models')
 const {Folder} = require('../models')
 const {sequelize} = require('../models')
 const {Course} = require('../models')
+const {File} = require('../models')
 
 async function getDirectoryTree (folder) {
   let children = (await folder.getChildren())
   let folderJson = folder.toJSON()
+  folderJson.Files = (await folder.getFiles()).map(file => file.toJSON())
   if (children.length == 0) {
     return folderJson
   } else {
@@ -16,7 +18,12 @@ async function getDirectoryTree (folder) {
 
 async function deleteDirectoryTree (folder) {
   let children = (await folder.getChildren())
-  await folder.destroy()
+  await sequelize.transaction(async (t) => {
+    await folder.destroy({
+      transaction: t,
+      individualHooks: true
+    })
+  })
   if (children.length > 0)
     children.map(async child => await deleteDirectoryTree(child))
 }
@@ -32,7 +39,7 @@ module.exports = {
           where: {
             id: lessonId
           },
-          include: Course
+          include: [Course, Folder]
         })
         
         if (!lesson) {
@@ -47,6 +54,7 @@ module.exports = {
           })
         }
 
+        console.log(lesson.Folder)
         let folder = null
         if (parentId) {
           let parent = await Folder.findOne({
@@ -55,11 +63,11 @@ module.exports = {
             }
           })
           req.body.relativePath = `${parent.relativePath}/${req.body.name}`
-          folder = await lesson.createFolder(req.body, { transaction: t })
+          folder = await Folder.create(req.body, { transaction: t })
           await folder.addParent(parent, { transaction: t })
           await parent.addChild(folder, { transaction: t })
-        } else {
-          req.body.relativePath = `${user.email}/${lesson.Course.name}/${lesson.name}/${req.body.name}`
+        } else if (!lesson.Folder) {
+          req.body.relativePath = `${lesson.Course.name}/${lesson.name}/Resources`
           req.body.isRoot = true
           folder = await lesson.createFolder(req.body, { transaction: t })
         }

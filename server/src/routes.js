@@ -230,16 +230,12 @@ module.exports = (app) => {
     FolderController.destroy),
 
   // file
-  app.get('/file/list',
-    isAuthenticated,
-    FileController.list),
-
-  app.post('/folder/new',
+  app.post('/file/new',
     upload.single('file'),
     isAuthenticated,
     FileController.create),
 
-  app.delete('/folder/del',
+  app.delete('/file/del',
     isAuthenticated,
     FileController.destroy)
 }

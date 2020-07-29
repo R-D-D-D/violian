@@ -31,32 +31,32 @@ module.exports = (sequelize, DataTypes) => {
     Exercise.belongsTo(models.Lesson)
   }
 
-  // Exercise.beforeDestroy(async (exercise, options) => {
-  //   console.log('in exercise before destroy')
-  //   if (exercise.videoUrl) {
-  //     // delete the previous video
-  //     var originalVideoUrl = exercise.videoUrl.split('/')
-  //     originalVideoUrl.splice(0, 3)
-  //     var newVideoUrl = originalVideoUrl.join('/')
-  //     var deleteVideoParams = {
-  //       Bucket: config.aws.bucket,
-  //       Key: newVideoUrl
-  //     }
+  Exercise.beforeDestroy(async (exercise, options) => {
+    console.log('in exercise before destroy')
+    if (exercise.videoUrl) {
+      // delete the previous video
+      var originalVideoUrl = exercise.videoUrl.split('/')
+      originalVideoUrl.splice(0, 3)
+      var newVideoUrl = originalVideoUrl.join('/')
+      var deleteVideoParams = {
+        Bucket: config.aws.bucket,
+        Key: newVideoUrl
+      }
 
-  //     await s3.deleteObject(deleteVideoParams).promise()
-  //   } else if (exercise.demoUrl) {
-  //     // delete the previous video
-  //     var originalDemoUrl = exercise.demoUrl.split('/')
-  //     originalDemoUrl.splice(0, 3)
-  //     var newDemoUrl = originalDemoUrl.join('/')
-  //     var deleteDemoParams = {
-  //       Bucket: config.aws.bucket,
-  //       Key: newDemoUrl
-  //     }
+      await s3.deleteObject(deleteVideoParams).promise()
+    } else if (exercise.demoUrl) {
+      // delete the previous video
+      var originalDemoUrl = exercise.demoUrl.split('/')
+      originalDemoUrl.splice(0, 3)
+      var newDemoUrl = originalDemoUrl.join('/')
+      var deleteDemoParams = {
+        Bucket: config.aws.bucket,
+        Key: newDemoUrl
+      }
 
-  //     await s3.deleteObject(deleteDemoParams).promise()
-  //   }
-  // })
+      await s3.deleteObject(deleteDemoParams).promise()
+    }
+  })
   
   return Exercise
 }

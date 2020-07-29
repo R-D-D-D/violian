@@ -13,16 +13,19 @@ module.exports = (sequelize, DataTypes) => {
 
   Lesson.associate = function (models) {
     Lesson.belongsTo(models.Course)
-    // Lesson.hasMany(models.Exercise, {
-    //   onDelete: 'CASCADE',
-    //   hooks: true
-    // })
-    Lesson.hasMany(models.Exercise)
+    Lesson.hasMany(models.Exercise, {
+      onDelete: 'CASCADE',
+      hooks: true
+    })
+    // Lesson.hasMany(models.Exercise)
     Lesson.hasMany(models.Thread, {
       onDelete: 'CASCADE',
       hooks: true
     })
-    Lesson.hasOne(models.Folder)
+    Lesson.hasOne(models.Folder, {
+      onDelete: 'CASCADE',
+      hooks: true
+    })
   }
 
   Lesson.beforeDestroy(async (folder, options) => {

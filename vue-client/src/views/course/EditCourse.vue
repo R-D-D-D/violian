@@ -3,12 +3,12 @@
     v-row.justify-center
       v-col(cols="12")
         v-card.text-left(outlined).mb-12
-          v-card-title.display-1 Course Info
+          v-card-title.display-1.px-10 Course Info
             v-spacer
             v-btn(outlined color='indigo' right @click='editCourse')
               v-icon(color="indigo") mdi-pencil
           v-divider
-          v-card-text
+          v-card-text.px-10
             v-row
               v-col(cols="12" md="4")
                 strong Title: 
@@ -64,9 +64,12 @@
     v-row.justify-center.mt-5
       v-col(cols="12")
         v-card.text-left(outlined).mb-12
-          v-card-title.display-1 Lessons
+          v-card-title.display-1.px-10 Lessons
+            v-spacer
+            v-btn(outlined color='indigo' right @click='')
+              v-icon(color="indigo") mdi-plus
           v-divider
-          v-card-text(v-for="(lesson, idx) in course.lessons")
+          v-card-text.px-10(v-for="(lesson, idx) in course.lessons")
             v-row
               v-col(cols="12" md="4")
                 strong Name: 
@@ -75,7 +78,7 @@
                 strong Duration: 
                 | {{ lesson.duration }}
               v-spacer
-              v-btn.mr-4(outlined color='indigo' right @click='editLesson($event, lesson)')
+              v-btn.mr-3(outlined color='indigo' right @click='editLesson($event, lesson)')
                 v-icon(color="indigo") mdi-pencil
             v-row
               v-col(cols="12")
@@ -184,5 +187,9 @@ export default {
 
 .item {
   border: thin solid rgba(0, 0, 0, 0.12)
+}
+
+div {
+  font-size: 18px;
 }
 </style>

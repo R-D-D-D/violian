@@ -5,7 +5,6 @@
       app
       absolute
       color="white"
-      elevate-on-scroll
     )
       v-app-bar-nav-icon(@click="drawer = true")
 

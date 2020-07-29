@@ -1,6 +1,11 @@
 const AWS = require('aws-sdk')
 const config = require('../config/config')
 
+const s3 = new AWS.S3({
+  accessKeyId: config.aws.id,
+  secretAccessKey: config.aws.secret
+});
+
 module.exports = (sequelize, DataTypes) => {
   const File = sequelize.define('File', {
     name: DataTypes.STRING,
@@ -14,8 +19,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   
   File.beforeDestroy(async (file, options) => {
+    console.log('in file before destroy hook')
     if (file.url) {
-      // delete the previous video
       var originalUrl = file.url.split('/')
       originalUrl.splice(0, 3)
       var newUrl = originalUrl.join('/')
@@ -23,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         Bucket: config.aws.bucket,
         Key: newUrl
       }
+      console.log(newUrl)
 
       await s3.deleteObject(deleteParams).promise()
     }

@@ -119,4 +119,8 @@ input:-webkit-autofill:focus {
 video:focus {
   outline: none;
 }
+
+.v-breadcrumbs li {
+  font-size: 18px !important;
+}
 </style>

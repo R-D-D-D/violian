@@ -3,9 +3,9 @@ v-container(v-if="course")
   v-row.justify-center
     v-col(cols="12")
       v-card.text-left(outlined).mb-12
-        v-card-title.display-1 Course Info
+        v-card-title.display-1.px-10 Course Info
         v-divider
-        v-card-text
+        v-card-text.px-10
           v-form(ref="courseForm")
             v-row
               v-col(cols="12" md="4")

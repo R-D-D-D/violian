@@ -1,7 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
   const Folder = sequelize.define('Folder', {
     name: DataTypes.STRING,
-    size: DataTypes.INTEGER,
+    size: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
     isRoot: {
       type: DataTypes.BOOLEAN,
       defaultValue: false 
@@ -17,21 +20,28 @@ module.exports = (sequelize, DataTypes) => {
     Folder.belongsToMany(Folder, { as: 'Children', through: 'ParentChildrenFolders', foreignKey: 'ParentId', onDelete: 'CASCADE', hooks: true}) 
     Folder.belongsToMany(Folder, { as: 'Parents', through: 'ParentChildrenFolders', foreignKey: 'ChildId' }) 
     Folder.belongsTo(models.Lesson)
-  }
 
-  Folder.beforeDestroy(async (folder, options) => {
-    console.log('in folder before destroy hook')
-    await sequelize.transaction(async (t) => {
-      let files = folder.getFiles()
-      if (files.length > 0) {
-        files.map(async file => {
-          await file.destroy({
-            transaction: t
-          })
+    Folder.beforeDestroy(async (folder, options) => {
+      console.log('in folder before destroy hook')
+      await sequelize.transaction(async (t) => {
+        // let files = folder.getFiles()
+        // if (files.length > 0) {
+        //   files.map(async file => {
+        //     await file.destroy({
+        //       transaction: t
+        //     })
+        //   })
+        // }
+        await models.File.destroy({
+          where: {
+            FolderId: folder.id
+          },
+          transaction: t,
+          individualHooks: true
         })
-      }
+      })
     })
-  })
+  }
   
   return Folder
 }
