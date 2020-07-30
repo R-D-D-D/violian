@@ -17,12 +17,11 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
       hooks: true
     })
-    // Lesson.hasMany(models.Exercise)
     Lesson.hasMany(models.Thread, {
       onDelete: 'CASCADE',
       hooks: true
     })
-    Lesson.hasOne(models.Folder, {
+    Lesson.hasMany(models.Folder, {
       onDelete: 'CASCADE',
       hooks: true
     })

@@ -63,7 +63,7 @@
     
     v-row.justify-center.mt-5
       v-col(cols="12")
-        v-card.text-left(outlined).mb-12
+        v-card.text-left(outlined).mb-12.pb-5
           v-card-title.display-1.px-10 Lessons
             v-spacer
             v-btn(outlined color='indigo' right @click='newLesson')

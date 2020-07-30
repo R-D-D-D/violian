@@ -4,19 +4,6 @@ const {Exercise} = require('../models')
 const {Course} = require('../models')
 const {sequelize} = require('../models')
 
-async function deleteDirectoryTree (folder) {
-  if (!folder)
-    return
-  let children = (await folder.getChildren())
-  await sequelize.transaction(async (t) => {
-    await folder.destroy({
-      transaction: t
-    })
-  })
-  if (children.length > 0)
-    children.map(async child => await deleteDirectoryTree(child))
-}
-
 module.exports = {
   async show (req, res) {
     try {
@@ -191,8 +178,6 @@ module.exports = {
           by: lesson.duration,
           transaction: t
         })
-
-        await deleteDirectoryTree((await lesson.getFolder()))
 
         await Lesson.destroy({
           where: {

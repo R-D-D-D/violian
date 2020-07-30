@@ -1,8 +1,12 @@
 import Api from '@/services/Api'
 
 export default {
-  show (lessonId) {
-    return Api().get(`folder/show?lid=${lessonId}`)
+  show (folderId) {
+    return Api().get(`folder/show?fid=${folderId}`)
+  },
+
+  list (lessonId) {
+    return Api().get(`folder/list?lid=${lessonId}`)
   },
 
   create (folderInfo) {

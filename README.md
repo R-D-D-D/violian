@@ -70,8 +70,8 @@
 
 ## folders
 - folder management
-  - GET `/folder/list` - `{ folders: [<folderObj>] }`
-  - GET `/folder/show?fid=&lid=` - `{ folder: <folderObj> }`
+  - GET `/folder/list?lid=` - `{ folders: [<folderObj>] }`
+  - GET `/folder/show?fid=` - `{ folder: <folderObj> }`
   - POST `/folder/new { name, parentId, lessonId }` - `{ folder: <folderObj> }`
   - PUT `/folder/edit { folderId, name }` - `{ folder: <folderObj> }`
   - DELETE `/folder/del?fid=` - `{ data: ok }`

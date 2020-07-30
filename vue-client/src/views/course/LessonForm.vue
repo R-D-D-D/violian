@@ -97,12 +97,12 @@ v-container
             v-col(cols="12")
               h1 Resources
             v-col.py-0(cols="12")
-              v-breadcrumbs.px-0.py-2(:items='folders')
+              v-breadcrumbs.px-0.py-2(:items="currentFolder.path.split('/')")
                 template(v-slot:divider)
                   v-icon mdi-chevron-right
                 template(v-slot:item="{ item }")
                   v-breadcrumbs-item
-                    v-btn.px-0(@click="navigateTo($event, item)" text color="indigo" style="font-size:1.2rem !important;") {{ item.name }}
+                    v-btn.px-2(@click="navigateTo($event, item)" text color="indigo" style="font-size:1rem !important;") {{ item }}
 
             v-col(cols="12")
               v-list.py-0
@@ -120,12 +120,12 @@ v-container
                   v-list-item-content
                     v-list-item-title Last Updated 
                 v-divider
-                template(v-for="(folder, idx) in currentFolder.children")
+                template(v-for="(folder, idx) in children")
                   v-list-item.pl-2(@click="navigateTo($event, folder)")
                     v-list-item-icon
                       v-icon mdi-folder
                     v-list-item-content
-                      v-list-item-title(v-text='folder.name')
+                      v-list-item-title(v-text="folder.path.split('/').slice(-2)[0]")
                     v-spacer
                     v-spacer
                     v-list-item-content
@@ -198,7 +198,7 @@ export default {
         demoStartTime: "0",
         useXml: false,
         musicXml: null,
-        folder: null
+        folders: []
       },
       lesson: null,
       handler: null,
@@ -214,7 +214,6 @@ export default {
         v => new RegExp(/^\d+$/).test(v) || "Please input numbers only"
       ],
       time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
-      folders: [],
       currentFolder: null,
       loading: false,
       error: null,
@@ -224,6 +223,13 @@ export default {
   watch: {
     'newLesson.demoPoster' (val) {
       console.log(val)
+    }
+  },
+
+  computed: {
+    children () {
+      let currPath = this.currentFolder.path
+      return this.newLesson.folders.filter(folder => folder.path.includes(currPath) && folder.path.split(currPath).length == 2 && folder.path.split(currPath)[1] != '')
     }
   },
 
@@ -352,9 +358,8 @@ export default {
     if (this.$route.params.lesson_id) {
       this.lesson = (await LessonService.show(this.$route.params.lesson_id)).data.lesson
 
-      this.newLesson.folder = (await FolderService.show(this.lesson.id)).data.folder
-      this.folders.push(this.newLesson.folder)
-      this.currentFolder = this.newLesson.folder
+      this.newLesson.folders = (await FolderService.list(this.lesson.id)).data.folders
+      this.currentFolder = this.newLesson.folders.find(folder => folder.path == 'Resources/')
 
       this.newLesson.name = this.lesson.name
       this.newLesson.duration = this.lesson.duration

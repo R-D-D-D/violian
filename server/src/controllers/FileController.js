@@ -1,5 +1,7 @@
 const {Folder} = require('../models')
 const {File} = require('../models')
+const {Lesson} = require('../models')
+const {Course} = require('../models')
 const {sequelize} = require('../models')
 const AWS = require('aws-sdk')
 const config = require('../config/config')
@@ -19,14 +21,20 @@ module.exports = {
         let folder = await Folder.findOne({
           where: {
             id: folderId
-          }
+          },
+          include: Lesson
         })
 
-        console.log(req.file)
+        let course = await Course.findOne({
+          where: {
+            id: folder.Lesson.CourseId
+          }
+        })
+        
         if (req.file) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/${folder.relativePath}/${req.file.originalname}`,
+              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path}/${req.file.originalname}`,
               Body: req.file.buffer
           }
       
