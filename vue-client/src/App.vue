@@ -120,7 +120,7 @@ video:focus {
   outline: none;
 }
 
-.v-breadcrumbs li {
-  font-size: 18px !important;
+.v-breadcrumbs li:nth-child(even) {
+  padding: 0 6px !important;
 }
 </style>

@@ -66,10 +66,10 @@
         v-card.text-left(outlined).mb-12
           v-card-title.display-1.px-10 Lessons
             v-spacer
-            v-btn(outlined color='indigo' right @click='')
+            v-btn(outlined color='indigo' right @click='newLesson')
               v-icon(color="indigo") mdi-plus
           v-divider
-          v-card-text.px-10(v-for="(lesson, idx) in course.lessons")
+          v-card-text.px-10.pb-0(v-for="(lesson, idx) in course.lessons")
             v-row
               v-col(cols="12" md="4")
                 strong Name: 
@@ -84,21 +84,21 @@
               v-col(cols="12")
                 strong Description: 
                 | {{ lesson.description }}
-            v-row(v-if="lesson.exercises[0].videoUrl && lesson.exercises[0].videoPosterUrl")
+            v-row(v-if="lesson.exercises && lesson.exercises[0].videoUrl && lesson.exercises[0].videoPosterUrl")
               v-col(cols="12" md="6")
                 strong Explanation Video: 
                 | {{ lesson.exercises[0].videoUrl.split('/')[6] }}
               v-col(cols="12" md="6")
                 strong Video Poster: 
                 | {{ lesson.exercises[0].videoPosterUrl.split('/')[6] }}
-            v-row(v-if="lesson.exercises[0].demoUrl && lesson.exercises[0].demoPosterUrl")
+            v-row(v-if="lesson.exercises && lesson.exercises[0].demoUrl && lesson.exercises[0].demoPosterUrl")
               v-col(cols="12" md="6")
                 strong Demo Video: 
                 | {{ lesson.exercises[0].demoUrl.split('/')[6] }}
               v-col(cols="12" md="6")
                 strong Demo Poster: 
                 | {{ lesson.exercises[0].demoPosterUrl.split('/')[6] }}
-            v-row(v-show="lesson.exercises[0].useScore && !lesson.exercises[0].useXml")
+            v-row(v-show="lesson.exercises && lesson.exercises[0].useScore && !lesson.exercises[0].useXml")
               v-col(cols="12")
                 div(:id="`vexflow-review-wrapper-${idx}`")
               v-col(cols="12" md="4")
@@ -107,11 +107,11 @@
               v-col(cols="12" md="4")
                 strong Number of Bars: 
                 | {{ lesson.exercises[0].numberOfBars }}
-            v-row(v-if="lesson.exercises[0].useScore && lesson.exercises[0].useXml")
+            v-row(v-if="lesson.exercises && lesson.exercises[0].useScore && lesson.exercises[0].useXml")
               v-col
                 strong MusicXML file: 
                 | {{ lesson.exercises[0].musicXmlUrl.split('/')[6] }}
-
+            v-divider(v-if="idx != course.lessons.length - 1")
     v-row.justify-center
       v-col.text-center
         v-btn(color="indigo" dark to="/course/index") Confirm

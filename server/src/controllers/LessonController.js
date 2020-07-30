@@ -5,6 +5,8 @@ const {Course} = require('../models')
 const {sequelize} = require('../models')
 
 async function deleteDirectoryTree (folder) {
+  if (!folder)
+    return
   let children = (await folder.getChildren())
   await sequelize.transaction(async (t) => {
     await folder.destroy({

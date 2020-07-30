@@ -5,6 +5,8 @@ const {Course} = require('../models')
 const {File} = require('../models')
 
 async function getDirectoryTree (folder) {
+  if (!folder)
+    return
   let children = (await folder.getChildren())
   let folderJson = folder.toJSON()
   folderJson.Files = (await folder.getFiles()).map(file => file.toJSON())
@@ -17,6 +19,8 @@ async function getDirectoryTree (folder) {
 }
 
 async function deleteDirectoryTree (folder) {
+  if (!folder)
+    return
   let children = (await folder.getChildren())
   await sequelize.transaction(async (t) => {
     await folder.destroy({
@@ -68,6 +72,7 @@ module.exports = {
           await parent.addChild(folder, { transaction: t })
         } else if (!lesson.Folder) {
           req.body.relativePath = `${lesson.Course.name}/${lesson.name}/Resources`
+          req.body.name = 'Resources'
           req.body.isRoot = true
           folder = await lesson.createFolder(req.body, { transaction: t })
         }

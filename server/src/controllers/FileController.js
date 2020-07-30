@@ -22,10 +22,11 @@ module.exports = {
           }
         })
 
+        console.log(req.file)
         if (req.file) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/${folder.relativePath}/${req.body.name}`,
+              Key: `${user.email}/${folder.relativePath}/${req.file.originalname}`,
               Body: req.file.buffer
           }
       

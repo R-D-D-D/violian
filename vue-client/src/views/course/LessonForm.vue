@@ -4,6 +4,9 @@ v-container
     v-col
       v-card.text-left(outlined).mb-12
         v-card-title.display-1.px-10.font-weight-bold Lesson
+          v-spacer
+          v-btn(outlined color='indigo' right @click="deleteLesson")
+            v-icon(color="indigo") mdi-trash-can-outline
         v-divider
         v-card-text.px-10
           v-form.mt-5(:ref="`lessonForm`")
@@ -19,7 +22,7 @@ v-container
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="video/mp4, video/ogg" 
-                  :placeholder="lesson.Exercises[0].videoUrl ? lesson.Exercises[0].videoUrl.split('/')[6] : 'Choose explanation video'" 
+                  :placeholder="lesson && lesson.Exercises[0].videoUrl ? lesson.Exercises[0].videoUrl.split('/')[6] : 'Choose explanation video'" 
                   prepend-icon="mdi-video" 
                   label="Explanation Video"
                   v-model="newLesson.video"
@@ -28,7 +31,7 @@ v-container
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="image/*" 
-                  :placeholder="lesson.Exercises[0].videoPosterUrl ? lesson.Exercises[0].videoPosterUrl.split('/')[6] : 'Choose coverpage for video'" 
+                  :placeholder="lesson && lesson.Exercises[0].videoPosterUrl ? lesson.Exercises[0].videoPosterUrl.split('/')[6] : 'Choose coverpage for video'" 
                   prepend-icon="mdi-image" 
                   label="Explanation Video Poster"
                   v-model="newLesson.videoPoster"
@@ -38,7 +41,7 @@ v-container
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="video/mp4, video/ogg" 
-                  :placeholder="lesson.Exercises[0].demoUrl ? lesson.Exercises[0].demoUrl.split('/')[6] : 'Choose Demo Video'" 
+                  :placeholder="lesson && lesson.Exercises[0].demoUrl ? lesson.Exercises[0].demoUrl.split('/')[6] : 'Choose Demo Video'" 
                   prepend-icon="mdi-video"
                   label="Demo Video"
                   v-model="newLesson.demo"
@@ -47,7 +50,7 @@ v-container
               v-col(cols="12" md="6")
                 v-file-input(
                   accept="image/*" 
-                  :placeholder="lesson.Exercises[0].demoPosterUrl ? lesson.Exercises[0].demoPosterUrl.split('/')[6] : 'Choose coverpage for demo video'" 
+                  :placeholder="lesson && lesson.Exercises[0].demoPosterUrl ? lesson.Exercises[0].demoPosterUrl.split('/')[6] : 'Choose coverpage for demo video'" 
                   prepend-icon="mdi-image"
                   label="Demo Video Poster"
                   v-model="newLesson.demoPoster"
@@ -88,15 +91,77 @@ v-container
             v-row
               v-col(cols="12" md="6")
                 v-subheader.pl-0 BPM
-                v-slider(v-model='lesson.bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3")
+                v-slider(v-model='newLesson.bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3")
 
-          v-row
+          v-row(v-if="currentFolder")
             v-col(cols="12")
               h1 Resources
-            v-col(cols="12")
-              v-breadcrumbs.px-0(:items='items')
-                template(v-slot:divider='')
+            v-col.py-0(cols="12")
+              v-breadcrumbs.px-0.py-2(:items='folders')
+                template(v-slot:divider)
                   v-icon mdi-chevron-right
+                template(v-slot:item="{ item }")
+                  v-breadcrumbs-item
+                    v-btn.px-0(@click="navigateTo($event, item)" text color="indigo" style="font-size:1.2rem !important;") {{ item.name }}
+
+            v-col(cols="12")
+              v-list.py-0
+                v-list-item.pl-2
+                  v-list-item-icon
+                    v-icon 
+                  v-list-item-content
+                    v-list-item-title Name
+                  v-spacer
+                  v-spacer
+                  v-list-item-content
+                    v-list-item-title File Type
+                  v-list-item-content
+                    v-list-item-title File Size
+                  v-list-item-content
+                    v-list-item-title Last Updated 
+                v-divider
+                template(v-for="(folder, idx) in currentFolder.children")
+                  v-list-item.pl-2(@click="navigateTo($event, folder)")
+                    v-list-item-icon
+                      v-icon mdi-folder
+                    v-list-item-content
+                      v-list-item-title(v-text='folder.name')
+                    v-spacer
+                    v-spacer
+                    v-list-item-content
+                      v-list-item-title folder
+                    v-list-item-content
+                      v-list-item-title {{ folder.size > 1024 ? (folder.size > 1048576 ? `${(folder.size / 1048576).toFixed(2)} GB` : `${(folder.size / 1024).toFixed(2)} MB`) : `${folder.size} KB`}}
+                    v-list-item-content
+                      v-list-item-title {{ new Date(folder.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                  v-divider
+                template(v-for="(file, idx) in currentFolder.Files")
+                  v-list-item.pl-2(:href="file.url" download)
+                    v-list-item-icon(v-if="file.type.includes('image')")
+                      v-icon mdi-image
+                    v-list-item-icon(v-else-if="file.type.includes('video')")
+                      v-icon mdi-video
+                    v-list-item-icon(v-else-if="file.type.includes('pdf')")
+                      v-icon mdi-file-pdf
+                    v-list-item-icon(v-else)
+                      v-icon mdi-file
+                    v-list-item-content
+                      v-list-item-title(v-text='file.name')
+                    v-spacer
+                    v-spacer
+                    v-list-item-content
+                      v-list-item-title(v-text='file.type')
+                    v-list-item-content
+                      v-list-item-title {{ file.size > 1024 ? (file.size > 1048576 ? `${(file.size / 1048576).toFixed(2)} GB` : `${(file.size / 1024).toFixed(2)} MB`) : `${file.size} KB`}}
+                    v-list-item-content
+                      v-list-item-title {{ new Date(file.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                  v-divider
+            v-col.text-center(cols="12")
+              v-btn.ma-2.white--text(color='indigo' @click="")
+                | Upload
+                v-icon(right dark) mdi-cloud-upload
+            
+      </v-breadcrumbs-item>
 
   
   v-row.justify-center
@@ -110,6 +175,7 @@ v-container
 /* eslint-disable */
 import LessonService from '@/services/LessonService'
 import ExerciseService from '@/services/ExerciseService'
+import FolderService from '@/services/FolderService'
 import vexUI from "@/plugins/vex"
 
 export default {
@@ -131,7 +197,8 @@ export default {
         melody: [],
         demoStartTime: "0",
         useXml: false,
-        musicXml: null
+        musicXml: null,
+        folder: null
       },
       lesson: null,
       handler: null,
@@ -147,34 +214,34 @@ export default {
         v => new RegExp(/^\d+$/).test(v) || "Please input numbers only"
       ],
       time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
-      items: [
-        {
-          text: 'parent'
-        }, 
-        {
-          text: 'child'
-        }, 
-        {
-          text: 'grand child'
-          }],
+      folders: [],
+      currentFolder: null,
       loading: false,
       error: null,
     }
   },
 
+  watch: {
+    'newLesson.demoPoster' (val) {
+      console.log(val)
+    }
+  },
+
   methods: {
     showVex () {
-      var div = document.createElement("div")
-      div.id = `vexflow-wrapper`
-      var pannel = document.getElementById(`pannel-content`)
-      pannel.appendChild(div)
-      this.handler = new vexUI.Handler(div.id, {
-        canvasProperties: {
-          id: div.id + '-canvas',
-          width: window.innerWidth * 5 / 6,
-          tabindex: 1
-        }
-      }).init()
+      if (this.handler == null) {
+        var div = document.createElement("div")
+        div.id = `vexflow-wrapper`
+        var pannel = document.getElementById(`pannel-content`)
+        pannel.appendChild(div)
+        this.handler = new vexUI.Handler(div.id, {
+          canvasProperties: {
+            id: div.id + '-canvas',
+            width: window.innerWidth * 5 / 6,
+            tabindex: 1
+          }
+        }).init()
+      }
     },
     
     changeTimeSignature () {
@@ -187,6 +254,15 @@ export default {
 
     changeMelody () {
       this.newLesson.melody = this.handler.exportNotes()
+    },
+
+    navigateTo (event, folder) {
+      console.log(folder.relativePath)
+      let arr = folder.relativePath.split('/')
+      let folderToBePushed = null
+      for (let i = 0; i < arr.length - 1; i++) {
+
+      }
     },
 
     async update () {
@@ -262,14 +338,24 @@ export default {
       if (this.$route.params.lesson_id) {
         this.$router.push(`/course/edit/${this.lesson.CourseId}`)
       } else {
-        this.$router.push(`/course/edit/${course.id}`)
+        this.$router.push(`/course/edit/${this.$route.params.course_id}`)
       }
+    },
+
+    async deleteLesson () {
+      await LessonService.delete(this.lesson.id)
+      this.$router.push(`/course/edit/${this.lesson.CourseId}`)
     }
   },
 
   mounted: async function () {
     if (this.$route.params.lesson_id) {
       this.lesson = (await LessonService.show(this.$route.params.lesson_id)).data.lesson
+
+      this.newLesson.folder = (await FolderService.show(this.lesson.id)).data.folder
+      this.folders.push(this.newLesson.folder)
+      this.currentFolder = this.newLesson.folder
+
       this.newLesson.name = this.lesson.name
       this.newLesson.duration = this.lesson.duration
       this.newLesson.description = this.lesson.description
@@ -298,6 +384,20 @@ export default {
           this.handler.importNotes(this.newLesson.melody, this.newLesson.timeSignature)
         }
       }
+    } else {
+      await this.$nextTick()
+      var div = document.createElement("div")
+      div.id = `vexflow-wrapper`
+      var pannel = document.getElementById(`pannel-content`)
+      pannel.appendChild(div)
+      this.handler = new vexUI.Handler(div.id, {
+        numberOfStaves: this.newLesson.numberOfBars,
+        canvasProperties: {
+          id: div.id + '-canvas',
+          width: window.innerWidth * 5 / 6,
+          tabindex: 1
+        }
+      }).init()
     }
   }
 }
