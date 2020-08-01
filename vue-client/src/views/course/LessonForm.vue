@@ -96,13 +96,18 @@ v-container
           v-row(v-if="currentFolder")
             v-col(cols="12")
               h1 Resources
-            v-col.py-0(cols="12")
-              v-breadcrumbs.px-0.py-2(:items="currentFolder.path.split('/')")
+            v-col.py-0(cols="10")
+              v-breadcrumbs.px-0.py-2(:items="currentFolder.path.split('/').filter(path => path != '')")
                 template(v-slot:divider)
                   v-icon mdi-chevron-right
                 template(v-slot:item="{ item }")
                   v-breadcrumbs-item
                     v-btn.px-2(@click="navigateTo($event, item)" text color="indigo" style="font-size:1rem !important;") {{ item }}
+
+            v-col.py-0(cols="2")
+              v-btn.ma-2(color='indigo' outlined @click="showFolder")
+                | New Folder
+                v-icon(right) mdi-plus
 
             v-col(cols="12")
               v-list.py-0
@@ -121,7 +126,7 @@ v-container
                     v-list-item-title Last Updated 
                 v-divider
                 template(v-for="(folder, idx) in children")
-                  v-list-item.pl-2(@click="navigateTo($event, folder)")
+                  v-list-item.pl-2(@click="" @dblclick="navigateTo($event, folder)")
                     v-list-item-icon
                       v-icon mdi-folder
                     v-list-item-content
@@ -156,11 +161,11 @@ v-container
                     v-list-item-content
                       v-list-item-title {{ new Date(file.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
                   v-divider
+
             v-col.text-center(cols="12")
-              v-btn.ma-2.white--text(color='indigo' @click="")
+              v-btn.ma-2(color='indigo' @click="showFile" outlined)
                 | Upload
-                v-icon(right dark) mdi-cloud-upload
-            
+                v-icon(right color="indigo") mdi-upload-outline
       </v-breadcrumbs-item>
 
   
@@ -169,6 +174,38 @@ v-container
       v-btn(color="indigo" @click='update' :loading="loading" dark)
         | Save
       v-btn(@click='cancel' :disabled="loading") Cancel
+
+  v-row(justify='center')
+    v-dialog(v-model='folderDialog' persistent='' max-width='500px')
+      v-card
+        v-card-title
+          span.headline Folder name
+        v-card-text.py-0
+          v-container.py-0
+            v-form(ref="folderForm")
+              v-row
+                v-col.pa-0(cols='12')
+                  v-text-field(v-model="newFolderName" required @focus="$event.target.select()" outlined clearable color="indigo" dense :rules="nameRules")
+        v-card-actions.pt-0
+          v-spacer
+          v-btn(color='indigo' text @click="folderDialog = false; newFolderName = 'Untitled';") Close
+          v-btn(color='indigo' text @click="newFolder") Save
+  
+  v-row(justify='center')
+    v-dialog(v-model='fileDialog' persistent='' max-width='500px')
+      v-card
+        v-card-title
+          span.headline File
+        v-card-text.py-0
+          v-container.py-0
+            v-form(ref="fileForm")
+              v-row
+                v-col.pa-0(cols='12')
+                  v-file-input(v-model="newFiles" label="Upload files..." multiple outlined clearable color="indigo" dense :rules="requiredRules")
+        v-card-actions.pt-0
+          v-spacer
+          v-btn(color='indigo' text @click='fileDialog = false; newFiles = [];') Close
+          v-btn(color='indigo' text @click='fileDialog = false') Save
 </template>
 
 <script>
@@ -213,16 +250,20 @@ export default {
         v => !!v || "Demo Start Time is required",
         v => new RegExp(/^\d+$/).test(v) || "Please input numbers only"
       ],
+      nameRules: [
+        v => !!v || "Name is required",
+        v => new RegExp(/^[a-zA-Z ]{2,30}$/).test(v) || "Name must be alphanumeric characters and of length 2 - 30"
+      ],
       time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
       currentFolder: null,
       loading: false,
       error: null,
-    }
-  },
 
-  watch: {
-    'newLesson.demoPoster' (val) {
-      console.log(val)
+      // dialog
+      folderDialog: false,
+      fileDialog: false,
+      newFolderName: 'Untitled',
+      newFiles: []
     }
   },
 
@@ -234,6 +275,14 @@ export default {
   },
 
   methods: {
+    showFolder () {
+      this.folderDialog = true
+    },
+
+    showFile () {
+      this.fileDialog = true
+    },
+
     showVex () {
       if (this.handler == null) {
         var div = document.createElement("div")
@@ -263,11 +312,11 @@ export default {
     },
 
     navigateTo (event, folder) {
-      console.log(folder.relativePath)
-      let arr = folder.relativePath.split('/')
-      let folderToBePushed = null
-      for (let i = 0; i < arr.length - 1; i++) {
-
+      if (typeof folder == 'string') {
+        // it from clicking breadcrumb
+        this.currentFolder = this.newLesson.folders.find(f => f.path.split('/').slice(-2)[0] == folder)
+      } else {
+        this.currentFolder = folder
       }
     },
 
@@ -351,6 +400,27 @@ export default {
     async deleteLesson () {
       await LessonService.delete(this.lesson.id)
       this.$router.push(`/course/edit/${this.lesson.CourseId}`)
+    },
+
+    async newFile () {
+
+    },
+
+    async newFolder () {
+      if (this.$refs.folderForm.validate()) {
+        if (this.lesson) {
+          this.newLesson.folders.push((await FolderService.create({
+            path: this.currentFolder.path + `${this.newFolderName}/`,
+            lessonId: this.lesson.id
+          })).data.folder)
+        } else {
+          this.newLesson.folders.push({
+            path: this.currentFolder.path + `${this.newFolderName}/`
+          })
+        }
+        this.newFolderName = 'Untitled'
+        this.folderDialog = false
+      }
     }
   },
 
