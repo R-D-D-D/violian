@@ -28,7 +28,6 @@ module.exports = (sequelize, DataTypes) => {
         Bucket: config.aws.bucket,
         Key: newUrl
       }
-      console.log(newUrl)
 
       await s3.deleteObject(deleteParams).promise()
     }

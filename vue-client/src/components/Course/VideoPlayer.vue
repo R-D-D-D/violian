@@ -153,7 +153,7 @@ export default {
           drawingParameters: 'compacttight'
         }
       )
-      let scoreXml = await axios.get(this.exercise.musicXmlUrl);    
+      let scoreXml = await axios.get(this.exercise.musicXmlUrl);
 
       await this.videoOsmd.load(scoreXml.data);
       await this.$nextTick()

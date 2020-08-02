@@ -114,7 +114,7 @@ v-container
                 v-list-item.pl-2
                   v-list-item-icon
                     v-icon 
-                  v-list-item-content
+                  v-list-item-content.file-name
                     v-list-item-title Name
                   v-spacer
                   v-spacer
@@ -124,12 +124,21 @@ v-container
                     v-list-item-title File Size
                   v-list-item-content
                     v-list-item-title Last Updated 
+                  v-list-item-action.ml-0
+                    v-menu(bottom left)
+                      template(v-slot:activator='{ on, attrs }')
+                        v-btn(icon v-bind='attrs' v-on='on')
+                          v-icon mdi-dots-vertical
+                      v-list
+                        v-list-item(@click="folderCrud($event, currentFolder, 'Download')")
+                          v-list-item-title Download all files
+                     
                 v-divider
                 template(v-for="(folder, idx) in children")
                   v-list-item.pl-2(@click="" @dblclick="navigateTo($event, folder)")
                     v-list-item-icon
                       v-icon mdi-folder
-                    v-list-item-content
+                    v-list-item-content.file-name
                       v-list-item-title(v-text="folder.path.split('/').slice(-2)[0]")
                     v-spacer
                     v-spacer
@@ -139,18 +148,27 @@ v-container
                       v-list-item-title {{ folder.size > 1024 ? (folder.size > 1048576 ? `${(folder.size / 1048576).toFixed(2)} GB` : `${(folder.size / 1024).toFixed(2)} MB`) : `${folder.size} KB`}}
                     v-list-item-content
                       v-list-item-title {{ new Date(folder.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                    v-list-item-action.ml-0
+                      v-menu(bottom left)
+                        template(v-slot:activator='{ on, attrs }')
+                          v-btn(icon v-bind='attrs' v-on='on')
+                            v-icon mdi-dots-vertical
+                        v-list
+                          v-list-item(v-for='(item, i) in options' :key='i' @click="folderCrud($event, folder, item)")
+                            v-list-item-title {{ item }}
                   v-divider
                 template(v-for="(file, idx) in currentFolder.Files")
-                  v-list-item.pl-2(:href="file.url" download)
+                  v-list-item.pl-2(@click="")
                     v-list-item-icon(v-if="file.type.includes('image')")
                       v-icon mdi-image
+                      //- v-img(:src="file.url")
                     v-list-item-icon(v-else-if="file.type.includes('video')")
                       v-icon mdi-video
                     v-list-item-icon(v-else-if="file.type.includes('pdf')")
                       v-icon mdi-file-pdf
                     v-list-item-icon(v-else)
                       v-icon mdi-file
-                    v-list-item-content
+                    v-list-item-content.file-name
                       v-list-item-title(v-text='file.name')
                     v-spacer
                     v-spacer
@@ -160,6 +178,14 @@ v-container
                       v-list-item-title {{ file.size > 1024 ? (file.size > 1048576 ? `${(file.size / 1048576).toFixed(2)} GB` : `${(file.size / 1024).toFixed(2)} MB`) : `${file.size} KB`}}
                     v-list-item-content
                       v-list-item-title {{ new Date(file.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                    v-list-item-action.ml-0
+                      v-menu(bottom left)
+                        template(v-slot:activator='{ on, attrs }')
+                          v-btn(icon v-bind='attrs' v-on='on')
+                            v-icon mdi-dots-vertical
+                        v-list
+                          v-list-item(v-for='(item, i) in options' :key='i' @click="fileCrud($event, file, item)")
+                            v-list-item-title {{ item }}
                   v-divider
 
             v-col.text-center(cols="12")
@@ -168,13 +194,23 @@ v-container
                 v-icon(right color="indigo") mdi-upload-outline
       </v-breadcrumbs-item>
 
-  
+
   v-row.justify-center
     v-col.text-center
       v-btn(color="indigo" @click='update' :loading="loading" dark)
         | Save
-      v-btn(@click='cancel' :disabled="loading") Cancel
+      v-btn(@click="cancel" :disabled="loading") Cancel
 
+  //- data table
+  //- v-data-table.elevation-1(v-if="currentFolder" :items="currentFolder.Files" sort-by='name' :headers="headers")
+  //-   template(v-slot:item.actions='{ item }')
+  //-     v-icon.mr-2(small @click='')
+  //-       | mdi-pencil
+  //-     v-icon(small @click='')
+  //-       | mdi-delete
+
+
+  //- modal
   v-row(justify='center')
     v-dialog(v-model='folderDialog' persistent='' max-width='500px')
       v-card
@@ -188,24 +224,39 @@ v-container
                   v-text-field(v-model="newFolderName" required @focus="$event.target.select()" outlined clearable color="indigo" dense :rules="nameRules")
         v-card-actions.pt-0
           v-spacer
-          v-btn(color='indigo' text @click="folderDialog = false; newFolderName = 'Untitled';") Close
-          v-btn(color='indigo' text @click="newFolder") Save
+          v-btn(color='indigo' text @click="folderDialog = false; newFolderName = 'Untitled';" :disabled="loading") Close
+          v-btn(color='indigo' text @click="newFolder" :loading="loading") Save
   
   v-row(justify='center')
     v-dialog(v-model='fileDialog' persistent='' max-width='500px')
       v-card
         v-card-title
-          span.headline File
+          span.headline Files
         v-card-text.py-0
           v-container.py-0
             v-form(ref="fileForm")
+              v-row
+                v-col.px-0.pt-0.pb-2(cols='12')
+                  v-list
+                    v-list-item(v-for="file in newFiles")
+                      v-list-item-icon(v-if="file.type.includes('image')")
+                        v-icon mdi-image
+                      v-list-item-icon(v-else-if="file.type.includes('video')")
+                        v-icon mdi-video
+                      v-list-item-icon(v-else-if="file.type.includes('pdf')")
+                        v-icon mdi-file-pdf
+                      v-list-item-icon(v-else)
+                        v-icon mdi-file
+                      v-list-item-content
+                        v-list-item-title {{ file.name }}
+
               v-row
                 v-col.pa-0(cols='12')
                   v-file-input(v-model="newFiles" label="Upload files..." multiple outlined clearable color="indigo" dense :rules="requiredRules")
         v-card-actions.pt-0
           v-spacer
-          v-btn(color='indigo' text @click='fileDialog = false; newFiles = [];') Close
-          v-btn(color='indigo' text @click='fileDialog = false') Save
+          v-btn(color='indigo' text @click='fileDialog = false; newFiles = [];' :disabled="loading") Close
+          v-btn(color='indigo' text @click='newFile' :loading="loading") Save
 </template>
 
 <script>
@@ -213,7 +264,11 @@ v-container
 import LessonService from '@/services/LessonService'
 import ExerciseService from '@/services/ExerciseService'
 import FolderService from '@/services/FolderService'
+import FileService from '@/services/FileService'
 import vexUI from "@/plugins/vex"
+import JSZip from 'jszip'
+import axios from 'axios'
+import { saveAs } from 'file-saver'
 
 export default {
   name: 'LessonForm',
@@ -263,7 +318,10 @@ export default {
       folderDialog: false,
       fileDialog: false,
       newFolderName: 'Untitled',
-      newFiles: []
+      newFiles: [],
+
+      // options for file CRUD
+      options: ['Download', 'Remove']
     }
   },
 
@@ -271,6 +329,12 @@ export default {
     children () {
       let currPath = this.currentFolder.path
       return this.newLesson.folders.filter(folder => folder.path.includes(currPath) && folder.path.split(currPath).length == 2 && folder.path.split(currPath)[1] != '')
+    }
+  },
+  
+  watch: {
+    'newLesson.videoPoster' (val) {
+      console.log(val)
     }
   },
 
@@ -403,11 +467,30 @@ export default {
     },
 
     async newFile () {
-
+      if (this.$refs.fileForm.validate()) {
+        this.loading = true
+        if (this.currentFolder.id) {
+          this.newFiles.forEach(async f => {
+            let formData = new FormData()
+            formData.set('folderId', this.currentFolder.id)
+            formData.set('name', f.name)
+            formData.set('size', parseInt(f.size / 1024))
+            formData.set('type', f.type)
+            formData.append('file', f)
+            this.currentFolder.Files.push((await FileService.create(formData)).data.file)
+          })
+        } else {
+          this.currentFolder.Files.concat(this.newFiles)
+        }
+        this.newFiles = []
+        this.fileDialog = false
+        this.loading = false
+      }
     },
 
     async newFolder () {
       if (this.$refs.folderForm.validate()) {
+        this.loading = true
         if (this.lesson) {
           this.newLesson.folders.push((await FolderService.create({
             path: this.currentFolder.path + `${this.newFolderName}/`,
@@ -415,11 +498,58 @@ export default {
           })).data.folder)
         } else {
           this.newLesson.folders.push({
-            path: this.currentFolder.path + `${this.newFolderName}/`
+            path: this.currentFolder.path + `${this.newFolderName}/`,
+            Files: []
           })
         }
         this.newFolderName = 'Untitled'
         this.folderDialog = false
+        this.loading = false
+      }
+    },
+
+    async folderCrud (event, folder, action) {
+      if (action == 'Download') {
+        if (this.currentFolder.Files.length > 0) {
+          const zip = new JSZip()
+          let files = this.currentFolder.Files
+          for (let i = 0; i < files.length; i++) {
+            let data = (await axios({
+              method: 'get',
+              responseType: 'stream',
+              url: files[i].url
+            })).data
+
+            console.log(data)
+            // var binary = ''
+            // var bytes = new Uint8Array(data)
+            // var len = bytes.byteLength;
+            // for (var j = 0; j < len; j++) {
+            //   binary += String.fromCharCode(bytes[j] );
+            // }
+            // console.log(data)
+            // console.log(binary)
+            // console.log(window.btoa(binary))
+            zip.file(files[i].name, data)
+          }
+
+          zip.generateAsync({type:"blob"})
+            .then(function (blob) {
+              saveAs(blob, "download.zip")
+            })
+        }
+      } else {
+
+      }
+    },
+
+    async fileCrud (event, file, action) {
+      if (action == 'Download') {
+
+      } else {
+        await FileService.delete(file.id)
+        let idx = this.currentFolder.Files.indexOf(file)
+        this.currentFolder.Files.splice(this.currentLesson.Files.splice(idx, 1))
       }
     }
   },
@@ -479,4 +609,7 @@ export default {
 </script>
 
 <style scoped>
+.file-name {
+  flex-grow: 4;
+}
 </style>

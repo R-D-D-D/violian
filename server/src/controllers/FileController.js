@@ -31,17 +31,22 @@ module.exports = {
           }
         })
         
+        console.log(req.file)
         if (req.file) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path}/${req.file.originalname}`,
-              Body: req.file.buffer
+              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.file.originalname}`,
+              Body: req.file.buffer,
+              ContentType: req.file.mimetype
           }
       
           // Uploading files to the bucket
           const response = await s3.upload(params).promise()
           req.body.url = response.Location
         }
+        
+        if (req.body.type == '' || !req.body.type) 
+          req.body.type = req.file.mimetype
 
         await folder.increment('size', { 
           by: parseInt(req.body.size) || 0,
