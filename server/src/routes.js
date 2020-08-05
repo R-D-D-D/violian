@@ -14,7 +14,9 @@ const AuthenticationControllerPolicy = require('./policies/AuthenticationControl
 const isAuthenticated = require('./policies/isAuthenticated')
 
 const multer = require('multer');
-const upload = multer();
+const upload = multer({
+  limits: { fieldSize: 1024 * 1024 * 1024 }
+});
 
 module.exports = (app) => {
   // log in

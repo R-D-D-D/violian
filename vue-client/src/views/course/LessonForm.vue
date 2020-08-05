@@ -161,7 +161,7 @@ v-container
                   v-list-item.pl-2(@click="")
                     v-list-item-icon(v-if="file.type.includes('image')")
                       v-icon mdi-image
-                      //- v-img(:src="file.url")
+                      v-img(:src="file.url")
                     v-list-item-icon(v-else-if="file.type.includes('video')")
                       v-icon mdi-video
                     v-list-item-icon(v-else-if="file.type.includes('pdf')")
@@ -184,7 +184,7 @@ v-container
                           v-btn(icon v-bind='attrs' v-on='on')
                             v-icon mdi-dots-vertical
                         v-list
-                          v-list-item(v-for='(item, i) in options' :key='i' @click="fileCrud($event, file, item)")
+                          v-list-item(v-for='(item, i) in options' :key='i' @click="changeToBase64($event, file, item)")
                             v-list-item-title {{ item }}
                   v-divider
 
@@ -200,6 +200,12 @@ v-container
       v-btn(color="indigo" @click='update' :loading="loading" dark)
         | Save
       v-btn(@click="cancel" :disabled="loading") Cancel
+
+  v-row
+    v-col
+      h1 hey
+    v-col
+      v-img(:src="href")
 
   //- data table
   //- v-data-table.elevation-1(v-if="currentFolder" :items="currentFolder.Files" sort-by='name' :headers="headers")
@@ -269,6 +275,7 @@ import vexUI from "@/plugins/vex"
 import JSZip from 'jszip'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
+import JSZipUtils from 'jszip-utils'
 
 export default {
   name: 'LessonForm',
@@ -321,7 +328,8 @@ export default {
       newFiles: [],
 
       // options for file CRUD
-      options: ['Download', 'Remove']
+      options: ['Download', 'Remove'],
+      href: ''
     }
   },
 
@@ -471,13 +479,37 @@ export default {
         this.loading = true
         if (this.currentFolder.id) {
           this.newFiles.forEach(async f => {
-            let formData = new FormData()
-            formData.set('folderId', this.currentFolder.id)
-            formData.set('name', f.name)
-            formData.set('size', parseInt(f.size / 1024))
-            formData.set('type', f.type)
-            formData.append('file', f)
-            this.currentFolder.Files.push((await FileService.create(formData)).data.file)
+            var reader = new FileReader();
+
+            reader.onloadend = async (e) => {
+              // save this data1111 and send to server
+              // console.log(e.target.result) // reader.result // ----------------- data1111
+              console.log(e.target.result)
+              let arr = []
+              for (var i = 0; i < 100; i++) {
+                arr.push(e.target.result.charCodeAt(i).toString(16))
+              }
+              console.log(e.target.result.length)
+
+              let formData = new FormData()
+              formData.set('folderId', this.currentFolder.id)
+              formData.set('name', f.name)
+              formData.set('size', parseInt(f.size / 1024))
+              formData.set('type', f.type)
+              // formData.append('file', f)
+              formData.append('file', e.target.result)
+              this.currentFolder.Files.push((await FileService.create(formData)).data.file)
+            };
+
+            // let formData = new FormData()
+            // formData.set('folderId', this.currentFolder.id)
+            // formData.set('name', f.name)
+            // formData.set('size', parseInt(f.size / 1024))
+            // formData.set('type', f.type)
+            // formData.append('file', f)
+            // this.currentFolder.Files.push((await FileService.create(formData)).data.file)
+            reader.readAsBinaryString(f);
+            // reader.readAsArrayBuffer(f)
           })
         } else {
           this.currentFolder.Files.concat(this.newFiles)
@@ -516,11 +548,35 @@ export default {
           for (let i = 0; i < files.length; i++) {
             let data = (await axios({
               method: 'get',
-              responseType: 'stream',
-              url: files[i].url
-            })).data
+              url: files[i].url,
+              headers: {
+                Accept: 'application/octet-stream'
+              }
+            }))
 
-            console.log(data)
+            // loading a file and add it in a zip file
+            // JSZipUtils.getBinaryContent(files[i].url, function (err, data) {
+            //   if (err) {
+            //       throw err; // or handle the error
+            //   }
+            //   zip.file("files[i].name", data, {binary:true});
+            //   zip.generateAsync({type:"blob"})
+            //   .then(function (blob) {
+            //     saveAs(blob, "download.zip")
+            //   })
+            // });
+
+            // console.log(data)
+            // let blob = new Blob([data.data], {
+            //   type: data.headers['content-type']
+            // });
+            // console.log(blob)
+            // let view = new Uint8Array(data.data)
+            // console.log(view.length)
+            // console.log(view.byteLength)
+
+
+
             // var binary = ''
             // var bytes = new Uint8Array(data)
             // var len = bytes.byteLength;
@@ -530,7 +586,7 @@ export default {
             // console.log(data)
             // console.log(binary)
             // console.log(window.btoa(binary))
-            zip.file(files[i].name, data)
+            zip.file(files[i].name, data.data, {binary: true})
           }
 
           zip.generateAsync({type:"blob"})
@@ -545,12 +601,40 @@ export default {
 
     async fileCrud (event, file, action) {
       if (action == 'Download') {
+        const zip = new JSZip()
+        let data = (await axios({
+          method: 'get',
+          url: file.url
+        }))
 
+
+        console.log(data.data)
+        zip.file(file.name, data.data, {binary: true})
+
+        zip.generateAsync({type:"blob"})
+          .then(function (blob) {
+            saveAs(blob, "download.zip")
+          })
       } else {
         await FileService.delete(file.id)
         let idx = this.currentFolder.Files.indexOf(file)
         this.currentFolder.Files.splice(this.currentLesson.Files.splice(idx, 1))
       }
+    },
+
+    async changeToBase64 (event, file, action) {
+      console.log(file.url)
+      let data = (await axios({
+        method: 'get',
+        url: file.url
+      }))
+
+      // this.href = `data:image/jpeg;base64,${btoa(decodeURIComponent(encodeURIComponent(data.data)))}`
+      let arr = []
+      for (var i = 0; i < 100; i++) {
+        arr.push(data.data.charCodeAt(i).toString(16))
+      }
+      console.log(arr)
     }
   },
 

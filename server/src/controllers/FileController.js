@@ -31,13 +31,50 @@ module.exports = {
           }
         })
         
-        console.log(req.file)
-        if (req.file) {
+        // console.log(req.file)
+        // AWS.config.update({
+        //   accessKeyId : config.aws.id,
+        //   secretAccessKey : config.aws.secret
+        // });
+        // AWS.config.region = 'ap-southeast-1'
+
+        // let upload = new AWS.S3.ManagedUpload({
+        //   partSize: 10 * 1024 * 1024,
+        //   params: {
+        //     Bucket: config.aws.bucket,
+        //     Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.file.originalname}`,
+        //     Body: req.file
+        //   }
+        // })
+        // // upload.on('httpUploadProgress', (evt) => {
+        // //   this.progress = parseInt((evt.loaded * 100) / evt.total)
+        // // })
+        // const response = await upload.promise()
+        // req.body.url = response.Location
+        // console.log(response)
+
+
+        // if (req.file) {
+        //   let params = {
+        //       Bucket: config.aws.bucket,
+        //       Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.file.originalname}`,
+        //       Body: req.file,
+        //       ContentType: req.file.mimetype
+        //   }
+      
+        //   // Uploading files to the bucket
+        //   const response = await s3.upload(params).promise()
+        //   req.body.url = response.Location
+        // }
+
+        console.log(req.body.file.length)
+        console.log(Buffer.from(req.body.file, "binary"))
+        console.log(Buffer.from(req.body.file, "binary").length)
+        if (req.body.file) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.file.originalname}`,
-              Body: req.file.buffer,
-              ContentType: req.file.mimetype
+              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.body.name}`,
+              Body: req.body.file
           }
       
           // Uploading files to the bucket

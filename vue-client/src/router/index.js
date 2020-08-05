@@ -19,6 +19,7 @@ import OSMD from "../components/OSMD"
 import ShowLesson from "../components/Course/ShowLesson"
 import CourseForm from "../views/course/CourseForm"
 import LessonForm from "../views/course/LessonForm"
+import MpegDash from "../components/MpegDash"
 
 Vue.use(VueRouter);
 
@@ -123,6 +124,10 @@ const routes = [
   {
     path: '/osmd',
     component: OSMD
+  },
+  {
+    path: '/mpeg-dash',
+    component: MpegDash
   }
 ];
 
