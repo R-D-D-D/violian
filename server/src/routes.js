@@ -9,6 +9,7 @@ const PaymentController = require('./controllers/PaymentController')
 const UserController = require('./controllers/UserController')
 const FolderController = require('./controllers/FolderController')
 const FileController = require('./controllers/FileController')
+const TestController = require('./controllers/TestController')
 
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy')
 const isAuthenticated = require('./policies/isAuthenticated')
@@ -239,6 +240,11 @@ module.exports = (app) => {
 
   app.delete('/file/del',
     isAuthenticated,
-    FileController.destroy)
+    FileController.destroy),
+
+  // testing
+  app.post('/test/new',
+    upload.single('file'),
+    TestController.create)
 }
   

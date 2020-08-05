@@ -1,6 +1,6 @@
 <template lang="pug">
   div 
-    video.vjs-big-play-centered(ref="videoPlayer" class="video-js" :id="`video`")
+    video.vjs-big-play-centered.vjs-16-9(ref="videoPlayer" class="video-js" :id="`video`")
 
 </template>
 
@@ -30,7 +30,7 @@ name: "MpegDash",
         fluid: true,
         sources: [
           { 
-            src: 'https://s3.amazonaws.com/_bc_dml/example-content/sintel_dash/sintel_vod.mpd',
+            src: 'https://rhythm-academy.s3.ap-southeast-1.amazonaws.com/mpeg-dash/sample.mpd',
             type: 'application/dash+xml'
           }
         ],
