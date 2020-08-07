@@ -113,7 +113,6 @@ import utils from "@/utils";
 import videojs from "video.js";
 import PostService from "@/services/PostService"
 import "videojs-hotkeys"
-import axios from "axios"
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay"
 import CourseService from "@/services/CourseService"
 import VideoPlayer from "@/components/Course/VideoPlayer"
@@ -392,9 +391,7 @@ export default {
           drawingParameters: 'compacttight'
         }
       )
-      let scoreXml = await axios.get(this.lesson.exercises[0].musicXmlUrl);    
-
-      await this.videoOsmd.load(scoreXml.data);
+      await this.videoOsmd.load(this.lesson.exercises[0].musicXmlUrl);
       await this.$nextTick()
       this.videoOsmd.zoom = 1.2
       // this.videoOsmd.setCustomPageFormat(1, .3)

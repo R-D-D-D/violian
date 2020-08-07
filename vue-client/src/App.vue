@@ -16,9 +16,11 @@ export default {
     'page-header': PageHeader
   },
 
-  data: () => ({
-    //
-  })
+  mounted: function () {
+    // window.addEventListener('resize', () => {
+    //   console.log(this.$vuetify.breakpoint.name)
+    // })
+  }
 };
 </script>
 

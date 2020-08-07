@@ -4,34 +4,6 @@ const {sequelize} = require('../models')
 const {Course} = require('../models')
 const {File} = require('../models')
 
-// async function getDirectoryTree (folder) {
-//   if (!folder)
-//     return
-//   let children = (await folder.getChildren())
-//   let folderJson = folder.toJSON()
-//   folderJson.Files = (await folder.getFiles()).map(file => file.toJSON())
-//   if (children.length == 0) {
-//     return folderJson
-//   } else {
-//     folderJson.children = await Promise.all(children.map(async child => await getDirectoryTree(child)))
-//     return folderJson
-//   }
-// }
-
-// async function deleteDirectoryTree (folder) {
-//   if (!folder)
-//     return
-//   let children = (await folder.getChildren())
-//   await sequelize.transaction(async (t) => {
-//     await folder.destroy({
-//       transaction: t,
-//       individualHooks: true
-//     })
-//   })
-//   if (children.length > 0)
-//     children.map(async child => await deleteDirectoryTree(child))
-// }
-
 module.exports = {
   async create (req, res) {
     try {

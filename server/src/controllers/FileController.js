@@ -54,36 +54,17 @@ module.exports = {
         // console.log(response)
 
 
-        // if (req.file) {
-        //   let params = {
-        //       Bucket: config.aws.bucket,
-        //       Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.file.originalname}`,
-        //       Body: req.file,
-        //       ContentType: req.file.mimetype
-        //   }
-      
-        //   // Uploading files to the bucket
-        //   const response = await s3.upload(params).promise()
-        //   req.body.url = response.Location
-        // }
-
-        console.log(req.body.file.length)
-        console.log(Buffer.from(req.body.file, "binary"))
-        console.log(Buffer.from(req.body.file, "binary").length)
-        if (req.body.file) {
+        if (req.file) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.body.name}`,
-              Body: req.body.file
+              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.file.originalname}`,
+              Body: req.file.buffer
           }
       
           // Uploading files to the bucket
           const response = await s3.upload(params).promise()
           req.body.url = response.Location
         }
-        
-        if (req.body.type == '' || !req.body.type) 
-          req.body.type = req.file.mimetype
 
         await folder.increment('size', { 
           by: parseInt(req.body.size) || 0,

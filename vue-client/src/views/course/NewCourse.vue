@@ -184,11 +184,162 @@
                       template(v-slot:actions)
                         v-icon mdi-plus
 
-            v-row.justify-center
-              v-col.text-center
-                v-btn(color="indigo" @click='goStepThree' dark)
-                  | Continue
-                v-btn(to="/course/index") Cancel
+          v-row(v-if="currentFolder")
+            v-col(cols="12")
+              h1 Resources
+            v-col.py-0(cols="11")
+              v-breadcrumbs.px-0.py-2(:items="currentFolder.path.split('/').filter(path => path != '')")
+                template(v-slot:divider)
+                  v-icon mdi-chevron-right
+                template(v-slot:item="{ item }")
+                  v-breadcrumbs-item
+                    v-btn.px-2(@click="navigateTo($event, item)" text color="indigo" style="font-size:1rem !important;") {{ item }}
+
+            v-col.py-0.text-right.pr-6(cols="1" align-self="center")
+              v-btn(color='indigo' icon @click="showFolder")
+                v-icon(large) mdi-plus
+            
+          v-divider
+
+          v-row(v-if="currentFolder")
+            v-col.pt-0(cols="12")
+              v-list.py-0
+                v-list-item.pl-2
+                  v-list-item-icon
+                    v-icon 
+                  v-list-item-content.file-name
+                    v-list-item-title Name
+                  v-spacer
+                  v-spacer
+                  v-list-item-content
+                    v-list-item-title Type
+                  v-list-item-content
+                    v-list-item-title Size
+                  v-list-item-action.ml-0
+                    v-menu(bottom left)
+                      template(v-slot:activator='{ on, attrs }')
+                        v-btn(icon v-bind='attrs' v-on='on')
+                          v-icon mdi-dots-vertical
+                      v-list
+                        v-list-item(@click="folderCrud($event, currentFolder, 'Download')")
+                          v-list-item-title Download all files
+                     
+                v-divider
+                template(v-for="(folder, idx) in children")
+                  v-list-item.pl-2(@click="" @dblclick="navigateTo($event, folder)")
+                    v-list-item-icon
+                      v-icon mdi-folder
+                    v-list-item-content.file-name
+                      v-list-item-title(v-text="folder.path.split('/').slice(-2)[0]")
+                    v-spacer
+                    v-spacer
+                    v-list-item-content
+                      v-list-item-title folder
+                    v-list-item-content
+                      v-list-item-title {{ folder.size > 1024 ? folder.size > 1048576 ? `${(folder.size / 1048576).toFixed(2)} GB` : `${(folder.size / 1024).toFixed(2)} MB` : `${folder.size} KB`}}
+                    v-list-item-action.ml-0
+                      v-menu(bottom left)
+                        template(v-slot:activator='{ on, attrs }')
+                          v-btn(icon v-bind='attrs' v-on='on')
+                            v-icon mdi-dots-vertical
+                        v-list
+                          v-list-item(v-for='(item, i) in options' :key='i' @click="folderCrud($event, folder, item)")
+                            v-list-item-title {{ item }}
+                  v-divider
+                template(v-for="(file, idx) in currentFolder.Files")
+                  v-list-item.pl-2(@click="")
+                    v-list-item-icon(v-if="file.type.includes('image')")
+                      v-icon mdi-image
+                    v-list-item-icon(v-else-if="file.type.includes('video')")
+                      v-icon mdi-video
+                    v-list-item-icon(v-else-if="file.type.includes('pdf')")
+                      v-icon mdi-file-pdf
+                    v-list-item-icon(v-else)
+                      v-icon mdi-file
+                    v-list-item-content.file-name
+                      v-list-item-title(v-text='file.name')
+                    v-spacer
+                    v-spacer
+                    v-list-item-content
+                      v-list-item-title(v-text='file.type')
+                    v-list-item-content
+                      v-list-item-title {{ file.size > 1024 ? file.size > 1048576 ? `${(file.size / 1048576).toFixed(2)} GB` : `${(file.size / 1024).toFixed(2)} MB` : `${file.size.toFixed(2)} KB`}}
+                    v-list-item-action.ml-0
+                      v-menu(bottom left)
+                        template(v-slot:activator='{ on, attrs }')
+                          v-btn(icon v-bind='attrs' v-on='on')
+                            v-icon mdi-dots-vertical
+                        v-list
+                          v-list-item(v-for='(item, i) in options' :key='i' @click="fileCrud($event, file, item)")
+                            v-list-item-title {{ item }}
+                  v-divider
+
+            v-col.text-center(cols="12")
+              v-btn.ma-2(color='indigo' @click="showFile" outlined)
+                | Upload
+                v-icon(right color="indigo") mdi-upload-outline
+
+      v-row.justify-center
+        v-col.text-center
+          v-btn(color="indigo" @click='update' :loading="loading" dark)
+            | Save
+          v-btn(@click="cancel" :disabled="loading") Cancel
+
+      //- modal
+      v-row(justify='center')
+        v-dialog(v-model='folderDialog' persistent='' max-width='500px')
+          v-card
+            v-card-title
+              span.headline Folder name
+            v-card-text.py-0
+              v-container.py-0
+                v-form(ref="folderForm" @submit.prevent="newFolder")
+                  v-row
+                    v-col.pa-0(cols='12')
+                      v-text-field(v-model="newFolderName" required @focus="$event.target.select()" outlined clearable color="indigo" dense :rules="nameRules")
+                  v-row
+                    v-col.pt-0.pr-0.text-right
+                      v-btn(color='indigo' text @click="folderDialog = false; newFolderName = 'Untitled';" :disabled="loading") Close
+                      v-btn(color='indigo' text type="submit" :loading="loading") Save
+      
+                  v-row(justify='center')
+                    v-dialog(v-model='fileDialog' persistent='' max-width='500px')
+                      v-card
+                        v-card-title
+                          span.headline Files
+                        v-card-text.py-0
+                          v-container.py-0
+                            v-form(ref="fileForm" @submit.prevent="newFile")
+                              v-row
+                                v-col.px-0.pt-0.pb-2(cols='12')
+                                  v-list
+                                    v-list-item(v-for="file in newFiles")
+                                      v-list-item-icon(v-if="file.type.includes('image')")
+                                        v-icon mdi-image
+                                      v-list-item-icon(v-else-if="file.type.includes('video')")
+                                        v-icon mdi-video
+                                      v-list-item-icon(v-else-if="file.type.includes('pdf')")
+                                        v-icon mdi-file-pdf
+                                      v-list-item-icon(v-else)
+                                        v-icon mdi-file
+                                      v-list-item-content(style="flex-grow: 2;")
+                                        v-list-item-title {{ file.name }}
+                                      v-spacer
+                                      v-list-item-content
+                                        v-list-item-title {{ file.size > 1024 ? (file.size > 1048576 ? file.size > 1073741824 ? `${(file.size / 1073741824).toFixed(2)} GB` : `${(file.size / 1048576).toFixed(2)} MB` : `${(file.size / 1024).toFixed(2)} KB`) : `${file.size} B` }}
+                              v-row
+                                v-col.pa-0(cols='12')
+                                  v-file-input(v-model="newFiles" label="Upload files..." multiple outlined clearable color="indigo" dense :rules="fileRules")
+                              v-row
+                                v-col.pt-0.pr-0.text-right
+                                  v-btn(color='indigo' text @click='fileDialog = false; newFiles = [];' :disabled="loading") Close
+                                  v-btn(color='indigo' text type="submit" :loading="loading") Save
+
+                v-row.justify-center
+                  v-col.text-center
+                    v-btn(color="indigo" @click='goStepThree' dark)
+                      | Continue
+                    v-btn(to="/course/index") Cancel
         v-stepper-content(step='3')
           v-container
             v-row.justify-center
@@ -366,7 +517,13 @@ export default {
         melody: [],
         demoStartTime: "0",
         scoreOption: 'vex',
-        musicXml: null
+        musicXml: null,
+        folders: [{
+          path: 'Resources/',
+          size: 0,
+          Files: [],
+          uuid: 0
+        }],
       }],
       durationRules: [
         v => !!v || "Duration is required",
@@ -386,6 +543,17 @@ export default {
       time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
       error: null,
       loading: false,
+      
+      // dialog
+      folderDialog: false,
+      fileDialog: false,
+      newFolderName: 'Untitled',
+      newFiles: [],
+      currentFolder: null,
+
+      // options for file CRUD
+      options: ['Download', 'Delete'],
+      uuid: 0
     }
   },
 
@@ -565,15 +733,26 @@ export default {
         duration: '',
         description: '',
         video: null,
-        demoVideo: null,
-        useScore: false,
+        videoPoster: null,
+        demo: null,
+        demoPoster: null,
+        useScore: true,
         handler: null,
         timeSignature: '4/4',
         bpm: 60,
         numberOfBars: 4,
         melody: [],
-        demoStartTime: "0"
+        demoStartTime: "0",
+        scoreOption: 'vex',
+        musicXml: null,
+        folders: [{
+          path: 'Resources/',
+          size: 0,
+          Files: [],
+          uuid: this.uuid
+        }],
       })
+      this.uuid++
       this.lesson.push(this.lessons.length)
     },
 

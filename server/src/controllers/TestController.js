@@ -11,13 +11,13 @@ const s3 = new AWS.S3({
 module.exports = {
   async create (req, res) {
     try {
-      // if (req.file) {
-      //   fs.writeFileSync(`/home/runding/Documents/${req.file.originalname}`, req.file.buffer);
-      // } else {
-      //   fs.writeFileSync(`/home/runding/Documents/test.txt`, 'Hey yo');
-      // }
+      if (req.file) {
+        fs.writeFileSync(`/home/runding/Documents/${req.file.originalname}`, req.file.buffer);
+      } else {
+        fs.writeFileSync(`/home/runding/Documents/test.txt`, 'Hey yo');
+      }
 
-      ffmpeg.changeVideoResolution(`/home/runding/Documents/${req.file.originalname}`, '854x480')
+      await ffmpeg.changeVideoResolution(`/home/runding/Documents/${req.file.originalname}`, '640x360')
 
       res.send({
         data: 'ok'
@@ -29,5 +29,23 @@ module.exports = {
       })
     }
   },
+
+  async test (req, res) {
+    try {
+      
+      fs.writeFileSync(`/home/runding/Documents/${req.file.originalname}`, req.file.buffer);
+
+      await ffmpeg.changeVideoResolution(`/home/runding/Documents/${req.file.originalname}`, '640x360')
+
+      res.send({
+        data: 'ok'
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: 'an error has occured trying to create the file'
+      })
+    }
+  }
 
 }

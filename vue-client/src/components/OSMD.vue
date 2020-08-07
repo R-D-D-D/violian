@@ -9,7 +9,6 @@
 
 <script>
 /* eslint-disable */
-import axios from "axios"
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay"
 
 export default {
@@ -126,10 +125,10 @@ export default {
     // })
     // this.osmd.setCustomPageFormat(1000)
     this.scoreLoading = true;
-    let scoreXml = await axios.get("https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/twinkle-twinkle-little-star.musicxml");    
-    // let scoreXml = await axios.get("https://opensheetmusicdisplay.github.io/demo/sheets/MuzioClementi_SonatinaOpus36No3_Part1.xml");
+    let scoreXml = "https://rhythm-academy.s3-ap-southeast-1.amazonaws.com/twinkle-twinkle-little-star.musicxml"
+    // let scoreXml = "https://opensheetmusicdisplay.github.io/demo/sheets/MuzioClementi_SonatinaOpus36No3_Part1.xml"
 
-    await this.osmd.load(scoreXml.data);
+    await this.osmd.load(scoreXml);
     this.scoreLoading = false;
     await this.$nextTick();
     // this.osmd.zoom = 1.3

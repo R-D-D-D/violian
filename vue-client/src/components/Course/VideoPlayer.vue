@@ -13,7 +13,6 @@ import vexUI from "@/plugins/vex";
 import videojs from "video.js";
 import "videojs-hotkeys"
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay"
-import axios from "axios"
 
 export default {
   name: 'VideoPlayer',
@@ -153,9 +152,8 @@ export default {
           drawingParameters: 'compacttight'
         }
       )
-      let scoreXml = await axios.get(this.exercise.musicXmlUrl);
-
-      await this.videoOsmd.load(scoreXml.data);
+      
+      await this.videoOsmd.load(this.exercise.musicXmlUrl)
       await this.$nextTick()
       this.videoOsmd.zoom = 1.2
       // this.videoOsmd.setCustomPageFormat(1, .3)

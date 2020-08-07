@@ -1,31 +1,35 @@
 const ffmpeg = require('fluent-ffmpeg')
 const fs = require('fs')
 const path = require('path')
-const Promise = require('bluebird')
 
 
 module.exports = {
 
-  promisifyCommand (command) {
-    return Promise.promisify((cb) => {
-      command
-        .on( 'end',   ()      => { cb(null)  } )
-        .on( 'error', (error) => { cb(error) } )
-        .run()
-    })
-  },
-
   async changeVideoResolution (pathToVid, resolution) {
     const pathObj = path.parse(pathToVid);
-    console.log(pathObj)
-    var stream  = fs.createWriteStream(`${pathObj.dir}/${pathObj.name}_${resolution.split('x')[1]}${pathObj.ext}`);
-    let command = ffmpeg(path)
-      .noAudio()
-      .size(resolution)
-      .output(`${pathObj.dir}/${pathObj.name}_${resolution.split('x')[1]}${pathObj.ext}`)
+    const bitrate = 10;
+    const promise = new Promise((resolve, reject) => {
+      ffmpeg(pathToVid)
+        .noAudio()
+        .size(resolution)
+        .toFormat('mp4')
+        .videoCodec('libx264')
+        .output(`${pathObj.dir}/${pathObj.name}_${resolution.split('x')[1]}${pathObj.ext}`)
+        .on('progress', (progress) => {
+          console.log(progress)
+        })
+        .on('error', (err) => {
+          console.log(`[ffmpeg] error: ${err.message}`)
+          reject(err);
+        })
+        .on('end', () => {
+          console.log('[ffmpeg] finished')
+          resolve();
+        })
+        .run()
+    });
 
-    command = this.promisifyCommand(command)
-    await command()
+    await promise
   },
 
   getAudio (pathToVid) {
