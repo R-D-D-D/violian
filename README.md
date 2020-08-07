@@ -1,5 +1,5 @@
 # getting started
-- `npm start` - starts server
+- `npm run dev` - starts dev server
 
 # paths
 ## login
@@ -68,16 +68,11 @@
   - GET `/paypal-client-token` - `{ token: client_token }`
   - POST `/paypal-new-payout { accessToken, amount, courseId }` - `{ result: responseObj }`
 
-## folders
-- folder management
-  - GET `/folder/list?lid=` - `{ folders: [<folderObj>] }`
-  - GET `/folder/show?fid=` - `{ folder: <folderObj> }`
-  - POST `/folder/new { name, parentId, lessonId }` - `{ folder: <folderObj> }`
-  - PUT `/folder/edit { folderId, name }` - `{ folder: <folderObj> }`
-  - DELETE `/folder/del?fid=` - `{ data: ok }`
-
 ## files
-- folder management
+- file management
   - GET `/file/list?lid=` - - `{ files: [<fileObj>] }`
-  - POST `/file/new { file, folderId, name, url, size, type }` - `{ file: <fileObj> }`
+  - POST `/file/new { file, lessonId, name, url, size, type }` - `{ file: <fileObj> }`
   - DELETE `/file/del?fid=` - `{ data: ok }`
+
+# TODOs
+- Add published attribute to course to determine whether a course should be shown to the public

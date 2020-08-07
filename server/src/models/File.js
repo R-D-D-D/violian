@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   File.associate = function (models) {
-    File.belongsTo(models.Folder)
+    File.belongsTo(models.Lesson)
   }
   
   File.beforeDestroy(async (file, options) => {

@@ -7,7 +7,6 @@ const ThreadController = require('./controllers/ThreadController')
 const PostController = require('./controllers/PostController')
 const PaymentController = require('./controllers/PaymentController')
 const UserController = require('./controllers/UserController')
-const FolderController = require('./controllers/FolderController')
 const FileController = require('./controllers/FileController')
 const TestController = require('./controllers/TestController')
 
@@ -215,24 +214,11 @@ module.exports = (app) => {
     isAuthenticated,
     PaymentController.captureOrder),
 
-  // folder
-  app.get('/folder/list',
-    isAuthenticated,
-    FolderController.list),
-
-  app.get('/folder/show',
-    isAuthenticated,
-    FolderController.show),
-
-  app.post('/folder/new',
-    isAuthenticated,
-    FolderController.create),
-
-  app.delete('/folder/del',
-    isAuthenticated,
-    FolderController.destroy),
-
   // file
+  app.get('/file/list',
+    isAuthenticated,
+    FileController.list),
+    
   app.post('/file/new',
     upload.single('file'),
     isAuthenticated,

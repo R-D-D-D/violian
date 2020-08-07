@@ -14,7 +14,6 @@
     "dashjs": "^3.1.2",
     "file-saver": "^2.0.2",
     "jszip": "^3.5.0",
-    "jszip-utils": "^0.1.0",
     "lodash": "^4.17.19",
     "opensheetmusicdisplay": "^0.8.2",
     "tone": "^13.8.25",

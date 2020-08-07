@@ -93,24 +93,13 @@ v-container
                 v-subheader.pl-0 BPM
                 v-slider(v-model='newLesson.bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3")
 
-          v-row(v-if="currentFolder")
+          v-row
             v-col(cols="12")
               h1 Resources
-            v-col.py-0(cols="11")
-              v-breadcrumbs.px-0.py-2(:items="currentFolder.path.split('/').filter(path => path != '')")
-                template(v-slot:divider)
-                  v-icon mdi-chevron-right
-                template(v-slot:item="{ item }")
-                  v-breadcrumbs-item
-                    v-btn.px-2(@click="navigateTo($event, item)" text color="indigo" style="font-size:1rem !important;") {{ item }}
-
-            v-col.py-0.text-right.pr-6(cols="1" align-self="center")
-              v-btn(color='indigo' icon @click="showFolder")
-                v-icon(large) mdi-plus
             
           v-divider
 
-          v-row(v-if="currentFolder")
+          v-row
             v-col.pt-0(cols="12")
               v-list.py-0
                 v-list-item.pl-2
@@ -130,32 +119,12 @@ v-container
                         v-btn(icon v-bind='attrs' v-on='on')
                           v-icon mdi-dots-vertical
                       v-list
-                        v-list-item(@click="folderCrud($event, currentFolder, 'Download')")
-                          v-list-item-title Download all files
+                        v-list-item(@click="fileCrud($event, {}, 'Download All')")
+                          v-list-item-title Download all
                      
                 v-divider
-                template(v-for="(folder, idx) in children")
-                  v-list-item.pl-2(@click="" @dblclick="navigateTo($event, folder)")
-                    v-list-item-icon
-                      v-icon mdi-folder
-                    v-list-item-content.file-name
-                      v-list-item-title(v-text="folder.path.split('/').slice(-2)[0]")
-                    v-spacer
-                    v-spacer
-                    v-list-item-content
-                      v-list-item-title folder
-                    v-list-item-content
-                      v-list-item-title {{ folder.size > 1024 ? folder.size > 1048576 ? `${(folder.size / 1048576).toFixed(2)} GB` : `${(folder.size / 1024).toFixed(2)} MB` : `${folder.size} KB`}}
-                    v-list-item-action.ml-0
-                      v-menu(bottom left)
-                        template(v-slot:activator='{ on, attrs }')
-                          v-btn(icon v-bind='attrs' v-on='on')
-                            v-icon mdi-dots-vertical
-                        v-list
-                          v-list-item(v-for='(item, i) in options' :key='i' @click="folderCrud($event, folder, item)")
-                            v-list-item-title {{ item }}
-                  v-divider
-                template(v-for="(file, idx) in currentFolder.Files")
+
+                template(v-for="(file, idx) in newLesson.files")
                   v-list-item.pl-2(@click="")
                     v-list-item-icon(v-if="file.type.includes('image')")
                       v-icon mdi-image
@@ -196,22 +165,6 @@ v-container
 
   //- modal
   v-row(justify='center')
-    v-dialog(v-model='folderDialog' persistent='' max-width='500px')
-      v-card
-        v-card-title
-          span.headline Folder name
-        v-card-text.py-0
-          v-container.py-0
-            v-form(ref="folderForm" @submit.prevent="newFolder")
-              v-row
-                v-col.pa-0(cols='12')
-                  v-text-field(v-model="newFolderName" required @focus="$event.target.select()" outlined clearable color="indigo" dense :rules="nameRules")
-              v-row
-                v-col.pt-0.pr-0.text-right
-                  v-btn(color='indigo' text @click="folderDialog = false; newFolderName = 'Untitled';" :disabled="loading") Close
-                  v-btn(color='indigo' text type="submit" :loading="loading") Save
-  
-  v-row(justify='center')
     v-dialog(v-model='fileDialog' persistent='' max-width='500px')
       v-card
         v-card-title
@@ -249,12 +202,10 @@ v-container
 /* eslint-disable */
 import LessonService from '@/services/LessonService'
 import ExerciseService from '@/services/ExerciseService'
-import FolderService from '@/services/FolderService'
 import FileService from '@/services/FileService'
 import vexUI from "@/plugins/vex"
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import JSZipUtils from 'jszip-utils'
 
 export default {
   name: 'LessonForm',
@@ -276,7 +227,7 @@ export default {
         demoStartTime: "0",
         useXml: false,
         musicXml: null,
-        folders: []
+        files: []
       },
       lesson: null,
       handler: null,
@@ -306,26 +257,16 @@ export default {
         }
       ],
       time_signatures: ["4/4", "3/4", "2/4", "3/8", "6/8"],
-      currentFolder: null,
       loading: false,
       error: null,
 
       // dialog
-      folderDialog: false,
       fileDialog: false,
-      newFolderName: 'Untitled',
       newFiles: [],
 
       // options for file CRUD
       options: ['Download', 'Delete'],
       uuid: 0
-    }
-  },
-
-  computed: {
-    children () {
-      let currPath = this.currentFolder.path
-      return this.newLesson.folders.filter(folder => folder.path.includes(currPath) && folder.path.split(currPath).length == 2 && folder.path.split(currPath)[1] != '')
     }
   },
   
@@ -336,10 +277,6 @@ export default {
   },
 
   methods: {
-    showFolder () {
-      this.folderDialog = true
-    },
-
     showFile () {
       this.fileDialog = true
     },
@@ -372,15 +309,6 @@ export default {
       this.newLesson.melody = this.handler.exportNotes()
     },
 
-    navigateTo (event, folder) {
-      if (typeof folder == 'string') {
-        // it from clicking breadcrumb
-        this.currentFolder = this.newLesson.folders.find(f => f.path.split('/').slice(-2)[0] == folder)
-      } else {
-        this.currentFolder = folder
-      }
-    },
-
     async update () {
       if (!this.$refs.lessonForm.validate())
         return
@@ -403,21 +331,14 @@ export default {
         })
         console.log(lessonResponse)
 
-        await Promise.all(this.newLesson.folders.map(async folder => {
-          let folderResponse = await FolderService.create({
-            path: folder.path,
-            lessonId: lessonResponse.data.lesson.id
-          })
-          
-          return Promise.all(folder.Files.map(fileObj => {
-            let formData = new FormData()
-            formData.set('folderId', folderResponse.data.folder.id)
-            formData.set('name', fileObj.name)
-            formData.set('size', parseInt(fileObj.size))
-            formData.set('type', fileObj.type)
-            formData.append('file', fileObj.file)
-            return FileService.create(formData)
-          }))
+        await Promise.all(this.newLesson.files.map(async fileObj => {
+          let formData = new FormData()
+          formData.set('lessonId', lessonResponse.data.lesson.id)
+          formData.set('name', fileObj.name)
+          formData.set('size', parseInt(fileObj.size))
+          formData.set('type', fileObj.type)
+          formData.append('file', fileObj.file)
+          return FileService.create(formData)
         }))
       }
 
@@ -487,15 +408,15 @@ export default {
         if (this.lesson) {
           this.newFiles.forEach(async f => {
             let formData = new FormData()
-            formData.set('folderId', this.currentFolder.id)
+            formData.set('lessonId', this.lesson.id)
             formData.set('name', f.name)
             formData.set('size', parseInt(f.size / 1024))
             formData.set('type', f.type)
             formData.append('file', f)
-            this.currentFolder.Files.push((await FileService.create(formData)).data.file)
+            this.newLesson.files.push((await FileService.create(formData)).data.file)
           })
         } else {
-          this.currentFolder.Files = this.currentFolder.Files.concat(this.newFiles.map(f => {
+          this.newLesson.files = this.newLesson.files.concat(this.newFiles.map(f => {
             return {
               file: f,
               size: f.size / 1024,
@@ -510,72 +431,6 @@ export default {
       }
     },
 
-    async newFolder () {
-      if (this.$refs.folderForm.validate()) {
-        if (this.lesson) {
-          let newFolder = (await FolderService.create({
-            path: this.currentFolder.path + `${this.newFolderName}/`,
-            lessonId: this.lesson.id
-          })).data.folder
-          newFolder.Files = []
-          this.newLesson.folders.push(newFolder)
-        } else {
-          this.newLesson.folders.push({
-            path: this.currentFolder.path + `${this.newFolderName}/`,
-            Files: [],
-            size: 0,
-            uuid: this.uuid
-          })
-          this.uuid++
-        }
-        this.newFolderName = 'Untitled'
-        this.folderDialog = false
-      }
-    },
-
-    async folderCrud (event, folder, action) {
-      if (action == 'Download') {
-        if (this.currentFolder.Files.length > 0) {
-          const zip = new JSZip()
-          let files = this.currentFolder.Files
-          Promise.all(files.map(file => fetch(file.url))).then(function (responses) {
-            // Get a JSON object from each of the responses
-            return Promise.all(responses.map(function (response) {
-              return response.blob();
-            }));
-          }).then(function (data) {
-            // Log the data to the console
-            // You would do something with both sets of data here
-            for (var i = 0; i < data.length; i++) {
-              zip.file(files[i].name, data[i])
-            }
-
-            zip.generateAsync({type:"blob"})
-              .then(function (blob) {
-                saveAs(blob, "download.zip")
-              })
-            console.log(data);
-          }).catch(function (error) {
-            // if there's an error, log it
-            console.log(error);
-          });
-        }
-      } else if (action == 'Delete') {
-        if (this.lesson) {
-          if (folder.Files.length > 0) {
-            let files = folder.Files
-            await Promise.all(files.map(file => FileService.delete(file.id)))
-          }
-          let idx = this.newLesson.folders.indexOf(folder)
-          this.newLesson.folders.splice(idx, 1)
-          await FolderService.delete(folder.id)
-        } else {
-          let idx = this.folders.indexOf(folder)
-          this.folders.splice(idx, 1)
-        }
-      }
-    },
-
     async fileCrud (event, file, action) {
       if (action == 'Download') {
         var zip = new JSZip();
@@ -583,9 +438,31 @@ export default {
           .then(resp => resp.blob())
           .then(content => saveAs(content, file.name));
       } else if (action == 'Delete') {
-        let idx = this.currentFolder.Files.indexOf(file)
-        this.currentFolder.Files.splice(idx, 1)
+        let idx = this.newLesson.files.indexOf(file)
+        this.newLesson.files.splice(idx, 1)
         await FileService.delete(file.id)
+      } else if (action == 'Download All') {
+        if (this.newLesson.files.length > 0) {
+          const zip = new JSZip()
+          let files = this.newLesson.files
+          Promise.all(files.map(file => fetch(file.url))).then(function (responses) {
+            // Get a JSON object from each of the responses
+            return Promise.all(responses.map(function (response) {
+              return response.blob();
+            }));
+          }).then(function (data) {
+            for (var i = 0; i < data.length; i++) {
+              zip.file(files[i].name, data[i])
+            }
+            zip.generateAsync({type:"blob"})
+              .then(function (blob) {
+                saveAs(blob, "download.zip")
+              })
+          }).catch(function (error) {
+            // if there's an error, log it
+            console.log(error);
+          });
+        }
       }
     },
   },
@@ -594,8 +471,7 @@ export default {
     if (this.$route.params.lesson_id) {
       this.lesson = (await LessonService.show(this.$route.params.lesson_id)).data.lesson
 
-      this.newLesson.folders = (await FolderService.list(this.lesson.id)).data.folders
-      this.currentFolder = this.newLesson.folders.find(folder => folder.path == 'Resources/')
+      this.newLesson.files = (await FileService.list(this.lesson.id)).data.files
 
       this.newLesson.name = this.lesson.name
       this.newLesson.duration = this.lesson.duration
@@ -626,15 +502,6 @@ export default {
         }
       }
     } else {
-      const folder = {
-        path: 'Resources/',
-        size: 0,
-        Files: [],
-        uuid: this.uuid
-      }
-      this.uuid++
-      this.newLesson.folders.push(folder),
-      this.currentFolder = folder
       await this.$nextTick()
       var div = document.createElement("div")
       div.id = `vexflow-wrapper`

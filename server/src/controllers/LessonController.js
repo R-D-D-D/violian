@@ -1,5 +1,4 @@
 const {Lesson} = require('../models')
-const {Folder} = require('../models')
 const {Exercise} = require('../models')
 const {Course} = require('../models')
 const {sequelize} = require('../models')

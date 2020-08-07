@@ -1,4 +1,3 @@
-const {Folder} = require('../models')
 const {File} = require('../models')
 const {Lesson} = require('../models')
 const {Course} = require('../models')
@@ -12,23 +11,37 @@ const s3 = new AWS.S3({
 });
 
 module.exports = {
+  async list (req, res) {
+    try {
+      const {lid} = req.query
+      const files = await File.findAll({
+        where: {
+          id: lid
+        }
+      })
+
+      res.send({
+        files: files.map(file => file.toJSON())
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: 'an error has occured trying to retrieve the files'
+      })
+    }
+  },
+
   async create (req, res) {
     try {
       await sequelize.transaction(async (t) => {
         let user = req.user
-        let {folderId} = req.body
+        let {lessonId} = req.body
 
-        let folder = await Folder.findOne({
+        let lesson = await Lesson.findOne({
           where: {
-            id: folderId
+            id: lessonId
           },
-          include: Lesson
-        })
-
-        let course = await Course.findOne({
-          where: {
-            id: folder.Lesson.CourseId
-          }
+          include: Course
         })
         
         // console.log(req.file)
@@ -57,7 +70,7 @@ module.exports = {
         if (req.file) {
           let params = {
               Bucket: config.aws.bucket,
-              Key: `${user.email}/${course.name}/${folder.Lesson.name}/${folder.path.slice(0, -1)}/${req.file.originalname}`,
+              Key: `${user.email}/${lesson.Course.name}/${lesson.name}/Resources/${req.file.originalname}`,
               Body: req.file.buffer
           }
       
@@ -66,12 +79,7 @@ module.exports = {
           req.body.url = response.Location
         }
 
-        await folder.increment('size', { 
-          by: parseInt(req.body.size) || 0,
-          transaction: t
-        })
-
-        let file = await folder.createFile(req.body)
+        let file = await lesson.createFile(req.body)
 
         res.send({
           file: file.toJSON()

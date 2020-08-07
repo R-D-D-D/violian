@@ -21,13 +21,13 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
       hooks: true
     })
-    Lesson.hasMany(models.Folder, {
+    Lesson.hasMany(models.File, {
       onDelete: 'CASCADE',
       hooks: true
     })
   }
 
-  Lesson.beforeDestroy(async (folder, options) => {
+  Lesson.beforeDestroy(async (lesson, options) => {
     console.log('in lesson before destroy hook')
   })
   
