@@ -37,28 +37,10 @@ v-container
                   v-model="newLesson.videoPoster"
                   outlined
                   color="indigo")
+
             v-row
               v-col(cols="12" md="6")
-                v-file-input(
-                  accept="video/mp4, video/ogg" 
-                  :placeholder="lesson && lesson.Exercises[0].demoUrl ? lesson.Exercises[0].demoUrl.split('/')[6] : 'Choose Demo Video'" 
-                  prepend-icon="mdi-video"
-                  label="Demo Video"
-                  v-model="newLesson.demo"
-                  outlined
-                  color="indigo")
-              v-col(cols="12" md="6")
-                v-file-input(
-                  accept="image/*" 
-                  :placeholder="lesson && lesson.Exercises[0].demoPosterUrl ? lesson.Exercises[0].demoPosterUrl.split('/')[6] : 'Choose coverpage for demo video'" 
-                  prepend-icon="mdi-image"
-                  label="Demo Video Poster"
-                  v-model="newLesson.demoPoster"
-                  outlined
-                  color="indigo")
-            v-row
-              v-col(cols="12" md="6")
-                v-switch(v-model="newLesson.useScore" :label="`Overlay score on your demo video`" color="indigo" @change="showVex")
+                v-switch(v-model="newLesson.useScore" :label="`Overlay score on your video`" color="indigo" @change="showVex")
             v-row  
               v-col(cols="12" md="6" v-if="newLesson.useScore")
                 v-radio-group(v-model="newLesson.useXml" :mandatory="true")
@@ -217,8 +199,6 @@ export default {
         description: '',
         video: null,
         videoPoster: null,
-        demo: null,
-        demoPoster: null,
         useScore: true,
         timeSignature: '4/4',
         bpm: 60,
@@ -366,12 +346,6 @@ export default {
       }
       if (tempLesson.videoPoster) {
         formData.append('videoPoster', tempLesson.videoPoster)
-      }
-      if (tempLesson.demo) {
-        formData.append('demo', tempLesson.demo)
-      }
-      if (tempLesson.demoPoster) {
-        formData.append('demoPoster', tempLesson.demoPoster)
       }
       if (tempLesson.musicXml) {
         formData.append('musicXml', tempLesson.musicXml)

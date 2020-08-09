@@ -38,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     previewVideoUrl: DataTypes.TEXT,
     tagline: DataTypes.STRING,
     coverPhotoUrl: DataTypes.STRING,
+    publishNow: DataTypes.BOOLEAN
   })
 
   Course.associate = function (models) {

@@ -76,12 +76,12 @@ module.exports = {
           await aws.managedUploadFromLocalFs(filePath, `${req.user.email}/${lesson.Course.name}/${lesson.name}/mpeg_dash_videos/${filenameObj.base}`)
         })
 
-        // fs.rmdirSync(srcDir, {
-        //   recursive: true
-        // })
-        // fs.rmdirSync(destDir, {
-        //   recursive: true
-        // })
+        fs.rmdirSync(srcDir, {
+          recursive: true
+        })
+        fs.rmdirSync(destDir, {
+          recursive: true
+        })
       }
 
       res.send({

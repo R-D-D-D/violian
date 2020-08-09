@@ -30,9 +30,9 @@
           v-card.mx-auto
             v-img.white--text.align-end(height="200px" :src="course.coverPhotoUrl" gradient="to top right, rgba(0,0,0,.5), rgba(0,0,0,.5)")
               v-card-title(style="text-shadow: 1px 1px 2px #000000;") {{ course.name }}
-            v-card-subtitle.pb-0.text-left Drum
+            v-card-subtitle.pb-0.text-left {{ course.instrument }}
             v-card-text.text-left.text--primary.pb-0
-              div Whitehaven Beach
+              div {{ course.tagline }}
             v-card-actions
               v-btn(color='indigo' text @click="go_to_course($event, course.id)")
                 | Find out more

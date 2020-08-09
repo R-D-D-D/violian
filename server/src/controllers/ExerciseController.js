@@ -47,30 +47,6 @@ module.exports = {
           }
         }
   
-        if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) {
-          let params = {
-              Bucket: config.aws.bucket,
-              Key: `${user.email}/${lesson.Course.name}/${lesson.name}/demoPoster/${req.files['demoPoster'][0].originalname}`,
-              Body: req.files['demoPoster'][0].buffer
-          }
-      
-          // Uploading files to the bucket
-          const response = await s3.upload(params).promise()
-          req.body.demoPosterUrl = response.Location
-        }
-  
-        if (req.files['demo'] && req.files['demo'].length > 0) {
-          let params = {
-              Bucket: config.aws.bucket,
-              Key: `${user.email}/${lesson.Course.name}/${lesson.name}/demo/${req.files['demo'][0].originalname}`,
-              Body: req.files['demo'][0].buffer
-          }
-      
-          // Uploading files to the bucket
-          const response = await s3.upload(params).promise()
-          req.body.demoUrl = response.Location
-        }
-  
         if (req.files['video'] && req.files['video'].length > 0) {
           let params = {
               Bucket: config.aws.bucket,
@@ -193,10 +169,6 @@ module.exports = {
         const user = await course.getTutor()
         let possibleAttr = ['demo', 'demoPoster', 'video', 'videoPoster', 'musicXml']
         let changedAttr = []
-        if (req.files['demo'] && req.files['demo'].length > 0) 
-          changedAttr.push(0)
-        if (req.files['demoPoster'] && req.files['demoPoster'].length > 0) 
-          changedAttr.push(1)
         if (req.files['video'] && req.files['video'].length > 0) 
           changedAttr.push(2)
         if (req.files['videoPoster'] && req.files['videoPoster'].length > 0) 
@@ -206,10 +178,6 @@ module.exports = {
         
         for (let i = 0; i < changedAttr.length; i++) {
           let originalKey = null
-          if (changedAttr[i] == 0 && exercise.demoUrl)
-            originalKey = exercise.demoUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
-          if (changedAttr[i] == 1 && exercise.demoPosterUrl)
-            originalKey = exercise.demoPosterUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
           if (changedAttr[i] == 2 && exercise.videoUrl)
             originalKey = exercise.videoUrl.split(`${possibleAttr[changedAttr[i]]}/${exercise.Lesson.id}/`)[1]
           if (changedAttr[i] == 3 && exercise.videoPosterUrl)

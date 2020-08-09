@@ -135,6 +135,7 @@ export default {
         formData.set('description', this.newCourse.description)
         formData.set('level', this.newCourse.level)
         formData.set('instrument', this.newCourse.instrument)
+        formData.set('language', this.newCourse.language)
         formData.set('targetAudiences', this.newCourse.targetAudiences.filter(x => x != '' && x != null).join('&'))
         formData.set('learningPoints', this.newCourse.learningPoints.filter(x => x != '' && x != null).join('&'))
         formData.set('requirements', this.newCourse.requirements.filter(x => x != '' && x != null).join('&'))

@@ -30,8 +30,8 @@
 
 ## exercises
 - exercise management
-  - POST `/exercise/new { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, useXml, musicXml, lid }` - `{ exercise: <exerciseObj> }`
-  - PUT `/exercise/edit { name, melody, timeSignature, bpm, demoVideo, demoPoster, explanationVideo, explanationPoster, useXml, musicXml, eid }` - `{ exercise: <exerciseObj> }`
+  - POST `/exercise/new { name, melody, timeSignature, bpm, video, videoPoster, useXml, musicXml, lid }` - `{ exercise: <exerciseObj> }`
+  - PUT `/exercise/edit { name, melody, timeSignature, bpm, video, videoPoster, useXml, musicXml, eid }` - `{ exercise: <exerciseObj> }`
   - GET `/exercise/list?lid=` - `{ exercises: [<exerciseObj>] }`
   - DELETE `/exercise/del?eid=` - `{ data: ok }`
 
