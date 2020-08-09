@@ -230,6 +230,7 @@ module.exports = (app) => {
 
   // testing
   app.post('/test/new',
+    isAuthenticated,
     upload.single('file'),
     TestController.create)
 }
