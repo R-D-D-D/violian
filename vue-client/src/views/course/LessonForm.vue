@@ -346,7 +346,6 @@ export default {
           description: this.newLesson.description,
           cid: this.$route.params.course_id
         })
-        console.log(lessonResponse)
 
         await Promise.all(this.newLesson.files.map(async fileObj => {
           let formData = new FormData()
