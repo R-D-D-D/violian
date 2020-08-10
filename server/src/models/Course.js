@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
     targetAudiences: DataTypes.TEXT,
     learningPoints: DataTypes.TEXT,
     previewVideoUrl: DataTypes.TEXT,
-    tagline: DataTypes.STRING,
+    tagline: DataTypes.TEXT,
     coverPhotoUrl: DataTypes.STRING,
     publishNow: DataTypes.BOOLEAN
   })

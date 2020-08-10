@@ -80,37 +80,6 @@
               v-spacer
               v-btn.mr-3(outlined color='indigo' right @click='editLesson($event, lesson)')
                 v-icon(color="indigo") mdi-pencil
-            v-row
-              v-col(cols="12")
-                strong Description: 
-                | {{ lesson.description }}
-            v-row(v-if="lesson.exercises && lesson.exercises[0].videoUrl && lesson.exercises[0].videoPosterUrl")
-              v-col(cols="12" md="6")
-                strong Explanation Video: 
-                | {{ lesson.exercises[0].videoUrl.split('/')[6] }}
-              v-col(cols="12" md="6")
-                strong Video Poster: 
-                | {{ lesson.exercises[0].videoPosterUrl.split('/')[6] }}
-            v-row(v-if="lesson.exercises && lesson.exercises[0].demoUrl && lesson.exercises[0].demoPosterUrl")
-              v-col(cols="12" md="6")
-                strong Demo Video: 
-                | {{ lesson.exercises[0].demoUrl.split('/')[6] }}
-              v-col(cols="12" md="6")
-                strong Demo Poster: 
-                | {{ lesson.exercises[0].demoPosterUrl.split('/')[6] }}
-            v-row(v-show="lesson.exercises && lesson.exercises[0].useScore && !lesson.exercises[0].useXml")
-              v-col(cols="12")
-                div(:id="`vexflow-review-wrapper-${idx}`")
-              v-col(cols="12" md="4")
-                strong BPM: 
-                | {{ lesson.exercises[0].bpm }}
-              v-col(cols="12" md="4")
-                strong Number of Bars: 
-                | {{ lesson.exercises[0].numberOfBars }}
-            v-row(v-if="lesson.exercises && lesson.exercises[0].useScore && lesson.exercises[0].useXml")
-              v-col
-                strong MusicXML file: 
-                | {{ lesson.exercises[0].musicXmlUrl.split('/')[6] }}
             v-divider(v-if="idx != course.lessons.length - 1")
     v-row.justify-center
       v-col.text-center
@@ -155,23 +124,6 @@ export default {
     try {
       var response = await CourseService.show(this.$route.params.course_id)
       this.course = response.data.course
-      for (var i = 0; i < this.course.lessons.length; i++) {
-        let ex = this.course.lessons[i].exercises[0]
-        if (ex.useScore && !ex.useXml) {
-          await this.$nextTick()
-          let handler = new vexUI.Handler(`vexflow-review-wrapper-${i}`, {
-            canEdit: false,
-            numberOfStaves: ex.numberOfBars,
-            canvasProperties: {
-              id: `vexflow-review-wrapper-${i}` + '-canvas',
-              width: window.innerWidth * 5 / 6,
-              tabindex: 1,
-            }
-          }).init()
-          handler.setTimeSignature(ex.timeSignature)
-          handler.importNotes(ex.melody.split('-'), ex.timeSignature)
-        }
-      }
     } catch (err) {
       console.log(err)
     }

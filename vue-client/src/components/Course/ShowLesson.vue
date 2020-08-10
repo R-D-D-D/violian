@@ -80,21 +80,18 @@
           h1.font-weight-bold.pl-4.py-2(style="background-color:#EEEEEE;") Lessons
 
           v-list.py-0
-            v-list-item.px-0(v-for='(currLesson, i) in course.lessons' :key='i')
+            v-list-item.px-0(v-for='(currLesson, lessonIdx) in course.lessons' :key='lessonIdx')
               v-expansion-panels.px-0(accordion flat hover tile dense v-if="currLesson == lesson" v-model="opened" multiple)
                 v-expansion-panel
-                  v-expansion-panel-header.py-0.pl-4.pr-2(style="font-size: 16px; background-color:#B2DFDB;") {{ i + 1 }}. {{currLesson.name}}
+                  v-expansion-panel-header.py-0.pl-4.pr-2(style="font-size: 16px; background-color:#B2DFDB;") {{ lessonIdx + 1 }}. {{currLesson.name}}
                   v-expansion-panel-content.pa-0
                     v-list.py-0
                       v-list-item-group.py-0
-                        v-list-item.px-0(v-if="currLesson.exercises[0].videoUrl" @click="src = 'video'")
+                        v-list-item.px-0(v-for="(exercise, exerciseIdx) in currLesson.exercises" @click="src = 'video'")
                           v-list-item-content
-                            div.pl-4.text-decoration-underline(style="font-size: 14px; color:#00897B;") Explanation
-                        v-list-item.px-0(v-if="currLesson.exercises[0].demoUrl" @click="src = 'demo'")
-                          v-list-item-content
-                            div.pl-4.text-decoration-underline(style="font-size: 14px; color:#00897B;") Demonstration
+                            div.pl-4.text-decoration-underline(style="font-size: 14px; color:#00897B;") {{ exercise.name }}
               v-list-item-content.py-0.link(v-else)
-                a.link.pl-4.py-5(style="font-size: 16px;" @click="goToLesson($event, currLesson)") {{ i + 1 }}. {{ currLesson.name }}
+                a.link.pl-4.py-5(style="font-size: 16px;" @click="goToLesson($event, currLesson)") {{ lessonIdx + 1 }}. {{ currLesson.name }}
 
       
       v-row.justify-center(v-show="useScore")

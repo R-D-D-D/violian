@@ -105,7 +105,7 @@ export default {
 
 
     async submit () {
-      // this.loading = true
+      this.loading = true
       this.error = ''
       try {
         if (this.$refs.languageForm.validate()) {
@@ -117,6 +117,9 @@ export default {
           courseFormData.set('TutorId', this.user.id)
           courseFormData.set('publishNow', this.publishNow)
 
+          let courseResponse = await CourseService.create(courseFormData)
+
+          this.loading = false
           this.$router.push(`/course/edit/${courseResponse.data.course.id}`)
         }
       } catch (err) {

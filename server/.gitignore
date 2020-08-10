@@ -1,3 +1,4 @@
 src/.env
 umzug.json
 src/tmp
+violian.sqlite
