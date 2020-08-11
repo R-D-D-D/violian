@@ -147,13 +147,13 @@ export default {
     const courseResponse = await CourseService.show(this.$route.params.course_id)
     this.course = courseResponse.data.course
     for (var i = 0; i < this.course.lessons.length; i++) {
-      if (this.user.isStudent) {
-        this.$store.dispatch('setNotifications', this.$store.state.notifications - this.course.unreadTutorPost)
-      } else {
-        this.$store.dispatch('setNotifications', this.$store.state.notifications - this.course.unreadStudentPost)
-      }
       const response = await ThreadService.show(this.course.lessons[i].id, this.$route.params.student_id)
       this.threads.push(response.data.thread)
+    }
+    if (this.user.isStudent) {
+      this.$store.dispatch('setNotifications', this.$store.state.notifications - this.course.unreadTutorPost)
+    } else {
+      this.$store.dispatch('setNotifications', this.$store.state.notifications - this.course.unreadStudentPost)
     }
   }
 }

@@ -18,8 +18,6 @@
 <script>
 import UserService from '@/services/UserService'
 import AuthenticationService from '@/services/AuthenticationService'
-import SubscriptionService from '@/services/SubscriptionService'
-import CourseService from '@/services/CourseService'
 import {mapState} from 'vuex'
 
 export default {
@@ -41,18 +39,6 @@ export default {
 
         this.$store.dispatch('setToken', response.data.token)
         this.$store.dispatch('setUser', response.data.user)
-
-        if (response.data.user.isStudent) {
-          const studentResponse = await SubscriptionService.getSubscriptionInfoOfStudent(response.data.user.id)
-          const userSubscribedCourses = studentResponse.data.courses
-          const reducer = (course, init) => course + init.unreadTutorPost
-          this.$store.dispatch('setNotifications', userSubscribedCourses.reduce(reducer, 0))
-        } else {
-          const tutorResponse = await CourseService.list(response.data.user.id);
-          const userOwnedCourses = tutorResponse.data.courses
-          const reducer = (course, init) => course + init.unreadStudentPost
-          this.$store.dispatch('setNotifications', userOwnedCourses.reduce(reducer, 0))
-        }
         
         this.$router.push({
           name: 'home'

@@ -1,12 +1,8 @@
 <template lang="pug">
   #student
-    panel(title="All Courses")
+    panel(title="All Students" md="8")
       v-list
         v-list-item(v-for='(student, idx) in students' :key='student.id' @click="showThread($event, student)")
-          //- v-list-item-icon
-          //-   v-icon(v-if='rhythm.icon' color='pink') mdi-star
-          v-list-item-avatar
-            v-img(:src='avatar')
           v-list-item-content
             v-list-item-title(v-text='student.username')
           v-list-item-icon
@@ -23,14 +19,13 @@ export default {
   name: 'CourseThreadsIndex',
   data () {
     return {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
       students: [],
       unreads: []
     }
   },
 
   computed: {
-    ...mapState(['user', 'userOwnedCourses'])
+    ...mapState(['user'])
   },
 
   methods: {

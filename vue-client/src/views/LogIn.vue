@@ -79,13 +79,15 @@ export default {
         if (response.data.user.isStudent) {
           const studentResponse = await SubscriptionService.getSubscriptionInfoOfStudent(response.data.user.id)
           const userSubscribedCourses = studentResponse.data.courses
-          const reducer = (course, init) => course + init.unreadTutorPost
-          this.$store.dispatch('setNotifications', userSubscribedCourses.reduce(reducer, 0))
+          let totalUnread = 0
+          userSubscribedCourses.forEach(course => totalUnread += course.unreadTutorPost)
+          this.$store.dispatch('setNotifications', totalUnread)
         } else {
           const tutorResponse = await CourseService.list(response.data.user.id);
           const userOwnedCourses = tutorResponse.data.courses
-          const reducer = (course, init) => course + init.unreadStudentPost
-          this.$store.dispatch('setNotifications', userOwnedCourses.reduce(reducer, 0))
+          let totalUnread = 0
+          userOwnedCourses.forEach(course => totalUnread += course.unreadStudentPost)
+          this.$store.dispatch('setNotifications', totalUnread)
         }
         
         this.$router.push({
