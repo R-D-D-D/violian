@@ -26,6 +26,7 @@ export default {
 
 <style>
 @import '../node_modules/video.js/dist/video-js.css';
+
 p {
   font-size: 18px;
 }
@@ -40,6 +41,9 @@ strong {
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
   color: #3c3b37;
+    overflow-x: hidden;
+
+  
 }
 
 .theme--light.v-card > .v-card__text {
