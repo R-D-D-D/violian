@@ -127,7 +127,6 @@ export default {
       this.error = ''
       try {  
         // create course
-        console.log(this.newCourse.tagline)
         var formData = new FormData()
         formData.set('name', this.newCourse.name)
         formData.set('tagline', this.newCourse.tagline)
@@ -174,23 +173,23 @@ export default {
 
   mounted: async function () {
     this.course = (await CourseService.show(this.$route.params.course_id)).data.course
-
+    console.log(this.course)
     this.newCourse.name = this.course.name
-    if (this.tagline)
+    if (this.tagline != null)
       this.newCourse.tagline = this.course.tagline
-    if (this.course.price)
+    if (this.course.price != null)
       this.newCourse.price = this.course.price.toFixed(2)
-    if (this.course.description)
+    if (this.course.description != null)
       this.newCourse.description = this.course.description
     this.newCourse.language = this.course.language
-    if (this.course.level)
+    if (this.course.level != null)
       this.newCourse.level = this.course.level
     this.newCourse.instrument = this.course.instrument
-    if (this.course.targetAudiences)
+    if (this.course.targetAudiences != null)
       this.newCourse.targetAudiences = this.course.targetAudiences ? this.course.targetAudiences.split('&') : []
-    if (this.course.learningPoints)
+    if (this.course.learningPoints != null)
       this.newCourse.learningPoints = this.course.learningPoints ? this.course.learningPoints.split('&') : []
-    if (this.course.requirements)
+    if (this.course.requirements != null)
       this.newCourse.requirements = this.course.requirements ? this.course.requirements.split('&') : []
   }
 }

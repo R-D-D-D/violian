@@ -157,7 +157,7 @@
 
           v-list.py-0
             v-list-item.px-0(v-for='(currLesson, lessonIdx) in course.lessons' :key='lessonIdx')
-              v-expansion-panels.px-0(accordion flat hover tile dense v-if="currLesson == lesson" v-model="opened" multiple)
+              v-expansion-panels.px-0(accordion flat hover tile dense v-if="currLesson == lesson && lesson.exercises.length > 1" v-model="opened" multiple)
                 v-expansion-panel
                   v-expansion-panel-header.py-0.pl-4.pr-2(style="font-size: 16px; background-color:#C5CAE9;") {{ lessonIdx + 1 }}. {{currLesson.name}}
                   v-expansion-panel-content.pa-0
@@ -166,7 +166,9 @@
                         v-list-item.px-0(v-for="(exercise, exerciseIdx) in currLesson.exercises" @click="src = exercise.videoUrl")
                           v-list-item-content
                             div.pl-4.text-decoration-underline(style="font-size: 14px; color:#291957;") {{ exercise.name }}
-              v-list-item-content.py-0.link(v-else)
+              v-list-item-content.py-0.link(v-else-if="currLesson == lesson && lesson.exercises.length == 1")
+                a.link.pl-4.py-5(style="font-size: 16px; background-color:#C5CAE9;") {{ lessonIdx + 1 }}. {{ currLesson.name }}
+              v-list-item-content.py-0.link(v-else-if="currLesson != lesson")
                 a.link.pl-4.py-5(style="font-size: 16px;" @click="goToLesson($event, currLesson)") {{ lessonIdx + 1 }}. {{ currLesson.name }}
 
       
@@ -575,13 +577,13 @@ export default {
     this.selected = this.course.lessons.indexOf(this.lesson)
     this.src = this.lesson.exercises[0].videoUrl
 
-    window.addEventListener('scroll', _.debounce(() => {
+    window.addEventListener('scroll', () => {
       if (window.pageYOffset == 0) {
         this.fullHeight = false
       } else if (window.pageYOffset > 64) {
         this.fullHeight = true
       }
-    }, 200))
+    })
   },
 
   beforeDestroy() {

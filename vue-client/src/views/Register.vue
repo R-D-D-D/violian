@@ -31,6 +31,14 @@
             v-model="password" 
             :rules="passwordRules")
 
+          v-text-field(
+            label="Password Confirmation" 
+            name="password confirmation" 
+            prepend-icon="mdi-lock" 
+            type="password" 
+            v-model="passwordConfirmation" 
+            :rules="passwordConfirmationRules")
+
           v-radio-group(v-model="role" row="")
             v-radio(label="Student" value="Student" color="indigo")
             v-radio(label="Tutor" value="Tutor" color="indigo")
@@ -63,6 +71,17 @@ export default {
       passwordRules: [
         v => !!v || "Password is required",
         v => new RegExp("^[a-zA-Z0-9]{8,32}$").test(v) || "Password must be alphanumeric characters and of length 8 - 32",
+      ],
+      passwordConfirmation: "",
+      passwordConfirmationRules: [
+        v => !!v || "Password confirmation is required",
+        v => {
+          if (v != this.password) {
+            return "Passwords don't match"
+          } else {
+            return true
+          }
+        },
       ],
       error: null,
       loading: false,
