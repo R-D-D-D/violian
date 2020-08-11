@@ -14,7 +14,7 @@ module.exports = {
         },
         include: Exercise
       })
-      
+            
       if (!lesson) {
         return res.status(403).send({
           error: "Lesson information is incorrect"

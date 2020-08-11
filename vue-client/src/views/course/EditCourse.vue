@@ -81,9 +81,10 @@
               v-btn.mr-3(outlined color='indigo' right @click='editLesson($event, lesson)')
                 v-icon(color="indigo") mdi-pencil
             v-divider(v-if="idx != course.lessons.length - 1")
-    v-row.justify-center
+    v-row.justify-center()
       v-col.text-center
-        v-btn(color="indigo" dark to="/course/index") Confirm
+        v-btn(color="indigo" dark to="/course/index" v-if="course.publishNow") Confirm
+        v-btn(color="indigo" dark v-else @click="publishCourse") Publish Now
         v-btn(to="/course/index") Cancel
 
 </template>
@@ -117,6 +118,14 @@ export default {
 
     newLesson (event, lesson) {
       this.$router.push(`/lesson/new-form/${this.course.id}`)
+    },
+
+    async publishCourse () {
+      let formData = new FormData()
+      formData.set('id', this.course.id)
+      formData.set('publishNow', true)
+      await CourseService.edit(formData)
+      this.$router.push('/')
     }
   },
 

@@ -122,14 +122,18 @@ module.exports = {
                   [Op.like]: `%${req.query.search}%`
                 }
               }
-            })
+            }),
+            publishNow: true
           },
           limit: 12
         })
       } else {
         courses = await Course.findAll({ 
           order: Sequelize.literal('random()'), 
-          limit: 12
+          limit: 12,
+          where: {
+            publishNow: true
+          }
         })
       }
 

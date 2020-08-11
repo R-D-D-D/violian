@@ -202,15 +202,7 @@ export default {
     },
 
     videoSrc: function (val) {
-      if (val == 'video' && this.exercise.videoUrl) {
-        if (this.player.src() != this.exercise.videoUrl) {
-          this.player.src(this.exercise.videoUrl)
-        }
-      } else if (val == 'demo' && this.exercise.demoUrl) {
-        if (this.player.src() != this.exercise.demoUrl) {
-          this.player.src(this.exercise.demoUrl)
-        }
-      }
+      this.player.src(val)
     }
   },
 
@@ -228,7 +220,7 @@ export default {
 
     const player = videojs(this.$refs.videoPlayer, {
         controls: true,
-        fluid: true,
+        aspectRatio: '16:9',
         sources: [
           {
             src: source,

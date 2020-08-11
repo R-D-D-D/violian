@@ -10,71 +10,147 @@
             v-col.pa-0
               video-player(:exercise="this.lesson.exercises[0]" :videoSrc="src" v-if="isVideoContent")
           
-          v-container#dicussion(v-if="user.isStudent")
-            v-row.justify-center
-              v-col.text-left.pb-0(cols="11")
-                h1.font-weight-bold.pt-2.pl-4 Ask your tutor about "{{ lesson.name }}"
-              v-col.pb-0(cols="11" v-if="lesson.thread")
-                v-list(v-if="lesson.thread.posts")
-                  v-list-item(v-for='(post, idx) in lesson.thread.posts' :key='post.id')
-                    v-list-item-content.pb-0
-                      v-container.pt-0.pb-4.px-0(fluid)
-                        v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != lesson.thread.posts[idx - 1].updatedAt.substring(0, 10)")
-                          v-col.py-0
-                            v-chip(label color="indigo" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
-                        v-row.mt-5(v-if="post.videoUrl")
-                          v-col.pb-0.text-center(style="margin-bottom: -3px; background-color:black;")
-                            video(style="max-width:100%; max-height:400px;" controls)
-                              source(:src="post.videoUrl" type="video/mp4")
-                              | Your browser does not support HTML video.
-                        v-row(v-else)
-                          v-col.pb-0(style="border-bottom: 1px solid #BDBDBD;")
+          v-container 
+            v-tabs(v-model='tab' color="indigo")
+              v-tabs-slider
+              v-tab(href=`#overview`) Overview
+              v-tab-item(value="overview")
+                v-card(flat tile)
+                  v-container
+                    v-row
+                      v-col
+                        h1 About this lesson
+                    v-row
+                      v-col
+                        div {{ lesson.description }}
+
+              v-tab(href=`#resources`) Resources
+              v-tab-item(value="resources")
+                v-card(flat tile)
+                  v-container
+                    v-row
+                      v-col
+                        h1 Resources
+                    v-row
+                      v-col.pt-0(cols="12")
+                        v-list.py-0
+                          v-list-item.pl-2
+                            v-list-item-icon
+                              v-icon 
+                            v-list-item-content.file-name
+                              v-list-item-title Name
+                            v-spacer
+                            v-spacer
+                            v-list-item-content
+                              v-list-item-title Type
+                            v-list-item-content
+                              v-list-item-title Size
+                            v-list-item-action.ml-0
+                              v-menu(bottom left)
+                                template(v-slot:activator='{ on, attrs }')
+                                  v-btn(icon v-bind='attrs' v-on='on')
+                                    v-icon mdi-dots-vertical
+                                v-list
+                                  v-list-item(@click="fileCrud($event, {}, 'Download All')")
+                                    v-list-item-title Download all
+                              
+                          v-divider
+
+                          template(v-for="(file, idx) in lesson.files")
+                            v-list-item.pl-2(@click="")
+                              v-list-item-icon(v-if="file.type.includes('image')")
+                                v-icon mdi-image
+                              v-list-item-icon(v-else-if="file.type.includes('video')")
+                                v-icon mdi-video
+                              v-list-item-icon(v-else-if="file.type.includes('pdf')")
+                                v-icon mdi-file-pdf
+                              v-list-item-icon(v-else)
+                                v-icon mdi-file
+                              v-list-item-content.file-name
+                                v-list-item-title(v-text='file.name')
+                              v-spacer
+                              v-spacer
+                              v-list-item-content
+                                v-list-item-title(v-text='file.type')
+                              v-list-item-content
+                                v-list-item-title {{ file.size > 1024 ? file.size > 1048576 ? `${(file.size / 1048576).toFixed(2)} GB` : `${(file.size / 1024).toFixed(2)} MB` : `${file.size.toFixed(2)} KB`}}
+                              v-list-item-action.ml-0
+                                v-menu(bottom left)
+                                  template(v-slot:activator='{ on, attrs }')
+                                    v-btn(icon v-bind='attrs' v-on='on')
+                                      v-icon mdi-dots-vertical
+                                  v-list
+                                    v-list-item(@click="fileCrud($event, file, 'Download')")
+                                      v-list-item-title Download
+                            v-divider
+              v-tab(href=`#discussion` v-if="user.isStudent") Ask your tutor
+              v-tab-item(value="discussion" v-if="user.isStudent")
+                v-card(flat tile)
+                  v-container#dicussion
+                    v-row.justify-center
+                      v-col.text-left.pb-0(cols="12")
+                        h1.font-weight-bold.pt-2.pl-4 Ask your tutor about "{{ lesson.name }}"
+                      v-col.pb-0(cols="12" v-if="lesson.thread")
+                        v-list(v-if="lesson.thread.posts")
+                          v-list-item(v-for='(post, idx) in lesson.thread.posts' :key='post.id')
+                            v-list-item-content.pb-0
+                              v-container.pt-0.pb-4.px-0(fluid)
+                                v-row.py-0(v-if="idx == 0 || post.updatedAt.substring(0, 10) != lesson.thread.posts[idx - 1].updatedAt.substring(0, 10)")
+                                  v-col.py-0
+                                    v-chip(label color="indigo" dark style="font-size: 12px;") {{ new Date(post.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day:'numeric'}) }}
+                                v-row.mt-5(v-if="post.videoUrl")
+                                  v-col.pb-0.text-center(style="margin-bottom: -3px; background-color:black;")
+                                    video(style="max-width:100%; max-height:400px;" controls)
+                                      source(:src="post.videoUrl" type="video/mp4")
+                                      | Your browser does not support HTML video.
+                                v-row(v-else)
+                                  v-col.pb-0(style="border-bottom: 1px solid #BDBDBD;")
 
 
-                        v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
-                          v-col.py-0.text-left(cols="5" v-if="post.UserId == user.id")
-                            v-btn(icon @click="deletePost($event, post)" color="indigo")
-                              v-icon mdi-trash-can-outline
-                          v-col.pr-8.py-0(cols="6") 
-                            .speech-bubble-other
-                              v-row.ma-0(style="width: 100%;")
-                                v-col.text-left
-                                  div {{ post.message }}
-                              .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
-                          v-col.text-center.pa-0(cols="1")
-                            v-avatar(color='grey' size="40")
-                              v-icon mdi-account
-                        v-row.justify-start.bottom-border.mx-0.py-3(v-else)
-                          v-col.text-center.pa-0(cols="1")
-                            v-avatar(color='grey' size="40")
-                              v-icon mdi-account
-                          v-col.pl-8.py-0(cols="6") 
-                            .speech-bubble-self
-                              v-row.ma-0(style="width: 100%;")
-                                v-col.text-left
-                                  div {{ post.message }}
-                              .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
-                          v-col.py-0.text-right(cols="5" v-if="post.UserId == user.id")
-                            v-btn(icon @click="deletePost($event, post)" color="indigo")
-                              v-icon mdi-trash-can-outline
-            
-            v-row.justify-center
-              v-col.pt-0(cols="11")
-                v-form.px-4(:ref="`form`")
-                  v-row
-                    v-col.pt-0(cols="12")
-                      v-textarea(outlined name='input-7-4' label='Type your thoughts here...' v-model="message")
-                    v-col(cols="6")
-                      v-file-input(
-                        accept="video/mp4, video/ogg" 
-                        placeholder="Upload" 
-                        prepend-icon="mdi-video"
-                        label="Upload Video"
-                        v-model="file")
+                                v-row.justify-end.bottom-border.mx-0.py-3(v-if="post.UserId != user.id")
+                                  v-col.py-0.text-left(cols="5" v-if="post.UserId == user.id")
+                                    v-btn(icon @click="deletePost($event, post)" color="indigo")
+                                      v-icon mdi-trash-can-outline
+                                  v-col.pr-8.py-0(cols="6") 
+                                    .speech-bubble-other
+                                      v-row.ma-0(style="width: 100%;")
+                                        v-col.text-left
+                                          div {{ post.message }}
+                                      .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+                                  v-col.text-center.pa-0(cols="1")
+                                    v-avatar(color='grey' size="40")
+                                      v-icon mdi-account
+                                v-row.justify-start.bottom-border.mx-0.py-3(v-else)
+                                  v-col.text-center.pa-0(cols="1")
+                                    v-avatar(color='grey' size="40")
+                                      v-icon mdi-account
+                                  v-col.pl-8.py-0(cols="6") 
+                                    .speech-bubble-self
+                                      v-row.ma-0(style="width: 100%;")
+                                        v-col.text-left
+                                          div {{ post.message }}
+                                      .timestamp {{ new Date(post.updatedAt).toLocaleString([], { hour: '2-digit', minute:'2-digit'}) }}
+                                  v-col.py-0.text-right(cols="5" v-if="post.UserId == user.id")
+                                    v-btn(icon @click="deletePost($event, post)" color="indigo")
+                                      v-icon mdi-trash-can-outline
+                    
+                    v-row.justify-center
+                      v-col.pt-0(cols="12")
+                        v-form.px-4(:ref="`form`")
+                          v-row
+                            v-col.pt-0(cols="12")
+                              v-textarea(outlined name='input-7-4' label='Type your thoughts here...' v-model="message")
+                            v-col(cols="6")
+                              v-file-input(
+                                accept="video/mp4, video/ogg" 
+                                placeholder="Upload" 
+                                prepend-icon="mdi-video"
+                                label="Upload Video"
+                                v-model="file")
 
-                  v-row
-                    v-col
-                      v-btn(large color="#ec5252" dark @click="create_post") Submit practice video
+                          v-row
+                            v-col
+                              v-btn(large color="#ec5252" dark @click="create_post") Submit practice video
 
         v-col.pa-0(cols="3" style="border-bottom: 1px solid #BDBDBD; border-left: 1px solid #BDBDBD; position: fixed; right:0;" :class="{ 'full-height': fullHeight, 'partial-height': !fullHeight }")
           h1.font-weight-bold.pl-4.py-2(style="background-color:#EEEEEE;") Lessons
@@ -83,13 +159,13 @@
             v-list-item.px-0(v-for='(currLesson, lessonIdx) in course.lessons' :key='lessonIdx')
               v-expansion-panels.px-0(accordion flat hover tile dense v-if="currLesson == lesson" v-model="opened" multiple)
                 v-expansion-panel
-                  v-expansion-panel-header.py-0.pl-4.pr-2(style="font-size: 16px; background-color:#B2DFDB;") {{ lessonIdx + 1 }}. {{currLesson.name}}
+                  v-expansion-panel-header.py-0.pl-4.pr-2(style="font-size: 16px; background-color:#C5CAE9;") {{ lessonIdx + 1 }}. {{currLesson.name}}
                   v-expansion-panel-content.pa-0
                     v-list.py-0
                       v-list-item-group.py-0
-                        v-list-item.px-0(v-for="(exercise, exerciseIdx) in currLesson.exercises" @click="src = 'video'")
+                        v-list-item.px-0(v-for="(exercise, exerciseIdx) in currLesson.exercises" @click="src = exercise.videoUrl")
                           v-list-item-content
-                            div.pl-4.text-decoration-underline(style="font-size: 14px; color:#00897B;") {{ exercise.name }}
+                            div.pl-4.text-decoration-underline(style="font-size: 14px; color:#291957;") {{ exercise.name }}
               v-list-item-content.py-0.link(v-else)
                 a.link.pl-4.py-5(style="font-size: 16px;" @click="goToLesson($event, currLesson)") {{ lessonIdx + 1 }}. {{ currLesson.name }}
 
@@ -112,6 +188,7 @@ import PostService from "@/services/PostService"
 import "videojs-hotkeys"
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay"
 import CourseService from "@/services/CourseService"
+import FileService from "@/services/FileService"
 import VideoPlayer from "@/components/Course/VideoPlayer"
 import ThreadService from "@/services/ThreadService"
 import _ from 'lodash'
@@ -166,7 +243,11 @@ export default {
       lesson: null,
       fullHeight: false,
       opened: [0],
-      src: 'video'
+      src: '',
+
+      // tabs
+      tab: null,
+      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     }
   },
   watch: {
@@ -184,17 +265,6 @@ export default {
     }
   },
   computed: {
-    tutor () {
-      if (this.user.isStudent)
-        return this.$store.getters.tutorFromSubscribedTutors;
-      else 
-        return null;
-    },
-
-    is_student () {
-      return this.user.isStudent;
-    },
-
     ...mapState(["user", "students", "subscribedTutors"])
   },
   methods: {
@@ -219,34 +289,6 @@ export default {
           }
         }
       }
-      // if (this.notesInBars) {
-      //   console.log('here')
-      //   if (this.currentDisplayedBar == 0) {
-      //     if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars >= 0) {
-      //       console.log('here')
-      //       this.currentDisplayedBar = 0
-      //       this.videoHandler.importNotes(this.notesInBars[0].concat(this.notesInBars[1]), this.timeSignature)
-      //     } else {
-      //       return
-      //     }
-      //   }
-
-      //   if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars - this.currentDisplayedBar >= 1) {
-      //     var currBar = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
-      //     if (currBar >= this.notesInBars.length / 2)
-      //       return
-      //     this.currentDisplayedBar = currBar
-      //     this.videoHandler.importNotes(this.notesInBars[currBar * 2].concat(this.notesInBars[currBar * 2 + 1]), this.timeSignature)
-      //     return
-      //   }
-      //   if ((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars < this.currentDisplayedBar) {
-      //     var currBar1 = Math.floor((event.target.currentTime - this.demoStartTime) / this.timePerTwoBars)
-      //     if (currBar1 < 0)
-      //       return
-      //     this.currentDisplayedBar = currBar1
-      //     this.videoHandler.importNotes(this.notesInBars[currBar1 * 2].concat(this.notesInBars[currBar1 * 2 + 1]), this.timeSignature)
-      //   }
-      // }
     },
 
     async timeUpdatedOsmd (event) {
@@ -477,7 +519,38 @@ export default {
           lesson: lesson
         }
       })
-    }
+    },
+
+    async fileCrud (event, file, action) {
+      if (action == 'Download') {
+        var zip = new JSZip();
+        fetch(file.url)
+          .then(resp => resp.blob())
+          .then(content => saveAs(content, file.name));
+      } else if (action == 'Download All') {
+        if (this.lesson.files.length > 0) {
+          const zip = new JSZip()
+          let files = this.lesson.files
+          Promise.all(files.map(file => fetch(file.url))).then(function (responses) {
+            // Get a JSON object from each of the responses
+            return Promise.all(responses.map(function (response) {
+              return response.blob();
+            }));
+          }).then(function (data) {
+            for (var i = 0; i < data.length; i++) {
+              zip.file(files[i].name, data[i])
+            }
+            zip.generateAsync({type:"blob"})
+              .then(function (blob) {
+                saveAs(blob, "download.zip")
+              })
+          }).catch(function (error) {
+            // if there's an error, log it
+            console.log(error);
+          });
+        }
+      }
+    },
   },
 
   created: async function () {
@@ -496,19 +569,11 @@ export default {
         console.log(err)
       }
       this.lesson = this.course.lessons.find(lesson => lesson.id == this.$route.params.lesson_id)
+      this.lesson.files = (await FileService.list(this.lesson.id)).data.files
     }
 
     this.selected = this.course.lessons.indexOf(this.lesson)
-    if (!this.lesson.exercises[0].videoUrl && !this.lesson.exercises[0].demoUrl) {
-      this.isVideoContent = false
-      this.src = 'undefined'
-    } else {
-      if (this.lesson.exercises[0].videoUrl) {
-        this.src = 'video'
-      } else {
-        this.src = 'demo'
-      }
-    }
+    this.src = this.lesson.exercises[0].videoUrl
 
     window.addEventListener('scroll', _.debounce(() => {
       if (window.pageYOffset == 0) {
@@ -517,129 +582,6 @@ export default {
         this.fullHeight = true
       }
     }, 200))
-
-    // OpenSheetMusicDisplay.prototype.preCalculate = function () {
-    //   if (!this.graphic) {
-    //       throw new Error("OpenSheetMusicDisplay: Before rendering a music sheet, please load a MusicXML file");
-    //   }
-    //   if (this.drawer) {
-    //       this.drawer.clear(); // clear canvas before setting width
-    //   }
-
-    //   let width = this.container.offsetWidth;
-    //   if (this.rules.RenderSingleHorizontalStaffline) {
-    //       width = 32767; // set safe maximum (browser limit), will be reduced later
-    //   }
-    //   console.log("[OSMD] render width: " + width);
-
-    //   this.sheet.pageWidth = width / this.zoom / 10.0;
-    //   if (this.rules.PageFormat && !this.rules.PageFormat.IsUndefined) {
-    //       this.rules.PageHeight = this.sheet.pageWidth / this.rules.PageFormat.aspectRatio;
-    //       console.log("[OSMD] PageHeight: " + this.rules.PageHeight);
-    //   } else {
-    //       console.log("[OSMD] endless/undefined pageformat, id: " + this.rules.PageFormat.idString);
-    //       this.rules.PageHeight = 100001; // infinite page height // TODO maybe Number.MAX_VALUE or Math.pow(10, 20)?
-    //   }
-
-    //   // Before introducing the following optimization (maybe irrelevant), tests
-    //   // have to be modified to ensure that width is > 0 when executed
-    //   //if (isNaN(width) || width === 0) {
-    //   //    return;
-    //   //}
-
-    //   // Calculate again
-    //   this.graphic.reCalculate();
-    // }
-
-    // const player = videojs(this.$refs.videoPlayer, {
-    //     controls: true,
-    //     fluid: true,
-    //     sources: [
-    //       {
-    //         src: this.lesson.exercises[0].demoUrl,
-    //         type: "video/mp4"
-    //       }
-    //     ],
-    //     playbackRates: [0.8, 0.9, 1, 1.1, 1.2],
-    //     poster: this.lesson.exercises[0].demoPosterUrl ? this.lesson.exercises[0].demoPosterUrl : null
-    //   }, () => {
-    //     // console.log('onPlayerReady', this)
-    //     player.hotkeys({
-    //       volumeStep: 0.1,
-    //       seekStep: 2,
-    //       enableModifiersForNumbers: false,
-    //       enableHoverScroll: true
-    //     })
-    //     player.on('userinactive', () => {
-    //       if (player.paused()) {
-    //         this.hide = false
-    //       } else {
-    //         this.hide = true
-    //       }
-    //     })
-    //     player.on('useractive', () => {
-    //       this.hide = false
-    //     })
-    //     player.on('play', () => {
-    //       this.hide = false
-    //     })
-    //     player.on('firstplay', () => {
-    //       this.hide = false
-    //     })
-    //     player.on('ratechange', () => {
-    //       this.playbackBpm = this.bpm * this.player.playbackRate()
-    //     })
-    //     if (this.useScore && this.useXml) {
-    //       player.on('timeupdate', (e) => {
-    //         this.timeUpdatedOsmd(e)
-    //       })
-    //     } else if (this.useScore && !this.useXml) {
-    //       player.on('timeupdate', (e) => {
-    //         this.timeUpdated(e)
-    //       })
-    //     }
-    // });
-
-
-    // this.player = player
-    // let exercise = this.lesson.exercises[0]
-
-    // if (exercise.useScore) {
-    //   this.useScore = exercise.useScore
-    //   this.useXml = exercise.useXml
-    //   this.bpm = parseInt(exercise.bpm)
-    //   this.playbackBpm = this.bpm
-    //   this.demoStartTime = exercise.demoStartTime
-    //   if (exercise.useXml) {
-    //     await this.drawOsmdScores()
-    //     let timeSignature = this.osmd.sheet.sourceMeasures[0].activeTimeSignature
-    //     this.timeSignature = `${timeSignature.numerator}/${timeSignature.denominator}`
-    //     this.numberOfBars = this.osmd.sheet.sourceMeasures.length
-    //   } else {
-    //     this.melody = exercise.melody.split('-')
-    //     this.timeSignature = exercise.timeSignature
-    //     this.numberOfBars = parseInt(exercise.numberOfBars)
-    //     this.drawScores()
-    //   }
-    //   this.timePerBar = ((parseInt(this.timeSignature.split('/')[0]) / this.bpm) * 60)
-    //   this.timePerTwoBars = this.timePerBar * 2
-    //   this.demoEndTime = this.demoStartTime + (this.timePerBar * this.numberOfBars)
-    // }
-
-    // this.description = this.lesson.description
-
-    // document.getElementById(`video-${this.lesson.id}`).appendChild(document.getElementById(`slider-${this.lesson.id}`))
-    // document.getElementsByClassName("v-slider__track-container")[0].style.width = "5px"
-    // document.getElementsByClassName("v-slider__thumb-label")[0].style.color = "black"
-    // document.getElementsByClassName("v-slider__thumb-label")[0].style.boxShadow = "0px 0px 5px black"
-
-    // var doit;
-    // window.onresize = () => {
-    //   clearTimeout(doit)
-    //   doit = setTimeout(() => {
-    //     this.drawScores(true)
-    //   }, 200)
-    // }
   },
 
   beforeDestroy() {
@@ -698,5 +640,9 @@ slider-bg: #72839d
 .link, .link:link, .link:visited, .link:active, .link:hover {
   text-decoration: none;
   color: #1e1e1c;
+}
+
+div >>> .v-slide-group__content {
+  border-bottom: 1px solid #BDBDBD;
 }
 </style>

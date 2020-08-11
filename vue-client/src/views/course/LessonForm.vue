@@ -27,24 +27,30 @@ v-container
                   v-expansion-panel-content.px-6
                     v-form(:ref="`exerciseForm-${exerciseIdx}`")
                       v-row
-                        v-col(cols="12" md="6")
+                        v-col.pt-6(cols="12" md="6")
                           v-text-field(hide-details label='Name' v-model='exercise.name' color="indigo" outlined dense)
+                        v-col.text-right.pt-6(cols="12" md="6" align-self="center")
+                          v-btn(outlined color="indigo" @click="deleteExercise($event, exerciseIdx)")
+                            v-icon mdi-trash-can-outline
+                            | Delete
+
                       v-row
                         v-col(cols="12" md="6")
                           v-file-input(
                             accept="video/mp4, video/ogg"
-                            :placeholder="exercise.videoUrl ? exercise.videoUrl.split('/')[6] : 'Choose explanation video'" 
+                            :placeholder="exercise.videoFilename ? exercise.videoFilename : 'Choose explanation video'" 
                             prepend-icon="mdi-video" 
                             label="Explanation Video"
                             v-model="exercise.video"
                             outlined
                             color="indigo"
                             dense
-                            hide-details)
+                            hide-details
+                            :rules="requiredRules")
                         v-col(cols="12" md="6")
                           v-file-input(
                             accept="image/*" 
-                            :placeholder="exercise.videoPosterUrl ? exercise.videoPosterUrl.split('/')[6] : 'Choose coverpage for video'" 
+                            :placeholder="exercise.videoPosterFilename ? exercise.videoPosterFilename : 'Choose coverpage for video'" 
                             prepend-icon="mdi-image" 
                             label="Explanation Video Poster"
                             v-model="exercise.videoPoster"
@@ -54,14 +60,14 @@ v-container
                             hide-details)
 
                       v-row
-                        v-col.pb-0(cols="12" md="6")
+                        v-col(cols="12" md="6")
                           v-switch.ma-0(v-model="exercise.useScore" :label="`Overlay score on your video`" color="indigo" @change="showVex($event, exerciseIdx)" dense hide-details)
                       v-row  
-                        v-col.pb-0(cols="12" md="6" v-if="exercise.useScore")
-                          v-radio-group(v-model="exercise.useXml" :mandatory="true")
+                        v-col.py-0(cols="12" md="6" v-if="exercise.useScore")
+                          v-radio-group(v-model="exercise.useXml" :mandatory="true" @change="showVex($event, exerciseIdx)")
                             v-radio(label="Upload musicXML file" :value="true" color="indigo")
                             v-radio(label="Design your own score" :value="false" color="indigo")
-                        v-col.pb-0(cols="12" md="6" v-if="exercise.useScore")
+                        v-col.py-0(cols="12" md="6" v-if="exercise.useScore")
                           v-text-field(label='Demo Start Time' v-model='exercise.demoStartTime' color="indigo" prepend-icon="mdi-alarm" persistent-hint hint="At roughly which second did you start playing in demo video" :rules="demoStartTimeRules")
                     
                       div(v-show="!exercise.useXml && exercise.useScore")
@@ -72,7 +78,7 @@ v-container
                             div.pl-0 No. Bars:   {{ exercise.numberOfBars }}
                             v-slider(v-model='exercise.numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, lessonIdx, exerciseIdx)" color="indigo" track-color="indigo lighten-3" hide-details)
                           v-col.pt-0(cols="12" md="6")
-                            div.pl-0 BPM:   {{ exercise.bpm }}
+                            div.pl-0 BPM for this score:   {{ exercise.bpm }}
                             v-slider(v-model='exercise.bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3" hide-details)
                           v-col(cols="12" md="6")
                             v-select(dense :items="time_signatures" outlined v-model="exercise.timeSignature" label='Time Signature' @change="changeTimeSignature($event, lessonIdx, exerciseIdx)" color="indigo")
@@ -81,14 +87,14 @@ v-container
                           v-col(cols="12" md="6")
                             v-file-input(
                               accept="text/xml, .musicxml" 
-                              placeholder="Music XML file" 
+                              :placeholder="exercise.musicXmlFilname ? exercise.musicXmlFilename : 'Music XML file'" 
                               prepend-icon="mdi-file-document-outline"
                               label="Upload musicxml file"
                               v-model="exercise.musicXml"
                               outlined
                               dense)
                           v-col.pt-0(cols="12" md="6")
-                            div.pl-0 BPM:   {{ exercise.bpm }}
+                            div.pl-0 BPM for this score:   {{ exercise.bpm }}
                             v-slider(v-model='exercise.bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3" hide-details)
 
 
@@ -222,15 +228,18 @@ export default {
         exercises: [{
           name: '',
           video: null,
+          videoFilename: '',
           videoPoster: null,
+          videoPosterFilename: '',
           useScore: true,
           timeSignature: '4/4',
           bpm: 60,
           numberOfBars: 4,
           melody: [],
           demoStartTime: "0",
-          useXml: false,
+          useXml: true,
           musicXml: null,
+          musicXmlFilename: '',
           handler: null,
         }]
       },
@@ -288,16 +297,17 @@ export default {
       this.fileDialog = true
     },
 
-    showVex (event, exerciseIdx) {
-      if (this.handler == null) {
+    async showVex (event, exerciseIdx) {
+      if (this.newLesson.exercises[exerciseIdx].handler == null) {
+        await this.$nextTick()
         var div = document.createElement("div")
         div.id = `vexflow-wrapper-${exerciseIdx}`
         var pannel = document.getElementById(`pannel-content-${exerciseIdx}`)
         pannel.appendChild(div)
-        this.handler = new vexUI.Handler(div.id, {
+        this.newLesson.exercises[exerciseIdx].handler = new vexUI.Handler(div.id, {
           canvasProperties: {
             id: div.id + '-canvas',
-            width: pannel.offsetWidth - 32,
+            width: pannel.offsetWidth,
             tabindex: 1
           }
         }).init()
@@ -323,8 +333,12 @@ export default {
         return
 
       for (let i = 0; i < tempLesson.exercises.length; i++) {
-        if (tempLesson.exercises[i].useScore && (!tempLesson.exercises[i].musicXml || tempLesson.exercises[i].melody.length == 0)) {
+        if (tempLesson.exercises[i].useScore && !tempLesson.exercises[i].musicXml && tempLesson.exercises[i].melody.length == 0) {
           alert('Please ensure that you have input corresponding data if you choose to use score')
+          return
+        }
+        if (!tempLesson.exercises[i].video) {
+          alert('Please ensure that you have input a video for video content')
           return
         }
       }
@@ -338,7 +352,6 @@ export default {
           duration: Number(this.newLesson.duration),
           description: this.newLesson.description,
         })
-
       } else {
         lessonResponse = await LessonService.create({
           name: this.newLesson.name,
@@ -361,7 +374,7 @@ export default {
       // create exercise that belongs to lessons
       for (let i = 0; i < tempLesson.exercises.length; i++) {
         var formData = new FormData()
-        formData.set('name', '')
+        formData.set('name', tempLesson.exercises[i].name)
         formData.set('melody', tempLesson.exercises[i].melody.join('-'))
         formData.set('timeSignature', tempLesson.exercises[i].timeSignature)
         formData.set('bpm', tempLesson.exercises[i].bpm)
@@ -387,13 +400,17 @@ export default {
           formData.append('musicXml', tempLesson.exercises[i].musicXml)
         }
 
-        console.log(formData)
-        if (this.$route.params.lesson_id) {
-          formData.set('id', this.lesson.Exercises[i].id)
+        if (tempLesson.exercises[i].id) {
+          formData.set('id', this.tempLesson.exercises[i].id)
           await ExerciseService.edit(formData)
         } else {
-          formData.set('lid', lessonResponse.data.lesson.id)
-          await ExerciseService.create(formData)
+          if (this.lesson) {
+            formData.set('lid', this.lesson.id)
+            await ExerciseService.create(formData)
+          } else {
+            formData.set('lid', lessonResponse.data.lesson.id)
+            await ExerciseService.create(formData)
+          }
         }
       }
 
@@ -482,17 +499,24 @@ export default {
       this.newLesson.exercises.push({
         name: '',
         video: null,
+        videoFilename: '',
         videoPoster: null,
+        videoPosterFilename: '',
         useScore: true,
         timeSignature: '4/4',
         bpm: 60,
         numberOfBars: 4,
         melody: [],
-        demoStartTime: "0",
-        useXml: false,
+        demoStartTime: '',
+        useXml: true,
         musicXml: null,
+        musicXmlFilename: '',
         handler: null,
       })
+    },
+
+    deleteExercise (event, exerciseIdx) {
+      this.newLesson.exercises.splice(exerciseIdx, 1)
     }
   },
 
@@ -505,21 +529,25 @@ export default {
       this.newLesson.name = this.lesson.name
       this.newLesson.duration = this.lesson.duration
       this.newLesson.description = this.lesson.description
-      if (this.lesson.Exercises) {
-        for (var i = 0; i < this.lesson.Exercises[i]; i++) {
+      if (this.lesson.Exercises.length > 0) {
+        for (var i = 0; i < this.lesson.Exercises.length; i++) {
           if (!this.newLesson.exercises[i]) {
             this.newExercise()
           }
+          this.newLesson.exercises[i].id = this.lesson.Exercises[i].id
           this.newLesson.exercises[i].name = this.lesson.Exercises[i].name
           this.newLesson.exercises[i].useScore = this.lesson.Exercises[i].useScore
           this.newLesson.exercises[i].useXml = this.lesson.Exercises[i].useXml
-          this.newLesson.exercises[i].demoStartTime = this.lesson.Exercises[i].demoStartTime
+          this.newLesson.exercises[i].videoFilename = this.lesson.Exercises[i].videoFilename
+          this.newLesson.exercises[i].videoPosterFilename = this.lesson.Exercises[i].videoPosterFilename
           if (this.newLesson.exercises[i].useScore) {
+            this.newLesson.exercises[i].bpm = this.lesson.Exercises[i].bpm
+            this.newLesson.exercises[i].demoStartTime = this.lesson.Exercises[i].demoStartTime.toString()
             if (!this.newLesson.exercises[i].useXml && i == 0) {
               this.newLesson.exercises[i].timeSignature = this.lesson.Exercises[i].timeSignature
-              this.newLesson.exercises[i].bpm = this.lesson.Exercises[i].bpm
               this.newLesson.exercises[i].numberOfBars = this.lesson.Exercises[i].numberOfBars
               this.newLesson.exercises[i].melody = this.lesson.Exercises[i].melody.split('-')
+
               await this.$nextTick()
               var div = document.createElement("div")
               div.id = `vexflow-wrapper-${i}`
@@ -529,29 +557,18 @@ export default {
                 numberOfStaves: this.newLesson.exercises[i].numberOfBars,
                 canvasProperties: {
                   id: div.id + '-canvas',
-                  width: pannel.offsetWidth - 32,
+                  width: pannel.offsetWidth,
                   tabindex: 1
                 }
               }).init()
-              this.handler.importNotes(this.newLesson.exercises[i].melody, this.newLesson.exercises[i].timeSignature)
+              if (this.newLesson.exercises[i].melody != '')
+                this.handler.importNotes(this.newLesson.exercises[i].melody, this.newLesson.exercises[i].timeSignature)
+            } else {
+              this.newLesson.exercises[i].musicXmlFilename = this.lesson.Exercises[i].musicXmlFilename
             }
           }
         }
       }
-    } else {
-      await this.$nextTick()
-      var div = document.createElement("div")
-      div.id = `vexflow-wrapper-0`
-      var pannel = document.getElementById(`pannel-content-0`)
-      pannel.appendChild(div)
-      this.handler = new vexUI.Handler(div.id, {
-        numberOfStaves: 4,
-        canvasProperties: {
-          id: div.id + '-canvas',
-          width: pannel.offsetWidth,
-          tabindex: 1
-        }
-      }).init()
     }
   }
 }
