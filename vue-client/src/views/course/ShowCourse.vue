@@ -56,7 +56,7 @@
               v-col.py-0.px-0
                 h2.py-3.pl-0(style="color: #3c3b37; font-size: 30px;") What you will learn
             v-row
-              v-col.py-0.px-0(cols="12" md="6" v-for="learningPoint in course.learningPoints.split('&')")
+              v-col.py-0.px-0(cols="12" md="6" v-for="(learningPoint, idx) in course.learningPoints.split('&')" :key="idx")
                 v-row
                   v-col.py-2.pr-0(cols="1")
                     v-icon.d-inline.mb-2(size="16" color="#ec5252") mdi-star
@@ -79,7 +79,7 @@
             v-row
               v-col.py-0.px-0
                 h2.pl-0(style="color: #3c3b37; font-size: 30px;") Prerequisites for this Course
-            v-row(align="start" v-for="requirement in course.requirements.split('&')")
+            v-row(align="start" v-for="(requirement, idx) in course.requirements.split('&')" :key="idx")
               v-col.py-0.px-0(cols="6")
                 v-row
                   v-col.pr-0(cols="1" align-self="center")
@@ -95,7 +95,7 @@
             v-row
               v-col.py-0.px-0
                 h2.pl-0(style="color: #3c3b37; font-size: 30px;") Who's suitable for the course
-            v-row(align="start" v-for="targetAudience in course.targetAudiences.split('&')")
+            v-row(align="start" v-for="(targetAudience, idx) in course.targetAudiences.split('&')" :key="idx")
               v-col.py-0.px-0(cols="6")
                 v-row
                   v-col.pr-0.py-0(cols="1" align-self="center")

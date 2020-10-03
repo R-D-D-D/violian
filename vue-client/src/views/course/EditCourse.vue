@@ -45,19 +45,19 @@
             v-row(v-if="course.learningPoints")
               v-col(cols="12")
                 strong What your student will learn:
-              v-col.py-0(v-for="learningPoint in course.learningPoints.split('&')" cols="12")
+              v-col.py-0(cols="12" v-for="(learningPoint, idx) in course.learningPoints.split('&')" :key="idx")
                 p {{ learningPoint }}
 
             v-row(v-if="course.targetAudiences")
               v-col(cols="12")
                 strong Who are this course for?
-              v-col.py-0(cols="12" v-for="targetAudience in course.targetAudiences.split('&')")
+              v-col.py-0(cols="12" v-for="(targetAudience, idx) in course.targetAudiences.split('&')" :key="idx")
                 p {{ targetAudience }}
 
             v-row(v-if="course.requirements")
               v-col(cols="12")
                 strong What are the requirements?
-              v-col.py-0(cols="12" v-for="requirement in course.requirements.split('&')")
+              v-col.py-0(cols="12" v-for="(requirement, idx) in course.requirements.split('&')" :key="idx")
                 p {{ requirement }}
 
     
@@ -69,7 +69,7 @@
             v-btn(outlined color='indigo' right @click='newLesson')
               v-icon(color="indigo") mdi-plus
           v-divider
-          v-card-text.px-10.pb-0(v-for="(lesson, idx) in course.lessons")
+          v-card-text.px-10.pb-0(v-for="(lesson, idx) in course.lessons" :key="idx")
             v-row
               v-col(cols="12" md="4")
                 strong Name: 

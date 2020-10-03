@@ -163,7 +163,7 @@
                   v-expansion-panel-content.pa-0
                     v-list.py-0
                       v-list-item-group.py-0
-                        v-list-item.px-0(v-for="(exercise, exerciseIdx) in currLesson.exercises" @click="src = exercise.videoUrl")
+                        v-list-item.px-0(v-for="(exercise, exerciseIdx) in currLesson.exercises" @click="src = exercise.videoUrl" :key="exerciseIdx")
                           v-list-item-content
                             div.pl-4.text-decoration-underline(style="font-size: 14px; color:#291957;") {{ exercise.name }}
               v-list-item-content.py-0.link(v-else-if="currLesson == lesson && lesson.exercises.length == 1")

@@ -1,5 +1,6 @@
 <template lang="pug">
 v-container
+  //- if have lesson_id means it's an edit action, if it has course_id means it's a new lesson action
   v-row(v-if="($route.params.lesson_id && lesson) || $route.params.course_id")
     v-col
       v-card.text-left(outlined).mb-12
@@ -22,7 +23,7 @@ v-container
           v-row
             v-col(cols="12")         
               v-expansion-panels.mb-5(multiple focusable v-model="openedExercise")
-                v-expansion-panel(v-for="(exercise, exerciseIdx) in newLesson.exercises" :key='exerciseIdx' @click="")
+                v-expansion-panel(v-for="(exercise, exerciseIdx) in newLesson.exercises" @click="" :key='exerciseIdx' )
                   v-expansion-panel-header.text-h5 Video Content {{ exerciseIdx + 1 }}: {{ exercise.name }}
                   v-expansion-panel-content.px-6
                     v-form(:ref="`exerciseForm-${exerciseIdx}`")
@@ -61,7 +62,7 @@ v-container
 
                       v-row
                         v-col(cols="12" md="6")
-                          v-switch.ma-0(v-model="exercise.useScore" :label="`Overlay score on your video`" color="indigo" @change="showVex($event, exerciseIdx)" dense hide-details)
+                          v-switch.ma-0(v-model="exercise.useScore" :label="`Overlay score on your video`" color="indigo" dense hide-details)
                       v-row  
                         v-col.py-0(cols="12" md="6" v-if="exercise.useScore")
                           v-radio-group(v-model="exercise.useXml" :mandatory="true" @change="showVex($event, exerciseIdx)")
@@ -76,12 +77,12 @@ v-container
                         v-row
                           v-col.pt-0(cols="12" md="6")
                             div.pl-0 No. Bars:   {{ exercise.numberOfBars }}
-                            v-slider(v-model='exercise.numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, lessonIdx, exerciseIdx)" color="indigo" track-color="indigo lighten-3" hide-details)
+                            v-slider(v-model='exercise.numberOfBars' min='0' max='16' thumb-label :thumb-size="24" @change="changeBars($event, exerciseIdx)" color="indigo" track-color="indigo lighten-3" hide-details)
                           v-col.pt-0(cols="12" md="6")
                             div.pl-0 BPM for this score:   {{ exercise.bpm }}
                             v-slider(v-model='exercise.bpm' min='60' max='120' thumb-label :thumb-size="24" color="indigo" track-color="indigo lighten-3" hide-details)
                           v-col(cols="12" md="6")
-                            v-select(dense :items="time_signatures" outlined v-model="exercise.timeSignature" label='Time Signature' @change="changeTimeSignature($event, lessonIdx, exerciseIdx)" color="indigo")
+                            v-select(dense :items="time_signatures" outlined v-model="exercise.timeSignature" label='Time Signature' @change="changeTimeSignature($event, exerciseIdx)" color="indigo")
                       div(v-show="exercise.useXml && exercise.useScore")
                         v-row
                           v-col(cols="12" md="6")
@@ -157,7 +158,7 @@ v-container
                           v-btn(icon v-bind='attrs' v-on='on')
                             v-icon mdi-dots-vertical
                         v-list
-                          v-list-item(v-for='(item, i) in options' :key='i' @click="fileCrud($event, file, item)")
+                          v-list-item(v-for='(item, i) in options' @click="fileCrud($event, file, item)" :key='i')
                             v-list-item-title {{ item }}
                   v-divider
 
@@ -172,7 +173,7 @@ v-container
         | Save
       v-btn(@click="cancel" :disabled="loading") Cancel
 
-  //- modal
+  //- modal for adding files as resources
   v-row(justify='center')
     v-dialog(v-model='fileDialog' persistent='' max-width='500px')
       v-card
@@ -184,7 +185,7 @@ v-container
               v-row
                 v-col.px-0.pt-0.pb-2(cols='12')
                   v-list
-                    v-list-item(v-for="file in newFiles")
+                    v-list-item(v-for="(file, idx) in newFiles" :key="idx")
                       v-list-item-icon(v-if="file.type.includes('image')")
                         v-icon mdi-image
                       v-list-item-icon(v-else-if="file.type.includes('video')")
@@ -212,7 +213,7 @@ v-container
 import LessonService from '@/services/LessonService'
 import ExerciseService from '@/services/ExerciseService'
 import FileService from '@/services/FileService'
-import vexUI from "@/plugins/vex"
+import vexUI from '@/plugins/vex'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 
@@ -298,7 +299,7 @@ export default {
     },
 
     async showVex (event, exerciseIdx) {
-      if (this.newLesson.exercises[exerciseIdx].handler == null) {
+      if (this.newLesson.exercises[exerciseIdx].handler == null && !this.newLesson.exercises[exerciseIdx].useXml && this.newLesson.exercises[exerciseIdx].useScore) {
         await this.$nextTick()
         var div = document.createElement("div")
         div.id = `vexflow-wrapper-${exerciseIdx}`
@@ -312,18 +313,20 @@ export default {
           }
         }).init()
       }
+      console.log(this.newLesson.exercises[exerciseIdx].handler)
     },
     
     changeTimeSignature (event, exerciseIdx) {
-      this.newLesson.exercises[exerciseIdx].handler.setTimeSignature(this.newLesson.timeSignature)
+      this.newLesson.exercises[exerciseIdx].handler.setTimeSignature(this.newLesson.exercises[exerciseIdx].timeSignature)
     },
 
     changeBars (event, exerciseIdx) {
-      this.newLesson.exercises[exerciseIdx].handler.changeNumberOfBars(this.newLesson.numberOfBars, this.handler.exportNotes())
+      console.log(exerciseIdx)
+      this.newLesson.exercises[exerciseIdx].handler.changeNumberOfBars(this.newLesson.exercises[exerciseIdx].numberOfBars, this.newLesson.exercises[exerciseIdx].handler.exportNotes())
     },
 
     changeMelody (event, exerciseIdx) {
-      this.newLesson.exercises[exerciseIdx].melody = this.handler.exportNotes()
+      this.newLesson.exercises[exerciseIdx].melody = this.newLesson.exercises[exerciseIdx].handler.exportNotes()
     },
 
     async update () {
@@ -543,6 +546,7 @@ export default {
           if (this.newLesson.exercises[i].useScore) {
             this.newLesson.exercises[i].bpm = this.lesson.Exercises[i].bpm
             this.newLesson.exercises[i].demoStartTime = this.lesson.Exercises[i].demoStartTime.toString()
+            // if the first exercise uses vexflow, immediately render it
             if (!this.newLesson.exercises[i].useXml && i == 0) {
               this.newLesson.exercises[i].timeSignature = this.lesson.Exercises[i].timeSignature
               this.newLesson.exercises[i].numberOfBars = this.lesson.Exercises[i].numberOfBars
@@ -553,7 +557,7 @@ export default {
               div.id = `vexflow-wrapper-${i}`
               var pannel = document.getElementById(`pannel-content-${i}`)
               pannel.appendChild(div)
-              this.handler = new vexUI.Handler(div.id, {
+              this.newLesson.exercises[i].handler = new vexUI.Handler(div.id, {
                 numberOfStaves: this.newLesson.exercises[i].numberOfBars,
                 canvasProperties: {
                   id: div.id + '-canvas',
@@ -562,7 +566,7 @@ export default {
                 }
               }).init()
               if (this.newLesson.exercises[i].melody != '')
-                this.handler.importNotes(this.newLesson.exercises[i].melody, this.newLesson.exercises[i].timeSignature)
+                this.newLesson.exercises[i].handler.importNotes(this.newLesson.exercises[i].melody, this.newLesson.exercises[i].timeSignature)
             } else {
               this.newLesson.exercises[i].musicXmlFilename = this.lesson.Exercises[i].musicXmlFilename
             }

@@ -14,7 +14,6 @@ import CourseThreadsIndex from "../views/thread/CourseThreadsIndex"
 import ShowCourseThread from "../views/thread/ShowCourseThread"
 import Payment from "../views/Payment"
 import store from "../store/store"
-import AdvancedPayment from "../views/AdvancedPayment"
 import OSMD from "../components/OSMD"
 import ShowLesson from "../components/Course/ShowLesson"
 import CourseForm from "../views/course/CourseForm"
@@ -116,10 +115,6 @@ const routes = [
     path: '/payment/:course_id',
     name: 'payment',
     component: Payment
-  },
-  {
-    path: '/advanced-payment',
-    component: AdvancedPayment
   },
   {
     path: '/osmd',

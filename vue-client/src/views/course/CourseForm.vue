@@ -49,7 +49,7 @@ v-container(v-if="course")
             v-row
               v-col(cols="12")
                 div(style="font-size: 16px;") What will your students learn from the newCourse?
-              v-col.py-1(cols="12" v-for="(learningPoint, idx) in newCourse.learningPoints")
+              v-col.py-1(cols="12" v-for="(learningPoint, idx) in newCourse.learningPoints" :key="idx")
                 v-text-field(color="indigo" label='Example: How to use pen tool in Photoshop' name='tagline' v-model='newCourse.learningPoints[idx]' outlined dense hide-details :rules="alphanumricRules")
               v-col(cols="12")
                 v-btn(@click="addLearningPoint" color="indigo" text) + Add an answer
@@ -57,7 +57,7 @@ v-container(v-if="course")
             v-row
               v-col(cols="12")
                 div(style="font-size: 16px;") Who are this newCourse for?
-              v-col.py-1(cols="12" v-for="(targetAudience, idx) in newCourse.targetAudiences")
+              v-col.py-1(cols="12" v-for="(targetAudience, idx) in newCourse.targetAudiences" :key="idx")
                 v-text-field(color="indigo" label='Example: Kids 6-8 years old' name='tagline' v-model='newCourse.targetAudiences[idx]' outlined dense hide-details :rules="alphanumricRules")
               v-col(cols="12")
                 v-btn(@click="addTargetAudience" color="indigo" text) + Add an answer
@@ -65,7 +65,7 @@ v-container(v-if="course")
             v-row
               v-col(cols="12")
                 div(style="font-size: 18px;") What are the requirements?
-              v-col.py-1(cols="12" v-for="(requirement, idx) in newCourse.requirements")
+              v-col.py-1(cols="12" v-for="(requirement, idx) in newCourse.requirements" :key="idx")
                 v-text-field(color="indigo" label='Example: Photoshop software' name='tagline' v-model='newCourse.requirements[idx]' outlined dense hide-details :rules="alphanumricRules")
               v-col(cols="12")
                 v-btn(@click="addRequirement" color="indigo" text) + Add an answer
