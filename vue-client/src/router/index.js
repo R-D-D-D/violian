@@ -19,6 +19,7 @@ import ShowLesson from "../components/Course/ShowLesson"
 import CourseForm from "../views/course/CourseForm"
 import LessonForm from "../views/course/LessonForm"
 import MpegDash from "../components/MpegDash"
+import AutoEvaluation from "../views/AutoEvaluation";
 
 Vue.use(VueRouter);
 
@@ -37,6 +38,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LogIn
+  },
+  {
+    path: '/auto-evaluation',
+    name: 'autoevaluation',
+    component: AutoEvaluation
   },
   {
     path: '/course/show/:course_id',

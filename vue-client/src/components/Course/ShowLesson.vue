@@ -181,7 +181,6 @@
 
 <script>
 /* eslint-disable */
-import tone from "@/plugins/tone";
 import vexUI from "@/plugins/vex";
 import { mapState } from "vuex";
 import utils from "@/utils";
