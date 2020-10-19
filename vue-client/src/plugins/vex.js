@@ -241,8 +241,6 @@ Vex.UI.Handler.prototype.drawNotes = function(stave, notesInserted){
 			} else {
 				this.drawBeams(stave);
 			}
-
-			console.log(stave.getTickables().map(note => note.getBoundingBox()))
 		}
 	}
 };

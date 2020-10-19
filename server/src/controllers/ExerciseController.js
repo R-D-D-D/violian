@@ -206,15 +206,18 @@ module.exports = {
           // Uploading files to the bucket
           const response = await s3.upload(params).promise()
 
-          if (changedAttr[i] == 2)
+          if (changedAttr[i] == 2) {
             req.body.videoUrl = response.Location
             req.body.videoFilename = req.files['video'][0].originalname
-          if (changedAttr[i] == 3)
+          }
+          if (changedAttr[i] == 3) {
             req.body.videoPosterUrl = response.Location
             req.body.videoPosterFilename = req.files['videoPoster'][0].originalname
-          if (changedAttr[i] == 4)
+          }
+          if (changedAttr[i] == 4) {
             req.body.musicXmlUrl = response.Location
             req.body.musicXmlFilename = req.files['musicXml'][0].originalname
+          }
         }
   
         await Exercise.update(req.body, {

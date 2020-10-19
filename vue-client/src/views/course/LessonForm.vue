@@ -340,7 +340,7 @@ export default {
           alert('Please ensure that you have input corresponding data if you choose to use score')
           return
         }
-        if (!tempLesson.exercises[i].video) {
+        if (!tempLesson.exercises[i].video && !tempLesson.exercises[i].videoFilename) {
           alert('Please ensure that you have input a video for video content')
           return
         }
@@ -404,7 +404,7 @@ export default {
         }
 
         if (tempLesson.exercises[i].id) {
-          formData.set('id', this.tempLesson.exercises[i].id)
+          formData.set('id', tempLesson.exercises[i].id)
           await ExerciseService.edit(formData)
         } else {
           if (this.lesson) {
