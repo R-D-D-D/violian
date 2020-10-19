@@ -241,6 +241,8 @@ Vex.UI.Handler.prototype.drawNotes = function(stave, notesInserted){
 			} else {
 				this.drawBeams(stave);
 			}
+
+			console.log(stave.getTickables().map(note => note.getBoundingBox()))
 		}
 	}
 };
@@ -344,7 +346,6 @@ Vex.UI.Handler.prototype.updateProvisoryType = function(newType){
 Vex.UI.Handler.prototype.drawProvisoryTickable = function(mousePos){
 	
 	if(this.provisoryTickable && this.currentStave!=null){
-		//console.log('hey----------', this.provisoryTickable)
 		this.redrawStave(this.currentStave);
 		if(mousePos!==undefined){
 			if(this.provisoryTickable instanceof Vex.Flow.StaveNote){
@@ -352,7 +353,7 @@ Vex.UI.Handler.prototype.drawProvisoryTickable = function(mousePos){
 				//TODO the -5 value shouldnt be absolute! it should reflect half the note's Width
 				this.provisoryTickable.x_shift= mousePos.x - this.provisoryTickable.getAbsoluteX() - 5;
 
-			}else if (this.provisoryTickable instanceof Vex.Flow.BarNote){// if(this.provisoryTickable instanceof Vex.Flow.BarNote){
+			} else if (this.provisoryTickable instanceof Vex.Flow.BarNote){// if(this.provisoryTickable instanceof Vex.Flow.BarNote){
 				const barline = new Vex.Flow.Barline(1);
 				// barline.setX(mousePos.x 
 				// 	- this.currentStave.getNoteStartX() 
